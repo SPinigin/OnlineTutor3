@@ -193,3 +193,34 @@ body {
         background-color: #333;
     }
 
+/* ===== COMPACT ASSIGNMENT PAGE ===== */
+.badge-sm {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+}
+
+.accordion-button {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+.accordion-body {
+    font-size: 0.875rem;
+    padding: 0.75rem;
+}
+
+.table-sm td, .table-sm th {
+    padding: 0.4rem;
+    font-size: 0.875rem;
+    vertical-align: middle;
+}
+
+.accordion-item {
+    border: 1px solid #dee2e6;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
