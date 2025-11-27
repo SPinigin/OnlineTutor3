@@ -1,0 +1,22 @@
+@{
+    ViewData["Title"] = "Доступ запрещен";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white text-center">
+                <h4><i class="fas fa-ban"></i> Доступ запрещен</h4>
+            </div>
+            <div class="card-body text-center">
+                <i class="fas fa-lock fa-5x text-danger mb-3"></i>
+                <p class="lead">У вас нет доступа к этой странице.</p>
+                <p>Обратитесь к администратору для получения доступа.</p>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                    <i class="fas fa-home"></i> Вернуться на главную
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+

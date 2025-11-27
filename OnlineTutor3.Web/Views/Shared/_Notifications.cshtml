@@ -1,0 +1,21 @@
+@* Скрытые поля для передачи TempData в JavaScript *@
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="tempSuccessMessage" style="display: none;">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div id="tempErrorMessage" style="display: none;">@TempData["ErrorMessage"]</div>
+}
+
+@if (TempData["WarningMessage"] != null)
+{
+    <div id="tempWarningMessage" style="display: none;">@TempData["WarningMessage"]</div>
+}
+
+@if (TempData["InfoMessage"] != null)
+{
+    <div id="tempInfoMessage" style="display: none;">@TempData["InfoMessage"]</div>
+}
+
