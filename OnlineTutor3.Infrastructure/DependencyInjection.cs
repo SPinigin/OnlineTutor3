@@ -28,6 +28,17 @@ namespace OnlineTutor3.Infrastructure
             services.AddScoped<IStudentRepository, StudentRepository>();
             services.AddScoped<ITeacherRepository, TeacherRepository>();
             services.AddScoped<ITeacherSubjectRepository, TeacherSubjectRepository>();
+            services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+            services.AddScoped<IAssignmentClassRepository, AssignmentClassRepository>();
+            services.AddScoped<ISpellingTestRepository, SpellingTestRepository>();
+            services.AddScoped<IPunctuationTestRepository, PunctuationTestRepository>();
+            services.AddScoped<IOrthoeopyTestRepository, OrthoeopyTestRepository>();
+            services.AddScoped<IRegularTestRepository, RegularTestRepository>();
+            services.AddScoped<ISpellingQuestionRepository, SpellingQuestionRepository>();
+            services.AddScoped<IPunctuationQuestionRepository, PunctuationQuestionRepository>();
+            services.AddScoped<IOrthoeopyQuestionRepository, OrthoeopyQuestionRepository>();
+            services.AddScoped<IRegularQuestionRepository, RegularQuestionRepository>();
+            services.AddScoped<IRegularQuestionOptionRepository, RegularQuestionOptionRepository>();
 
             // Настройка Identity
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>

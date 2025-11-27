@@ -13,6 +13,7 @@ namespace OnlineTutor3.Application
             services.AddScoped<IStudentService, StudentService>();
             services.AddScoped<ITeacherService, TeacherService>();
             services.AddScoped<ISubjectService, SubjectService>();
+            services.AddScoped<IAssignmentService, AssignmentService>();
             
             return services;
         }
