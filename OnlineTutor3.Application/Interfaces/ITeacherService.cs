@@ -15,6 +15,8 @@ namespace OnlineTutor3.Application.Interfaces
         Task<int> DeleteAsync(int id);
         Task<bool> ExistsAsync(int id);
         Task<List<Subject>> GetTeacherSubjectsAsync(int teacherId);
+        Task<List<Subject>> GetTeacherSubjectsByUserIdAsync(string userId);
+        Task<bool> TeacherTeachesSubjectAsync(string userId, int subjectId);
         Task<int> AddSubjectToTeacherAsync(int teacherId, int subjectId);
         Task<int> RemoveSubjectFromTeacherAsync(int teacherId, int subjectId);
     }
