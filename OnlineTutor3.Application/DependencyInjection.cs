@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using OnlineTutor3.Application.Interfaces;
+using OnlineTutor3.Application.Services;
 
 namespace OnlineTutor3.Application
 {
@@ -6,8 +8,11 @@ namespace OnlineTutor3.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            // Здесь будут регистрироваться сервисы приложения
-            // Пока оставляем пустым, добавим позже
+            // Регистрация сервисов
+            services.AddScoped<IClassService, ClassService>();
+            services.AddScoped<IStudentService, StudentService>();
+            services.AddScoped<ITeacherService, TeacherService>();
+            services.AddScoped<ISubjectService, SubjectService>();
             
             return services;
         }
