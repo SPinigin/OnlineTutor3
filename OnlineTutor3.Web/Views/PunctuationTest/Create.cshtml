@@ -1,0 +1,125 @@
+@model OnlineTutor3.Web.ViewModels.CreatePunctuationTestViewModel
+@{
+    ViewData["Title"] = "Создание теста по пунктуации";
+    var assignment = ViewBag.Assignment as OnlineTutor3.Domain.Entities.Assignment;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus"></i> Создание теста по пунктуации
+                </h4>
+            </div>
+            <div class="card-body">
+                @if (assignment != null)
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Задание:</strong> @assignment.Title
+                    </div>
+                }
+
+                <form asp-action="Create" method="post">
+                    <input asp-for="AssignmentId" type="hidden" />
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label">
+                            <i class="fas fa-heading"></i> Название теста <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Title" class="form-control" placeholder="Например: Пунктуация. Знаки препинания в предложении" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">
+                            <i class="fas fa-align-left"></i> Описание
+                        </label>
+                        <textarea asp-for="Description" class="form-control" rows="3"
+                                  placeholder="Краткое описание теста, инструкции для учеников..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TimeLimit" class="form-label">
+                                <i class="fas fa-clock"></i> Время на выполнение (минут)
+                            </label>
+                            <input asp-for="TimeLimit" type="number" class="form-control" min="5" max="300" />
+                            <span asp-validation-for="TimeLimit" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MaxAttempts" class="form-label">
+                                <i class="fas fa-redo"></i> Количество попыток
+                            </label>
+                            <input asp-for="MaxAttempts" type="number" class="form-control" min="1" max="100" />
+                            <span asp-validation-for="MaxAttempts" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="StartDate" class="form-label">
+                                <i class="fas fa-calendar-alt"></i> Дата начала
+                            </label>
+                            <input asp-for="StartDate" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EndDate" class="form-label">
+                                <i class="fas fa-calendar-times"></i> Дата окончания
+                            </label>
+                            <input asp-for="EndDate" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input asp-for="ShowHints" class="form-check-input" />
+                            <label asp-for="ShowHints" class="form-check-label">
+                                <i class="fas fa-question-circle"></i> Показывать подсказки
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input asp-for="ShowCorrectAnswers" class="form-check-input" />
+                            <label asp-for="ShowCorrectAnswers" class="form-check-label">
+                                <i class="fas fa-check-circle"></i> Показывать правильные ответы
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <label asp-for="IsActive" class="form-check-label">
+                                <i class="fas fa-toggle-on"></i> Тест активен
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-controller="Assignment" asp-action="Details" asp-route-id="@Model.AssignmentId" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-info">
+                            <i class="fas fa-save"></i> Создать тест
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
