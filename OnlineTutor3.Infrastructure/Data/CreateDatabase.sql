@@ -263,7 +263,7 @@ BEGIN
         [AssignedAt] DATETIME2 NOT NULL DEFAULT GETDATE(),
         CONSTRAINT [PK_AssignmentClasses] PRIMARY KEY CLUSTERED ([Id] ASC),
         CONSTRAINT [FK_AssignmentClasses_Assignments] FOREIGN KEY ([AssignmentId]) REFERENCES [dbo].[Assignments]([Id]) ON DELETE CASCADE,
-        CONSTRAINT [FK_AssignmentClasses_Classes] FOREIGN KEY ([ClassId]) REFERENCES [dbo].[Classes]([Id]) ON DELETE CASCADE
+        CONSTRAINT [FK_AssignmentClasses_Classes] FOREIGN KEY ([ClassId]) REFERENCES [dbo].[Classes]([Id]) ON DELETE NO ACTION
     )
     
     CREATE UNIQUE INDEX [IX_AssignmentClasses_AssignmentId_ClassId] ON [dbo].[AssignmentClasses]([AssignmentId], [ClassId])
@@ -296,7 +296,7 @@ BEGIN
         [CreatedAt] DATETIME2 NOT NULL DEFAULT GETDATE(),
         CONSTRAINT [PK_SpellingTests] PRIMARY KEY CLUSTERED ([Id] ASC),
         CONSTRAINT [FK_SpellingTests_Assignments] FOREIGN KEY ([AssignmentId]) REFERENCES [dbo].[Assignments]([Id]) ON DELETE CASCADE,
-        CONSTRAINT [FK_SpellingTests_AspNetUsers] FOREIGN KEY ([TeacherId]) REFERENCES [dbo].[AspNetUsers]([Id]) ON DELETE CASCADE
+        CONSTRAINT [FK_SpellingTests_AspNetUsers] FOREIGN KEY ([TeacherId]) REFERENCES [dbo].[AspNetUsers]([Id]) ON DELETE NO ACTION
     )
     
     CREATE INDEX [IX_SpellingTests_AssignmentId] ON [dbo].[SpellingTests]([AssignmentId])
@@ -329,7 +329,7 @@ BEGIN
         [CreatedAt] DATETIME2 NOT NULL DEFAULT GETDATE(),
         CONSTRAINT [PK_PunctuationTests] PRIMARY KEY CLUSTERED ([Id] ASC),
         CONSTRAINT [FK_PunctuationTests_Assignments] FOREIGN KEY ([AssignmentId]) REFERENCES [dbo].[Assignments]([Id]) ON DELETE CASCADE,
-        CONSTRAINT [FK_PunctuationTests_AspNetUsers] FOREIGN KEY ([TeacherId]) REFERENCES [dbo].[AspNetUsers]([Id]) ON DELETE CASCADE
+        CONSTRAINT [FK_PunctuationTests_AspNetUsers] FOREIGN KEY ([TeacherId]) REFERENCES [dbo].[AspNetUsers]([Id]) ON DELETE NO ACTION
     )
     
     CREATE INDEX [IX_PunctuationTests_AssignmentId] ON [dbo].[PunctuationTests]([AssignmentId])
@@ -362,7 +362,7 @@ BEGIN
         [CreatedAt] DATETIME2 NOT NULL DEFAULT GETDATE(),
         CONSTRAINT [PK_OrthoeopyTests] PRIMARY KEY CLUSTERED ([Id] ASC),
         CONSTRAINT [FK_OrthoeopyTests_Assignments] FOREIGN KEY ([AssignmentId]) REFERENCES [dbo].[Assignments]([Id]) ON DELETE CASCADE,
-        CONSTRAINT [FK_OrthoeopyTests_AspNetUsers] FOREIGN KEY ([TeacherId]) REFERENCES [dbo].[AspNetUsers]([Id]) ON DELETE CASCADE
+        CONSTRAINT [FK_OrthoeopyTests_AspNetUsers] FOREIGN KEY ([TeacherId]) REFERENCES [dbo].[AspNetUsers]([Id]) ON DELETE NO ACTION
     )
     
     CREATE INDEX [IX_OrthoeopyTests_AssignmentId] ON [dbo].[OrthoeopyTests]([AssignmentId])
@@ -396,7 +396,7 @@ BEGIN
         [Type] INT NOT NULL DEFAULT 1,
         CONSTRAINT [PK_RegularTests] PRIMARY KEY CLUSTERED ([Id] ASC),
         CONSTRAINT [FK_RegularTests_Assignments] FOREIGN KEY ([AssignmentId]) REFERENCES [dbo].[Assignments]([Id]) ON DELETE CASCADE,
-        CONSTRAINT [FK_RegularTests_AspNetUsers] FOREIGN KEY ([TeacherId]) REFERENCES [dbo].[AspNetUsers]([Id]) ON DELETE CASCADE
+        CONSTRAINT [FK_RegularTests_AspNetUsers] FOREIGN KEY ([TeacherId]) REFERENCES [dbo].[AspNetUsers]([Id]) ON DELETE NO ACTION
     )
     
     CREATE INDEX [IX_RegularTests_AssignmentId] ON [dbo].[RegularTests]([AssignmentId])
@@ -662,7 +662,7 @@ BEGIN
         [Points] INT NOT NULL DEFAULT 0,
         CONSTRAINT [PK_SpellingAnswers] PRIMARY KEY CLUSTERED ([Id] ASC),
         CONSTRAINT [FK_SpellingAnswers_SpellingQuestions] FOREIGN KEY ([SpellingQuestionId]) REFERENCES [dbo].[SpellingQuestions]([Id]) ON DELETE CASCADE,
-        CONSTRAINT [FK_SpellingAnswers_SpellingTestResults] FOREIGN KEY ([TestResultId]) REFERENCES [dbo].[SpellingTestResults]([Id]) ON DELETE CASCADE
+        CONSTRAINT [FK_SpellingAnswers_SpellingTestResults] FOREIGN KEY ([TestResultId]) REFERENCES [dbo].[SpellingTestResults]([Id]) ON DELETE NO ACTION
     )
     
     CREATE INDEX [IX_SpellingAnswers_SpellingQuestionId] ON [dbo].[SpellingAnswers]([SpellingQuestionId])
@@ -687,7 +687,7 @@ BEGIN
         [Points] INT NOT NULL DEFAULT 0,
         CONSTRAINT [PK_PunctuationAnswers] PRIMARY KEY CLUSTERED ([Id] ASC),
         CONSTRAINT [FK_PunctuationAnswers_PunctuationQuestions] FOREIGN KEY ([PunctuationQuestionId]) REFERENCES [dbo].[PunctuationQuestions]([Id]) ON DELETE CASCADE,
-        CONSTRAINT [FK_PunctuationAnswers_PunctuationTestResults] FOREIGN KEY ([TestResultId]) REFERENCES [dbo].[PunctuationTestResults]([Id]) ON DELETE CASCADE
+        CONSTRAINT [FK_PunctuationAnswers_PunctuationTestResults] FOREIGN KEY ([TestResultId]) REFERENCES [dbo].[PunctuationTestResults]([Id]) ON DELETE NO ACTION
     )
     
     CREATE INDEX [IX_PunctuationAnswers_PunctuationQuestionId] ON [dbo].[PunctuationAnswers]([PunctuationQuestionId])
@@ -712,7 +712,7 @@ BEGIN
         [Points] INT NOT NULL DEFAULT 0,
         CONSTRAINT [PK_OrthoeopyAnswers] PRIMARY KEY CLUSTERED ([Id] ASC),
         CONSTRAINT [FK_OrthoeopyAnswers_OrthoeopyQuestions] FOREIGN KEY ([OrthoeopyQuestionId]) REFERENCES [dbo].[OrthoeopyQuestions]([Id]) ON DELETE CASCADE,
-        CONSTRAINT [FK_OrthoeopyAnswers_OrthoeopyTestResults] FOREIGN KEY ([TestResultId]) REFERENCES [dbo].[OrthoeopyTestResults]([Id]) ON DELETE CASCADE
+        CONSTRAINT [FK_OrthoeopyAnswers_OrthoeopyTestResults] FOREIGN KEY ([TestResultId]) REFERENCES [dbo].[OrthoeopyTestResults]([Id]) ON DELETE NO ACTION
     )
     
     CREATE INDEX [IX_OrthoeopyAnswers_OrthoeopyQuestionId] ON [dbo].[OrthoeopyAnswers]([OrthoeopyQuestionId])
@@ -738,7 +738,7 @@ BEGIN
         [Points] INT NOT NULL DEFAULT 0,
         CONSTRAINT [PK_RegularAnswers] PRIMARY KEY CLUSTERED ([Id] ASC),
         CONSTRAINT [FK_RegularAnswers_RegularQuestions] FOREIGN KEY ([RegularQuestionId]) REFERENCES [dbo].[RegularQuestions]([Id]) ON DELETE CASCADE,
-        CONSTRAINT [FK_RegularAnswers_RegularTestResults] FOREIGN KEY ([TestResultId]) REFERENCES [dbo].[RegularTestResults]([Id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_RegularAnswers_RegularTestResults] FOREIGN KEY ([TestResultId]) REFERENCES [dbo].[RegularTestResults]([Id]) ON DELETE NO ACTION,
         CONSTRAINT [FK_RegularAnswers_RegularQuestionOptions] FOREIGN KEY ([SelectedOptionId]) REFERENCES [dbo].[RegularQuestionOptions]([Id]) ON DELETE NO ACTION
     )
     
