@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using OnlineTutor3.Domain.Entities;
 
 namespace OnlineTutor3.Web.ViewModels
 {
@@ -39,9 +38,6 @@ namespace OnlineTutor3.Web.ViewModels
 
         [Display(Name = "Показывать правильные ответы")]
         public bool ShowCorrectAnswers { get; set; } = true;
-
-        [Display(Name = "Тип теста")]
-        public TestType Type { get; set; } = TestType.Practice;
 
         [Display(Name = "Тест активен")]
         public bool IsActive { get; set; } = true;
