@@ -54,16 +54,105 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div class="container-fluid main-content px-2 px-md-3 px-lg-4">
+        <main role="main" class="pb-3" style="max-width: 1600px; margin: 0 auto;">
             @await Html.PartialAsync("_Notifications")
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="footer-fixed footer-compact bg-light border-top">
         <div class="container">
-            &copy; @DateTime.Now.Year - OnlineTutor3
+
+            <div class="row d-none d-md-flex align-items-start">
+
+                <div class="col-md-4 footer-column text-center">
+                    <h6 class="mb-2"><i class="fas fa-graduation-cap text-primary text-center"></i> Тьюторная</h6>
+                    <p class="mb-2">
+                        <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none">
+                            <i class="fas fa-shield-alt text-center"></i> Конфиденциальность
+                        </a>
+                    </p>
+                    <p class="mb-0">&copy; 2025</p>
+                </div>
+
+                <div class="col-md-4 footer-column text-center">
+                    <h6><i class="fas fa-address-book text-success"></i> Контакты</h6>
+                    <p class="mb-1">Пинигина Наталья Анатольевна</p>
+                    <div class="social-links justify-content-center">
+                        <a href="mailto:pn31@mail.ru" title="Email: pn31@mail.ru">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                        <a href="tel:+79324224597" title="Телефон: +7 (932) 422-45-97">
+                            <i class="fas fa-phone"></i>
+                        </a>
+                    </div>
+                </div>
+
+
+                <div class="col-md-4 footer-column text-center">
+                    <h6><i class="fas fa-code text-info"></i> Тех.поддержка</h6>
+                    <p class="mb-1">Пинигин Сергей</p>
+                    <div class="social-links justify-content-center">
+                        <a href="mailto:pinigin09@yandex.ru" title="Email: pinigin09@yandex.ru">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                        <a href="https://t.me/SPin09" class="telegram" target="_blank" title="Telegram: @@SPin09">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                        <a href="https://github.com/SPinigin" class="github" target="_blank" title="GitHub: github.com/SPinigin">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row d-md-none gx-2">
+                <div class="col-6 footer-column-mobile">
+                    <div class="text-center">
+                        <h6 class="footer-mobile-title">
+                            <i class="fas fa-address-book text-success"></i> Контакты
+                        </h6>
+                        <p class="footer-mobile-name">Пинигина Наталья Анатольевна</p>
+                        <div class="footer-mobile-contacts">
+                            <a href="mailto:pn31@mail.ru" class="footer-contact-icon" title="Email">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                            <a href="tel:+79324224597" class="footer-contact-icon" title="Телефон">
+                                <i class="fas fa-phone"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 footer-column-mobile">
+                    <div class="text-center">
+                        <h6 class="footer-mobile-title">
+                            <i class="fas fa-code text-info"></i> Тех.поддержка
+                        </h6>
+                        <p class="footer-mobile-name">Пинигин Сергей</p>
+                        <div class="footer-mobile-contacts">
+                            <a href="mailto:pinigin09@yandex.ru" class="footer-contact-icon" title="Email">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                            <a href="https://t.me/SPin09" class="footer-contact-icon telegram" target="_blank" title="Telegram">
+                                <i class="fab fa-telegram"></i>
+                            </a>
+                            <a href="https://github.com/SPinigin" class="footer-contact-icon github" target="_blank" title="GitHub">
+                                <i class="fab fa-github"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row d-md-none mt-1">
+                <div class="col-12 text-center">
+                    <small class="text-muted" style="font-weight: bold;">&copy; 2025 Тьюторная</small>
+                </div>
+            </div>
         </div>
     </footer>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
