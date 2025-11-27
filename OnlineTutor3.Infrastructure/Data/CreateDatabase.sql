@@ -393,7 +393,6 @@ BEGIN
         [ShowCorrectAnswers] BIT NOT NULL DEFAULT 1,
         [IsActive] BIT NOT NULL DEFAULT 1,
         [CreatedAt] DATETIME2 NOT NULL DEFAULT GETDATE(),
-        [Type] INT NOT NULL DEFAULT 1,
         CONSTRAINT [PK_RegularTests] PRIMARY KEY CLUSTERED ([Id] ASC),
         CONSTRAINT [FK_RegularTests_Assignments] FOREIGN KEY ([AssignmentId]) REFERENCES [dbo].[Assignments]([Id]) ON DELETE CASCADE,
         CONSTRAINT [FK_RegularTests_AspNetUsers] FOREIGN KEY ([TeacherId]) REFERENCES [dbo].[AspNetUsers]([Id]) ON DELETE NO ACTION
