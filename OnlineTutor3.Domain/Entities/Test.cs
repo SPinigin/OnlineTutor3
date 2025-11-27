@@ -70,15 +70,7 @@ namespace OnlineTutor3.Domain.Entities
     /// </summary>
     public class RegularTest : Test
     {
-        public TestType Type { get; set; } = TestType.Practice;
-    }
-
-    public enum TestType
-    {
-        Practice = 1,   // Практика
-        Quiz = 2,       // Викторина
-        Exam = 3,       // Экзамен
-        Homework = 4    // Домашнее задание
+        // Специфичные свойства для классических тестов можно добавить позже
     }
 }
 
