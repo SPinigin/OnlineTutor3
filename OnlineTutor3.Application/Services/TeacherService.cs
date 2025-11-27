@@ -150,6 +150,57 @@ namespace OnlineTutor3.Application.Services
             }
         }
 
+        public async Task<List<Subject>> GetTeacherSubjectsByUserIdAsync(string userId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(userId))
+                {
+                    throw new ArgumentException("UserId не может быть пустым", nameof(userId));
+                }
+
+                // Получаем Teacher по UserId
+                var teacher = await _teacherRepository.GetByUserIdAsync(userId);
+                if (teacher == null)
+                {
+                    return new List<Subject>();
+                }
+
+                return await GetTeacherSubjectsAsync(teacher.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении предметов учителя по UserId: {UserId}", userId);
+                throw;
+            }
+        }
+
+        public async Task<bool> TeacherTeachesSubjectAsync(string userId, int subjectId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(userId))
+                {
+                    return false;
+                }
+
+                // Получаем Teacher по UserId
+                var teacher = await _teacherRepository.GetByUserIdAsync(userId);
+                if (teacher == null)
+                {
+                    return false;
+                }
+
+                var teacherSubject = await _teacherSubjectRepository.GetByTeacherAndSubjectIdAsync(teacher.Id, subjectId);
+                return teacherSubject != null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при проверке, ведет ли учитель предмет: UserId={UserId}, SubjectId={SubjectId}", userId, subjectId);
+                throw;
+            }
+        }
+
         public async Task<int> AddSubjectToTeacherAsync(int teacherId, int subjectId)
         {
             try
