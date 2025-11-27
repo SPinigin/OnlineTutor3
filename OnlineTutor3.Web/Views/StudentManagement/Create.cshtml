@@ -1,0 +1,124 @@
+@model OnlineTutor3.Web.ViewModels.CreateStudentViewModel
+@{
+    ViewData["Title"] = "Создание ученика";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus"></i> Создание нового ученика
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FirstName" class="form-label">
+                                <i class="fas fa-user"></i> Имя <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="FirstName" class="form-control" placeholder="Имя" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="LastName" class="form-label">
+                                <i class="fas fa-user"></i> Фамилия <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="LastName" class="form-control" placeholder="Фамилия" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Email" class="form-label">
+                                <i class="fas fa-envelope"></i> Email <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Email" class="form-control" type="email" placeholder="example@email.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PhoneNumber" class="form-label">
+                                <i class="fas fa-phone"></i> Телефон
+                            </label>
+                            <input asp-for="PhoneNumber" class="form-control" type="tel" placeholder="+7 (999) 999-99-99" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DateOfBirth" class="form-label">
+                            <i class="fas fa-calendar"></i> Дата рождения <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="DateOfBirth" class="form-control" type="date" />
+                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">
+                            <i class="fas fa-lock"></i> Пароль <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="Минимум 6 символов" id="Password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="School" class="form-label">
+                                <i class="fas fa-school"></i> Школа
+                            </label>
+                            <input asp-for="School" class="form-control" placeholder="Номер школы" />
+                            <span asp-validation-for="School" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Grade" class="form-label">
+                                <i class="fas fa-graduation-cap"></i> Класс в школе
+                            </label>
+                            <input asp-for="Grade" class="form-control" type="number" min="1" max="11" placeholder="1-11" />
+                            <span asp-validation-for="Grade" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ClassId" class="form-label">
+                            <i class="fas fa-users"></i> Назначить в онлайн-класс
+                        </label>
+                        <select asp-for="ClassId" class="form-select">
+                            <option value="">Не назначать</option>
+                            @if (ViewBag.Classes != null)
+                            {
+                                @foreach (var item in (SelectList)ViewBag.Classes)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="ClassId" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Создать ученика
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/registration.js" asp-append-version="true"></script>
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/password-toggle.css" asp-append-version="true" />
+}
+
