@@ -1,0 +1,116 @@
+@model OnlineTutor3.Web.ViewModels.EditAssignmentViewModel
+@{
+    ViewData["Title"] = "Редактирование задания";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-edit"></i> Редактирование задания
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <input asp-for="Id" type="hidden" />
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label">
+                            <i class="fas fa-heading"></i> Название задания <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">
+                            <i class="fas fa-align-left"></i> Описание
+                        </label>
+                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SubjectId" class="form-label">
+                            <i class="fas fa-book"></i> Предмет <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="SubjectId" asp-items="ViewBag.Subjects" class="form-select">
+                            <option value="">-- Выберите предмет --</option>
+                        </select>
+                        <span asp-validation-for="SubjectId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DueDate" class="form-label">
+                            <i class="fas fa-calendar-alt"></i> Срок выполнения
+                        </label>
+                        <input asp-for="DueDate" type="datetime-local" class="form-control" />
+                        <span asp-validation-for="DueDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <label asp-for="IsActive" class="form-check-label">
+                                <i class="fas fa-toggle-on"></i> Задание активно
+                            </label>
+                        </div>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle"></i> Неактивные задания скрыты от учеников
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-graduation-cap"></i> Назначить классам
+                        </label>
+                        <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                            @if (ViewBag.Classes != null && ((List<OnlineTutor3.Domain.Entities.Class>)ViewBag.Classes).Any())
+                            {
+                                @foreach (var classItem in (List<OnlineTutor3.Domain.Entities.Class>)ViewBag.Classes)
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               name="SelectedClassIds" 
+                                               value="@classItem.Id" 
+                                               id="class_@classItem.Id"
+                                               @(Model.SelectedClassIds.Contains(classItem.Id) ? "checked" : "") />
+                                        <label class="form-check-label" for="class_@classItem.Id">
+                                            @classItem.Name
+                                            @if (!string.IsNullOrEmpty(classItem.Description))
+                                            {
+                                                <small class="text-muted"> - @classItem.Description</small>
+                                            }
+                                        </label>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-info-circle"></i> У вас пока нет активных классов.
+                                </p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Сохранить изменения
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
