@@ -16,6 +16,14 @@ namespace OnlineTutor3.Web.Controllers
         private readonly IClassService _classService;
         private readonly IAssignmentClassRepository _assignmentClassRepository;
         private readonly ITeacherService _teacherService;
+        private readonly ISpellingTestService _spellingTestService;
+        private readonly IPunctuationTestService _punctuationTestService;
+        private readonly IOrthoeopyTestService _orthoeopyTestService;
+        private readonly IRegularTestService _regularTestService;
+        private readonly ISpellingQuestionRepository _spellingQuestionRepository;
+        private readonly IPunctuationQuestionRepository _punctuationQuestionRepository;
+        private readonly IOrthoeopyQuestionRepository _orthoeopyQuestionRepository;
+        private readonly IRegularQuestionRepository _regularQuestionRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<AssignmentController> _logger;
 
@@ -25,6 +33,14 @@ namespace OnlineTutor3.Web.Controllers
             IClassService classService,
             IAssignmentClassRepository assignmentClassRepository,
             ITeacherService teacherService,
+            ISpellingTestService spellingTestService,
+            IPunctuationTestService punctuationTestService,
+            IOrthoeopyTestService orthoeopyTestService,
+            IRegularTestService regularTestService,
+            ISpellingQuestionRepository spellingQuestionRepository,
+            IPunctuationQuestionRepository punctuationQuestionRepository,
+            IOrthoeopyQuestionRepository orthoeopyQuestionRepository,
+            IRegularQuestionRepository regularQuestionRepository,
             UserManager<ApplicationUser> userManager,
             ILogger<AssignmentController> logger)
         {
@@ -33,6 +49,14 @@ namespace OnlineTutor3.Web.Controllers
             _classService = classService;
             _assignmentClassRepository = assignmentClassRepository;
             _teacherService = teacherService;
+            _spellingTestService = spellingTestService;
+            _punctuationTestService = punctuationTestService;
+            _orthoeopyTestService = orthoeopyTestService;
+            _regularTestService = regularTestService;
+            _spellingQuestionRepository = spellingQuestionRepository;
+            _punctuationQuestionRepository = punctuationQuestionRepository;
+            _orthoeopyQuestionRepository = orthoeopyQuestionRepository;
+            _regularQuestionRepository = regularQuestionRepository;
             _userManager = userManager;
             _logger = logger;
         }
@@ -50,30 +74,171 @@ namespace OnlineTutor3.Web.Controllers
                 }
 
                 // Получаем предметы, которые ведет учитель
-                var teacherSubjects = await _teacherService.GetTeacherSubjectsByUserIdAsync(currentUser.Id);
+                var teacherSubjects = await _teacherService.GetTeacherSubjectsByUserIdAsync(currentUser.Id) ?? new List<Subject>();
                 ViewBag.Subjects = new SelectList(teacherSubjects, "Id", "Name", subjectId);
 
                 // Получаем задания учителя
                 List<Assignment> assignments;
                 if (subjectId.HasValue)
                 {
-                    assignments = await _assignmentService.GetByTeacherIdAndSubjectIdAsync(currentUser.Id, subjectId.Value);
+                    assignments = await _assignmentService.GetByTeacherIdAndSubjectIdAsync(currentUser.Id, subjectId.Value) ?? new List<Assignment>();
                 }
                 else
                 {
-                    assignments = await _assignmentService.GetByTeacherIdAsync(currentUser.Id);
+                    assignments = await _assignmentService.GetByTeacherIdAsync(currentUser.Id) ?? new List<Assignment>();
+                }
+
+                // Загружаем тесты для каждого задания
+                var assignmentsWithTests = new Dictionary<int, AssignmentTestsViewModel>();
+                if (assignments != null && assignments.Any())
+                {
+                    foreach (var assignment in assignments)
+                    {
+                        try
+                        {
+                            List<SpellingTest> spellingTests = new List<SpellingTest>();
+                            List<PunctuationTest> punctuationTests = new List<PunctuationTest>();
+                            List<OrthoeopyTest> orthoeopyTests = new List<OrthoeopyTest>();
+                            List<RegularTest> regularTests = new List<RegularTest>();
+
+                            try
+                            {
+                                spellingTests = await _spellingTestService.GetByAssignmentIdAsync(assignment.Id);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Ошибка при загрузке тестов по орфографии для задания {AssignmentId}", assignment.Id);
+                            }
+
+                            try
+                            {
+                                punctuationTests = await _punctuationTestService.GetByAssignmentIdAsync(assignment.Id);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Ошибка при загрузке тестов по пунктуации для задания {AssignmentId}", assignment.Id);
+                            }
+
+                            try
+                            {
+                                orthoeopyTests = await _orthoeopyTestService.GetByAssignmentIdAsync(assignment.Id);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Ошибка при загрузке тестов по орфоэпии для задания {AssignmentId}", assignment.Id);
+                            }
+
+                            try
+                            {
+                                regularTests = await _regularTestService.GetByAssignmentIdAsync(assignment.Id);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Ошибка при загрузке классических тестов для задания {AssignmentId}", assignment.Id);
+                            }
+
+                            // Загружаем количество вопросов для каждого теста
+                            var spellingQuestionCounts = new Dictionary<int, int>();
+                            foreach (var test in spellingTests)
+                            {
+                                try
+                                {
+                                    spellingQuestionCounts[test.Id] = await _spellingQuestionRepository.GetCountByTestIdAsync(test.Id);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogWarning(ex, "Ошибка при получении количества вопросов для теста по орфографии {TestId}", test.Id);
+                                    spellingQuestionCounts[test.Id] = 0;
+                                }
+                            }
+
+                            var punctuationQuestionCounts = new Dictionary<int, int>();
+                            foreach (var test in punctuationTests)
+                            {
+                                try
+                                {
+                                    punctuationQuestionCounts[test.Id] = await _punctuationQuestionRepository.GetCountByTestIdAsync(test.Id);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogWarning(ex, "Ошибка при получении количества вопросов для теста по пунктуации {TestId}", test.Id);
+                                    punctuationQuestionCounts[test.Id] = 0;
+                                }
+                            }
+
+                            var orthoeopyQuestionCounts = new Dictionary<int, int>();
+                            foreach (var test in orthoeopyTests)
+                            {
+                                try
+                                {
+                                    orthoeopyQuestionCounts[test.Id] = await _orthoeopyQuestionRepository.GetCountByTestIdAsync(test.Id);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogWarning(ex, "Ошибка при получении количества вопросов для теста по орфоэпии {TestId}", test.Id);
+                                    orthoeopyQuestionCounts[test.Id] = 0;
+                                }
+                            }
+
+                            var regularQuestionCounts = new Dictionary<int, int>();
+                            foreach (var test in regularTests)
+                            {
+                                try
+                                {
+                                    regularQuestionCounts[test.Id] = await _regularQuestionRepository.GetCountByTestIdAsync(test.Id);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogWarning(ex, "Ошибка при получении количества вопросов для классического теста {TestId}", test.Id);
+                                    regularQuestionCounts[test.Id] = 0;
+                                }
+                            }
+
+                            assignmentsWithTests[assignment.Id] = new AssignmentTestsViewModel
+                            {
+                                Assignment = assignment,
+                                SpellingTests = spellingTests,
+                                PunctuationTests = punctuationTests,
+                                OrthoeopyTests = orthoeopyTests,
+                                RegularTests = regularTests,
+                                SpellingTestQuestionCounts = spellingQuestionCounts,
+                                PunctuationTestQuestionCounts = punctuationQuestionCounts,
+                                OrthoeopyTestQuestionCounts = orthoeopyQuestionCounts,
+                                RegularTestQuestionCounts = regularQuestionCounts
+                            };
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Ошибка при загрузке тестов для задания {AssignmentId}", assignment.Id);
+                            // Продолжаем обработку других заданий даже если одно упало
+                            assignmentsWithTests[assignment.Id] = new AssignmentTestsViewModel
+                            {
+                                Assignment = assignment,
+                                SpellingTests = new List<SpellingTest>(),
+                                PunctuationTests = new List<PunctuationTest>(),
+                                OrthoeopyTests = new List<OrthoeopyTest>(),
+                                RegularTests = new List<RegularTest>(),
+                                SpellingTestQuestionCounts = new Dictionary<int, int>(),
+                                PunctuationTestQuestionCounts = new Dictionary<int, int>(),
+                                OrthoeopyTestQuestionCounts = new Dictionary<int, int>(),
+                                RegularTestQuestionCounts = new Dictionary<int, int>()
+                            };
+                        }
+                    }
                 }
 
                 // Загружаем предметы для отображения
                 var subjectsDict = teacherSubjects.ToDictionary(s => s.Id, s => s.Name);
                 ViewBag.SubjectsDict = subjectsDict;
 
+                ViewBag.AssignmentsWithTests = assignmentsWithTests;
                 return View(assignments);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка в Assignment/Index");
-                TempData["ErrorMessage"] = "Произошла ошибка при загрузке заданий. Попробуйте обновить страницу.";
+                _logger.LogError(ex, "Ошибка в Assignment/Index: {Message}", ex.Message);
+                _logger.LogError(ex, "StackTrace: {StackTrace}", ex.StackTrace);
+                TempData["ErrorMessage"] = $"Произошла ошибка при загрузке заданий: {ex.Message}. Попробуйте обновить страницу.";
                 return View(new List<Assignment>());
             }
         }
