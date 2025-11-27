@@ -14,14 +14,55 @@ html {
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 100vh;
-  min-height: 100%;
-  background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+    min-height: 100%;
+    background-color: #f8f9fa;
 }
+
+/* ===== NAVBAR ===== */
+.navbar-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+    .navbar-fixed.scrolled {
+        background-color: rgba(248, 249, 250, 0.95) !important;
+        backdrop-filter: blur(10px);
+    }
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+.navbar-fixed .dropdown-menu {
+    margin-top: 8px;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+    padding-top: 65px;
+    grid-row: 2;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+    .main-content main {
+        padding-bottom: 1rem;
+        max-height: 100%;
+    }
 
 /* ===== FOOTER ===== */
 .footer-fixed {
