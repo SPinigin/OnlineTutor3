@@ -20,6 +20,12 @@ try
     builder.Services.AddApplication();
     builder.Services.AddWeb();
 
+// Регистрация сервисов импорта вопросов
+builder.Services.AddScoped<OnlineTutor3.Web.Services.SpellingQuestionImportService>();
+builder.Services.AddScoped<OnlineTutor3.Web.Services.PunctuationQuestionImportService>();
+builder.Services.AddScoped<OnlineTutor3.Web.Services.OrthoeopyQuestionImportService>();
+builder.Services.AddScoped<OnlineTutor3.Web.Services.RegularQuestionImportService>();
+
     logger.Info("Building application. Environment: {Environment}", builder.Environment.EnvironmentName);
     
     var app = builder.Build();
