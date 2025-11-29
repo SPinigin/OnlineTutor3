@@ -207,7 +207,8 @@ namespace OnlineTutor3.Web.Services
             {
                 worksheet.Cells[1, i].Style.Font.Bold = true;
                 worksheet.Cells[1, i].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                worksheet.Cells[1, i].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightBlue);
+                // LightBlue RGB: A=255, R=173, G=216, B=230
+                worksheet.Cells[1, i].Style.Fill.BackgroundColor.SetColor(255, 173, 216, 230);
             }
 
             // Настройка ширины столбцов
