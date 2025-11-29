@@ -120,9 +120,12 @@ namespace OnlineTutor3.Web.Services
 
         public async Task<byte[]> GenerateTemplateAsync()
         {
-            ConfigureExcelPackage();
+            try
+            {
+                _logger.LogInformation("Начало генерации шаблона импорта вопросов по пунктуации");
+                ConfigureExcelPackage();
 
-            using var package = new ExcelPackage();
+                using var package = new ExcelPackage();
             var worksheet = package.Workbook.Worksheets.Add("Вопросы");
 
             // Заголовки
@@ -146,9 +149,7 @@ namespace OnlineTutor3.Web.Services
             for (int i = 1; i <= 4; i++)
             {
                 worksheet.Cells[1, i].Style.Font.Bold = true;
-                worksheet.Cells[1, i].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                // LightBlue RGB: A=255, R=173, G=216, B=230
-                worksheet.Cells[1, i].Style.Fill.BackgroundColor.SetColor(255, 173, 216, 230);
+                // Убираем цветовое оформление, чтобы избежать проблем с SetColor
             }
 
             // Настройка ширины столбцов
@@ -183,7 +184,15 @@ namespace OnlineTutor3.Web.Services
 
             instructionSheet.Cells.AutoFitColumns();
 
-            return await package.GetAsByteArrayAsync();
+                var templateBytes = package.GetAsByteArray();
+                _logger.LogInformation("Шаблон импорта вопросов по пунктуации успешно создан. Размер: {Size} байт", templateBytes.Length);
+                return await Task.FromResult(templateBytes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка генерации шаблона импорта вопросов по пунктуации");
+                throw new InvalidOperationException($"Ошибка при генерации шаблона: {ex.Message}", ex);
+            }
         }
 
         private string? GetCellValue(ExcelWorksheet worksheet, int row, int col)

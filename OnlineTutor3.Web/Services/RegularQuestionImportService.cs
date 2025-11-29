@@ -153,10 +153,13 @@ namespace OnlineTutor3.Web.Services
 
         public async Task<byte[]> GenerateTemplateAsync()
         {
-            ConfigureExcelPackage();
+            try
+            {
+                _logger.LogInformation("Начало генерации шаблона импорта классических вопросов");
+                ConfigureExcelPackage();
 
-            using var package = new ExcelPackage();
-            var worksheet = package.Workbook.Worksheets.Add("Вопросы");
+                using var package = new ExcelPackage();
+                var worksheet = package.Workbook.Worksheets.Add("Вопросы");
 
             // Заголовки
             worksheet.Cells[1, 1].Value = "Текст вопроса*";
@@ -206,9 +209,7 @@ namespace OnlineTutor3.Web.Services
             for (int i = 1; i <= 16; i++)
             {
                 worksheet.Cells[1, i].Style.Font.Bold = true;
-                worksheet.Cells[1, i].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                // LightBlue RGB: A=255, R=173, G=216, B=230
-                worksheet.Cells[1, i].Style.Fill.BackgroundColor.SetColor(255, 173, 216, 230);
+                // Убираем цветовое оформление, чтобы избежать проблем с SetColor
             }
 
             // Настройка ширины столбцов
@@ -251,9 +252,17 @@ namespace OnlineTutor3.Web.Services
             instructionSheet.Cells[20, 1].Value = "• Для множественного выбора должно быть хотя бы два правильных ответа";
             instructionSheet.Cells[21, 1].Value = "• Для Верно/Неверно используйте только два варианта ответа";
 
-            instructionSheet.Cells.AutoFitColumns();
+                instructionSheet.Cells.AutoFitColumns();
 
-            return await package.GetAsByteArrayAsync();
+                var templateBytes = package.GetAsByteArray();
+                _logger.LogInformation("Шаблон импорта классических вопросов успешно создан. Размер: {Size} байт", templateBytes.Length);
+                return await Task.FromResult(templateBytes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка генерации шаблона импорта классических вопросов");
+                throw new InvalidOperationException($"Ошибка при генерации шаблона: {ex.Message}", ex);
+            }
         }
 
         private string? GetCellValue(ExcelWorksheet worksheet, int row, int col)
