@@ -12,6 +12,7 @@ namespace OnlineTutor3.Web.Controllers
     {
         private readonly IOrthoeopyTestService _testService;
         private readonly IAssignmentService _assignmentService;
+        private readonly ISubjectService _subjectService;
         private readonly IOrthoeopyQuestionRepository _questionRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<OrthoeopyTestController> _logger;
@@ -19,12 +20,14 @@ namespace OnlineTutor3.Web.Controllers
         public OrthoeopyTestController(
             IOrthoeopyTestService testService,
             IAssignmentService assignmentService,
+            ISubjectService subjectService,
             IOrthoeopyQuestionRepository questionRepository,
             UserManager<ApplicationUser> userManager,
             ILogger<OrthoeopyTestController> logger)
         {
             _testService = testService;
             _assignmentService = assignmentService;
+            _subjectService = subjectService;
             _questionRepository = questionRepository;
             _userManager = userManager;
             _logger = logger;
@@ -52,6 +55,14 @@ namespace OnlineTutor3.Web.Controllers
                 if (assignment == null)
                 {
                     TempData["ErrorMessage"] = "Задание не найдено.";
+                    return RedirectToAction("Index", "Assignment");
+                }
+
+                // Проверяем, что предмет - Русский язык
+                var subject = await _subjectService.GetByIdAsync(assignment.SubjectId);
+                if (subject == null || !subject.Name.Equals("Русский язык", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["ErrorMessage"] = "Тесты по орфоэпии можно создавать только для предмета 'Русский язык'.";
                     return RedirectToAction("Index", "Assignment");
                 }
 
@@ -93,7 +104,22 @@ namespace OnlineTutor3.Web.Controllers
                     }
                     else
                     {
-                        var test = new OrthoeopyTest
+                        // Проверяем, что предмет - Русский язык
+                        var assignmentToCheck = await _assignmentService.GetByIdAsync(model.AssignmentId);
+                        if (assignmentToCheck != null)
+                        {
+                            var subject = await _subjectService.GetByIdAsync(assignmentToCheck.SubjectId);
+                            if (subject == null || !subject.Name.Equals("Русский язык", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ModelState.AddModelError("AssignmentId", "Тесты по орфоэпии можно создавать только для предмета 'Русский язык'.");
+                            }
+                        }
+                    }
+                }
+
+                if (ModelState.IsValid)
+                {
+                    var test = new OrthoeopyTest
                         {
                             Title = model.Title,
                             Description = model.Description,
@@ -109,11 +135,10 @@ namespace OnlineTutor3.Web.Controllers
                             CreatedAt = DateTime.Now
                         };
 
-                        var testId = await _testService.CreateAsync(test);
+                    var testId = await _testService.CreateAsync(test);
 
-                        TempData["SuccessMessage"] = $"Тест по орфоэпии \"{test.Title}\" успешно создан! Теперь добавьте вопросы.";
-                        return RedirectToAction("Details", new { id = testId });
-                    }
+                    TempData["SuccessMessage"] = $"Тест по орфоэпии \"{test.Title}\" успешно создан! Теперь добавьте вопросы.";
+                    return RedirectToAction("Details", new { id = testId });
                 }
 
                 var assignment = await _assignmentService.GetByIdAsync(model.AssignmentId);

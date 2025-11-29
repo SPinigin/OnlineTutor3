@@ -138,15 +138,21 @@ else
                                 <i class="fas fa-clipboard-list"></i> Тесты (@totalTests)
                             </small>
                             <div class="btn-group btn-group-sm">
-                                <a asp-controller="SpellingTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-outline-success" title="Орфография">
-                                    <i class="fas fa-plus"></i> <i class="fas fa-spell-check"></i>
-                                </a>
-                                <a asp-controller="PunctuationTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-outline-info" title="Пунктуация">
-                                    <i class="fas fa-plus"></i> <i class="fas fa-quote-right"></i>
-                                </a>
-                                <a asp-controller="OrthoeopyTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-outline-warning" title="Орфоэпия">
-                                    <i class="fas fa-plus"></i> <i class="fas fa-volume-up"></i>
-                                </a>
+                                @{
+                                    var isRussianLanguage = subjectName.Equals("Русский язык", StringComparison.OrdinalIgnoreCase);
+                                }
+                                @if (isRussianLanguage)
+                                {
+                                    <a asp-controller="SpellingTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-outline-success" title="Орфография">
+                                        <i class="fas fa-plus"></i> <i class="fas fa-spell-check"></i>
+                                    </a>
+                                    <a asp-controller="PunctuationTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-outline-info" title="Пунктуация">
+                                        <i class="fas fa-plus"></i> <i class="fas fa-quote-right"></i>
+                                    </a>
+                                    <a asp-controller="OrthoeopyTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-outline-warning" title="Орфоэпия">
+                                        <i class="fas fa-plus"></i> <i class="fas fa-volume-up"></i>
+                                    </a>
+                                }
                                 <a asp-controller="RegularTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-outline-primary" title="Классический">
                                     <i class="fas fa-plus"></i> <i class="fas fa-clipboard-check"></i>
                                 </a>

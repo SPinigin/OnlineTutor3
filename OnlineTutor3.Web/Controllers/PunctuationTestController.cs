@@ -12,6 +12,7 @@ namespace OnlineTutor3.Web.Controllers
     {
         private readonly IPunctuationTestService _testService;
         private readonly IAssignmentService _assignmentService;
+        private readonly ISubjectService _subjectService;
         private readonly IPunctuationQuestionRepository _questionRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<PunctuationTestController> _logger;
@@ -19,12 +20,14 @@ namespace OnlineTutor3.Web.Controllers
         public PunctuationTestController(
             IPunctuationTestService testService,
             IAssignmentService assignmentService,
+            ISubjectService subjectService,
             IPunctuationQuestionRepository questionRepository,
             UserManager<ApplicationUser> userManager,
             ILogger<PunctuationTestController> logger)
         {
             _testService = testService;
             _assignmentService = assignmentService;
+            _subjectService = subjectService;
             _questionRepository = questionRepository;
             _userManager = userManager;
             _logger = logger;
@@ -52,6 +55,14 @@ namespace OnlineTutor3.Web.Controllers
                 if (assignment == null)
                 {
                     TempData["ErrorMessage"] = "Задание не найдено.";
+                    return RedirectToAction("Index", "Assignment");
+                }
+
+                // Проверяем, что предмет - Русский язык
+                var subject = await _subjectService.GetByIdAsync(assignment.SubjectId);
+                if (subject == null || !subject.Name.Equals("Русский язык", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["ErrorMessage"] = "Тесты по пунктуации можно создавать только для предмета 'Русский язык'.";
                     return RedirectToAction("Index", "Assignment");
                 }
 
@@ -93,7 +104,22 @@ namespace OnlineTutor3.Web.Controllers
                     }
                     else
                     {
-                        var test = new PunctuationTest
+                        // Проверяем, что предмет - Русский язык
+                        var assignmentToCheck = await _assignmentService.GetByIdAsync(model.AssignmentId);
+                        if (assignmentToCheck != null)
+                        {
+                            var subject = await _subjectService.GetByIdAsync(assignmentToCheck.SubjectId);
+                            if (subject == null || !subject.Name.Equals("Русский язык", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ModelState.AddModelError("AssignmentId", "Тесты по пунктуации можно создавать только для предмета 'Русский язык'.");
+                            }
+                        }
+                    }
+                }
+
+                if (ModelState.IsValid)
+                {
+                    var test = new PunctuationTest
                         {
                             Title = model.Title,
                             Description = model.Description,
@@ -109,11 +135,10 @@ namespace OnlineTutor3.Web.Controllers
                             CreatedAt = DateTime.Now
                         };
 
-                        var testId = await _testService.CreateAsync(test);
+                    var testId = await _testService.CreateAsync(test);
 
-                        TempData["SuccessMessage"] = $"Тест по пунктуации \"{test.Title}\" успешно создан! Теперь добавьте вопросы.";
-                        return RedirectToAction("Details", new { id = testId });
-                    }
+                    TempData["SuccessMessage"] = $"Тест по пунктуации \"{test.Title}\" успешно создан! Теперь добавьте вопросы.";
+                    return RedirectToAction("Details", new { id = testId });
                 }
 
                 var assignment = await _assignmentService.GetByIdAsync(model.AssignmentId);
