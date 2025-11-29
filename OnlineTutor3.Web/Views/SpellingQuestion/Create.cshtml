@@ -1,0 +1,95 @@
+@model OnlineTutor3.Web.ViewModels.CreateSpellingQuestionViewModel
+@{
+    ViewData["Title"] = "Создание вопроса по орфографии";
+    var test = ViewBag.Test as OnlineTutor3.Domain.Entities.SpellingTest;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white py-2">
+                <h5 class="mb-0">
+                    <i class="fas fa-plus"></i> Создание вопроса по орфографии
+                </h5>
+            </div>
+            <div class="card-body p-2">
+                @if (test != null)
+                {
+                    <div class="alert alert-info alert-sm py-2 mb-2">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Тест:</strong> @test.Title
+                    </div>
+                }
+
+                <form asp-action="Create" method="post">
+                    <input asp-for="SpellingTestId" type="hidden" />
+                    <div asp-validation-summary="All" class="text-danger mb-2 small"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label asp-for="OrderIndex" class="form-label small">
+                                <i class="fas fa-sort-numeric-down"></i> Порядковый номер <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="OrderIndex" type="number" class="form-control form-control-sm" min="1" />
+                            <span asp-validation-for="OrderIndex" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-2">
+                            <label asp-for="Points" class="form-label small">
+                                <i class="fas fa-star"></i> Баллы <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Points" type="number" class="form-control form-control-sm" min="1" max="100" />
+                            <span asp-validation-for="Points" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label asp-for="WordWithGap" class="form-label small">
+                            <i class="fas fa-spell-check"></i> Слово с пропуском <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="WordWithGap" class="form-control form-control-sm" placeholder="Например: к_рзина" />
+                        <span asp-validation-for="WordWithGap" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-2">
+                        <label asp-for="CorrectLetter" class="form-label small">
+                            <i class="fas fa-check-circle"></i> Правильная буква <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="CorrectLetter" class="form-control form-control-sm" placeholder="Например: о" maxlength="10" />
+                        <span asp-validation-for="CorrectLetter" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-2">
+                        <label asp-for="FullWord" class="form-label small">
+                            <i class="fas fa-book"></i> Полное слово <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="FullWord" class="form-control form-control-sm" placeholder="Например: корзина" />
+                        <span asp-validation-for="FullWord" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Hint" class="form-label small">
+                            <i class="fas fa-lightbulb"></i> Подсказка
+                        </label>
+                        <textarea asp-for="Hint" class="form-control form-control-sm" rows="2" placeholder="Необязательная подсказка для ученика..."></textarea>
+                        <span asp-validation-for="Hint" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <a asp-controller="SpellingTest" asp-action="Details" asp-route-id="@Model.SpellingTestId" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-sm btn-success">
+                            <i class="fas fa-save"></i> Создать вопрос
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

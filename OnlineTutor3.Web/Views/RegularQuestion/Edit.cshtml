@@ -1,0 +1,188 @@
+@model OnlineTutor3.Web.ViewModels.EditRegularQuestionViewModel
+@{
+    ViewData["Title"] = "Редактирование вопроса классического теста";
+    var test = ViewBag.Test as OnlineTutor3.Domain.Entities.RegularTest;
+    var questionTypes = ViewBag.QuestionTypes as SelectList ?? new SelectList(new List<SelectListItem>());
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white py-2">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit"></i> Редактирование вопроса классического теста
+                </h5>
+            </div>
+            <div class="card-body p-2">
+                @if (test != null)
+                {
+                    <div class="alert alert-info alert-sm py-2 mb-2">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Тест:</strong> @test.Title
+                    </div>
+                }
+
+                <form asp-action="Edit" method="post" id="questionForm">
+                    <input asp-for="Id" type="hidden" />
+                    <input asp-for="RegularTestId" type="hidden" />
+                    <div asp-validation-summary="All" class="text-danger mb-2 small"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label asp-for="OrderIndex" class="form-label small">
+                                <i class="fas fa-sort-numeric-down"></i> Порядковый номер <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="OrderIndex" type="number" class="form-control form-control-sm" min="1" />
+                            <span asp-validation-for="OrderIndex" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-2">
+                            <label asp-for="Points" class="form-label small">
+                                <i class="fas fa-star"></i> Баллы <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Points" type="number" class="form-control form-control-sm" min="1" max="100" />
+                            <span asp-validation-for="Points" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label asp-for="Text" class="form-label small">
+                            <i class="fas fa-question-circle"></i> Текст вопроса <span class="text-danger">*</span>
+                        </label>
+                        <textarea asp-for="Text" class="form-control form-control-sm" rows="3" placeholder="Введите текст вопроса..."></textarea>
+                        <span asp-validation-for="Text" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-2">
+                        <label asp-for="Type" class="form-label small">
+                            <i class="fas fa-list"></i> Тип вопроса <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="Type" asp-items="questionTypes" class="form-select form-select-sm" id="questionType">
+                        </select>
+                        <span asp-validation-for="Type" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-2">
+                        <label asp-for="Explanation" class="form-label small">
+                            <i class="fas fa-info-circle"></i> Объяснение правильного ответа
+                        </label>
+                        <textarea asp-for="Explanation" class="form-control form-control-sm" rows="2" placeholder="Объяснение правильного ответа..."></textarea>
+                        <span asp-validation-for="Explanation" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Hint" class="form-label small">
+                            <i class="fas fa-lightbulb"></i> Подсказка
+                        </label>
+                        <textarea asp-for="Hint" class="form-control form-control-sm" rows="2" placeholder="Необязательная подсказка для ученика..."></textarea>
+                        <span asp-validation-for="Hint" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label small mb-0">
+                                <i class="fas fa-list-ul"></i> Варианты ответов <span class="text-danger">*</span>
+                            </label>
+                            <button type="button" class="btn btn-sm btn-outline-success" id="addOption">
+                                <i class="fas fa-plus"></i> Добавить вариант
+                            </button>
+                        </div>
+                        <div id="optionsContainer">
+                            @if (Model.Options != null && Model.Options.Any())
+                            {
+                                for (int i = 0; i < Model.Options.Count; i++)
+                                {
+                                    <div class="option-item mb-2 p-2 border rounded">
+                                        <div class="d-flex gap-2 align-items-start">
+                                            <div class="flex-grow-1">
+                                                <input type="hidden" asp-for="Options[i].Id" />
+                                                <input type="hidden" asp-for="Options[i].OrderIndex" value="@(i + 1)" />
+                                                <input asp-for="Options[i].Text" class="form-control form-control-sm mb-2" placeholder="Текст варианта ответа" />
+                                                <div class="form-check">
+                                                    <input asp-for="Options[i].IsCorrect" class="form-check-input" type="checkbox" />
+                                                    <label asp-for="Options[i].IsCorrect" class="form-check-label small">Правильный ответ</label>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-option">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <span asp-validation-for="Options" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <a asp-controller="RegularTest" asp-action="Details" asp-route-id="@Model.RegularTestId" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="fas fa-save"></i> Сохранить изменения
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            let optionIndex = @(Model.Options?.Count ?? 0);
+
+            $('#addOption').on('click', function() {
+                const optionHtml = `
+                    <div class="option-item mb-2 p-2 border rounded">
+                        <div class="d-flex gap-2 align-items-start">
+                            <div class="flex-grow-1">
+                                <input type="hidden" name="Options[${optionIndex}].OrderIndex" value="${optionIndex + 1}" />
+                                <input name="Options[${optionIndex}].Text" class="form-control form-control-sm mb-2" placeholder="Текст варианта ответа" />
+                                <div class="form-check">
+                                    <input name="Options[${optionIndex}].IsCorrect" class="form-check-input" type="checkbox" />
+                                    <label class="form-check-label small">Правильный ответ</label>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-option">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                $('#optionsContainer').append(optionHtml);
+                optionIndex++;
+            });
+
+            $(document).on('click', '.remove-option', function() {
+                $(this).closest('.option-item').remove();
+                updateOptionIndices();
+            });
+
+            function updateOptionIndices() {
+                $('#optionsContainer .option-item').each(function(index) {
+                    $(this).find('input[type="hidden"]').not('[name*="Id"]').attr('name', `Options[${index}].OrderIndex`).val(index + 1);
+                    $(this).find('input[type="text"]').attr('name', `Options[${index}].Text`);
+                    $(this).find('input[type="checkbox"]').attr('name', `Options[${index}].IsCorrect`);
+                });
+                optionIndex = $('#optionsContainer .option-item').length;
+            }
+
+            $('#questionType').on('change', function() {
+                const type = $(this).val();
+                const correctCheckboxes = $('#optionsContainer input[type="checkbox"]');
+                
+                if (type === '1') { // SingleChoice
+                    correctCheckboxes.on('change', function() {
+                        if ($(this).is(':checked')) {
+                            correctCheckboxes.not(this).prop('checked', false);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}
+

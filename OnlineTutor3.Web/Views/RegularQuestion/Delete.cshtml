@@ -1,0 +1,95 @@
+@model OnlineTutor3.Domain.Entities.RegularQuestion
+@{
+    ViewData["Title"] = "Удаление вопроса классического теста";
+    var test = ViewBag.Test as OnlineTutor3.Domain.Entities.RegularTest;
+    var options = ViewBag.Options as List<OnlineTutor3.Domain.Entities.RegularQuestionOption> ?? new List<OnlineTutor3.Domain.Entities.RegularQuestionOption>();
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white py-2">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> Удаление вопроса
+                </h5>
+            </div>
+            <div class="card-body p-3">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <strong>Внимание!</strong> Вы уверены, что хотите удалить этот вопрос? Это действие нельзя отменить. Все варианты ответов также будут удалены.
+                </div>
+
+                @if (test != null)
+                {
+                    <div class="mb-3">
+                        <strong>Тест:</strong> @test.Title
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <strong>Порядковый номер:</strong> @Model.OrderIndex
+                </div>
+
+                <div class="mb-3">
+                    <strong>Текст вопроса:</strong> @Model.Text
+                </div>
+
+                <div class="mb-3">
+                    <strong>Тип вопроса:</strong> 
+                    @switch (Model.Type)
+                    {
+                        case OnlineTutor3.Domain.Entities.QuestionType.SingleChoice:
+                            <span>Одиночный выбор</span>
+                            break;
+                        case OnlineTutor3.Domain.Entities.QuestionType.MultipleChoice:
+                            <span>Множественный выбор</span>
+                            break;
+                        case OnlineTutor3.Domain.Entities.QuestionType.TrueFalse:
+                            <span>Верно/Неверно</span>
+                            break;
+                    }
+                </div>
+
+                @if (options.Any())
+                {
+                    <div class="mb-3">
+                        <strong>Варианты ответов (@options.Count):</strong>
+                        <ul class="list-unstyled mt-2">
+                            @foreach (var option in options)
+                            {
+                                <li class="mb-1">
+                                    @if (option.IsCorrect)
+                                    {
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-circle text-muted"></i>
+                                    }
+                                    @option.Text
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <strong>Баллы:</strong> @Model.Points
+                </div>
+
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <a asp-controller="RegularTest" asp-action="Details" asp-route-id="@Model.RegularTestId" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            <i class="fas fa-trash"></i> Удалить вопрос
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
