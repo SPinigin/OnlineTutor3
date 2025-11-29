@@ -41,6 +41,13 @@ namespace OnlineTutor3.Web.Controllers
 
                 var students = await _studentService.GetByTeacherIdAsync(currentUser.Id);
                 
+                _logger.LogInformation("Получено студентов для учителя {TeacherId}: {Count}", currentUser.Id, students?.Count ?? 0);
+                
+                if (students == null)
+                {
+                    students = new List<Student>();
+                }
+                
                 // Загружаем данные пользователей для студентов
                 var studentsWithUsers = new List<(Student Student, ApplicationUser? User)>();
                 foreach (var student in students)
@@ -48,6 +55,8 @@ namespace OnlineTutor3.Web.Controllers
                     var user = await _userManager.FindByIdAsync(student.UserId);
                     studentsWithUsers.Add((student, user));
                 }
+                
+                _logger.LogInformation("Загружено студентов с пользователями: {Count}", studentsWithUsers.Count);
 
                 // Фильтрация по классу
                 if (classFilter.HasValue && classFilter.Value > 0)

@@ -27,13 +27,32 @@ namespace OnlineTutor3.Infrastructure.Repositories
 
         public async Task<List<Student>> GetByTeacherIdAsync(string teacherId)
         {
+            // Получаем студентов из классов учителя
             var sql = @"
                 SELECT s.* 
                 FROM Students s
                 INNER JOIN Classes c ON s.ClassId = c.Id
                 WHERE c.TeacherId = @TeacherId
                 ORDER BY c.Name, s.CreatedAt";
-            return await _db.QueryAsync<Student>(sql, new { TeacherId = teacherId });
+            var studentsInClasses = await _db.QueryAsync<Student>(sql, new { TeacherId = teacherId });
+            
+            // Также получаем студентов без класса (которые могут быть назначены учителю)
+            // ВАЖНО: В текущей структуре БД нет прямой связи студента с учителем,
+            // поэтому возвращаем всех студентов без класса
+            // В будущем можно добавить поле CreatedByTeacherId в таблицу Students
+            var sqlWithoutClass = @"
+                SELECT s.* 
+                FROM Students s
+                WHERE s.ClassId IS NULL
+                ORDER BY s.CreatedAt";
+            var studentsWithoutClass = await _db.QueryAsync<Student>(sqlWithoutClass);
+            
+            // Объединяем результаты
+            var allStudents = new List<Student>();
+            allStudents.AddRange(studentsInClasses);
+            allStudents.AddRange(studentsWithoutClass);
+            
+            return allStudents;
         }
     }
 }
