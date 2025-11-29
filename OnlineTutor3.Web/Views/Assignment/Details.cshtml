@@ -117,29 +117,33 @@
             <i class="fas fa-tasks text-muted" style="font-size: 3rem;"></i>
             <p class="text-muted mt-3">В этом задании пока нет тестов</p>
             <div class="btn-group" role="group">
-                <a asp-controller="SpellingTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-outline-primary btn-sm">
-                    <i class="fas fa-plus"></i> Тест по орфографии
-                </a>
-                <a asp-controller="PunctuationTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-outline-primary btn-sm">
-                    <i class="fas fa-plus"></i> Тест по пунктуации
-                </a>
-                <a asp-controller="OrthoeopyTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-outline-primary btn-sm">
-                    <i class="fas fa-plus"></i> Тест по орфоэпии
-                </a>
-                <a asp-controller="RegularTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-outline-primary btn-sm">
-                    <i class="fas fa-plus"></i> Классический тест
-                </a>
+                <div class="d-flex gap-1 flex-wrap">
+                    <a asp-controller="SpellingTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-plus"></i> Тест по орфографии
+                    </a>
+                    <a asp-controller="PunctuationTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-plus"></i> Тест по пунктуации
+                    </a>
+                    <a asp-controller="OrthoeopyTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-plus"></i> Тест по орфоэпии
+                    </a>
+                    <a asp-controller="RegularTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-plus"></i> Классический тест
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <div class="mt-3">
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
-        <i class="fas fa-edit"></i> Редактировать
-    </a>
-    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
-        <i class="fas fa-trash"></i> Удалить
-    </a>
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Редактировать
+        </a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Удалить
+        </a>
+    </div>
 </div>
 

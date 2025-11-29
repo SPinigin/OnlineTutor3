@@ -105,7 +105,7 @@
                                 <td>@question.FullWord</td>
                                 <td>@question.Points</td>
                                 <td>
-                                    <div class="btn-group btn-group-sm">
+                                    <div class="d-flex gap-1">
                                         <a asp-controller="SpellingQuestion" asp-action="Edit" asp-route-id="@question.Id" class="btn btn-outline-primary" title="Редактировать">
                                             <i class="fas fa-edit"></i>
                                         </a>
@@ -134,11 +134,13 @@
 </div>
 
 <div class="mt-3">
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
-        <i class="fas fa-edit"></i> Редактировать тест
-    </a>
-    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
-        <i class="fas fa-trash"></i> Удалить тест
-    </a>
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Редактировать тест
+        </a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Удалить тест
+        </a>
+    </div>
 </div>
 

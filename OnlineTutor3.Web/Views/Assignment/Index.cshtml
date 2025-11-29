@@ -123,7 +123,7 @@ else
                                     }
                                 </small>
                             </div>
-                            <div class="btn-group btn-group-sm">
+                            <div class="d-flex gap-1">
                                 <a asp-action="Edit" asp-route-id="@assignment.Id" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-edit"></i>
                                 </a>
@@ -137,7 +137,7 @@ else
                             <small class="text-muted">
                                 <i class="fas fa-clipboard-list"></i> Тесты (@totalTests)
                             </small>
-                            <div class="btn-group btn-group-sm">
+                            <div class="d-flex gap-1">
                                 @{
                                     var isRussianLanguage = subjectName.Equals("Русский язык", StringComparison.OrdinalIgnoreCase);
                                 }
@@ -211,7 +211,7 @@ else
                                                         </span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <div class="btn-group btn-group-sm">
+                                                        <div class="d-flex gap-1 justify-content-center">
                                                             <a asp-controller="SpellingTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
                                                                 <i class="fas fa-eye"></i>
                                                             </a>
@@ -258,7 +258,7 @@ else
                                                         </span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <div class="btn-group btn-group-sm">
+                                                        <div class="d-flex gap-1">
                                                             <a asp-controller="PunctuationTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
                                                                 <i class="fas fa-eye"></i>
                                                             </a>
@@ -305,7 +305,7 @@ else
                                                         </span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <div class="btn-group btn-group-sm">
+                                                        <div class="d-flex gap-1">
                                                             <a asp-controller="OrthoeopyTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
                                                                 <i class="fas fa-eye"></i>
                                                             </a>
@@ -352,7 +352,7 @@ else
                                                         </span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <div class="btn-group btn-group-sm">
+                                                        <div class="d-flex gap-1">
                                                             <a asp-controller="RegularTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
                                                                 <i class="fas fa-eye"></i>
                                                             </a>
