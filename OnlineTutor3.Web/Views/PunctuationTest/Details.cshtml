@@ -84,30 +84,30 @@
         @if (questions.Any())
         {
             <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
+                <table class="table table-hover table-sm">
+                    <thead class="table-light">
                         <tr>
-                            <th style="width: 5%;">#</th>
-                            <th style="width: 50%;">Предложение с номерами</th>
-                            <th style="width: 15%;">Правильные позиции</th>
-                            <th style="width: 10%;">Баллы</th>
-                            <th style="width: 10%;">Действия</th>
+                            <th style="width: 5%;" class="small">#</th>
+                            <th style="width: 50%;" class="small">Предложение с номерами</th>
+                            <th style="width: 15%;" class="small">Правильные позиции</th>
+                            <th style="width: 10%;" class="small">Баллы</th>
+                            <th style="width: 10%;" class="small text-center">Действия</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var question in questions.OrderBy(q => q.OrderIndex))
                         {
                             <tr>
-                                <td>@question.OrderIndex</td>
-                                <td>@question.SentenceWithNumbers</td>
-                                <td><strong>@question.CorrectPositions</strong></td>
-                                <td>@question.Points</td>
-                                <td>
-                                    <div class="d-flex gap-1">
-                                        <a asp-controller="PunctuationQuestion" asp-action="Edit" asp-route-id="@question.Id" class="btn btn-outline-primary" title="Редактировать">
+                                <td class="small">@question.OrderIndex</td>
+                                <td class="small">@question.SentenceWithNumbers</td>
+                                <td class="small"><strong>@question.CorrectPositions</strong></td>
+                                <td class="small">@question.Points</td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <a asp-controller="PunctuationQuestion" asp-action="Edit" asp-route-id="@question.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a asp-controller="PunctuationQuestion" asp-action="Delete" asp-route-id="@question.Id" class="btn btn-outline-danger" title="Удалить">
+                                        <a asp-controller="PunctuationQuestion" asp-action="Delete" asp-route-id="@question.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
