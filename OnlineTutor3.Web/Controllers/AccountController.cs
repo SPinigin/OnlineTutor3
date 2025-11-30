@@ -250,6 +250,24 @@ namespace OnlineTutor3.Web.Controllers
 
         #endregion
 
+        #region Profile
+
+        // GET: Account/Profile
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Profile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound($"Невозможно загрузить пользователя с ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            return View(user);
+        }
+
+        #endregion
+
         #region Helper Methods
 
         private IActionResult RedirectToLocal(string? returnUrl)

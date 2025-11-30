@@ -131,18 +131,7 @@
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-user"></i> @User.Identity.Name
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Account" asp-action="Logout">
-                                            <i class="fas fa-sign-out-alt"></i> Выход
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
+                            @await Component.InvokeAsync("UserInfo")
                         }
                         else
                         {
