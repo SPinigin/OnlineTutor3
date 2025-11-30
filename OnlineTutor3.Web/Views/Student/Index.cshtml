@@ -1,0 +1,218 @@
+@model OnlineTutor3.Web.ViewModels.StudentDashboardViewModel
+@{
+    ViewData["Title"] = "Главная";
+}
+
+<div class="container-fluid">
+    <!-- Приветствие -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h4 class="mb-0 d-flex align-items-center gap-2">
+                <i class="fas fa-graduation-cap text-primary"></i>
+                <span>Добро пожаловать, @Model.User.FirstName @Model.User.LastName!</span>
+            </h4>
+            @if (Model.Data.Class != null)
+            {
+                <p class="text-muted mb-0 mt-1">
+                    <i class="fas fa-users"></i> Класс: @Model.Data.Class.Name
+                </p>
+            }
+        </div>
+    </div>
+
+    <!-- Карточки навигации -->
+    <div class="row g-2 g-md-3 mb-4">
+        <div class="col-6 col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-play"></i> Тесты
+                    </h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text d-none d-md-block">Проходите тесты и проверяйте свои знания</p>
+                    <a asp-controller="StudentTest" asp-action="Index" class="btn btn-primary mt-auto w-100">
+                        <i class="fas fa-list"></i> Доступные тесты
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line"></i> Мой прогресс
+                    </h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text d-none d-md-block">Отслеживайте свой прогресс и результаты тестов</p>
+                    <a asp-controller="StudentTest" asp-action="History" class="btn btn-success mt-auto w-100">
+                        <i class="fas fa-history"></i> История результатов
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user"></i> Профиль
+                    </h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text d-none d-md-block">Управляйте своим профилем</p>
+                    <a asp-controller="Account" asp-action="Profile" class="btn btn-info mt-auto w-100">
+                        <i class="fas fa-cog"></i> Настройки
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="row g-2 g-md-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center p-3">
+                    <i class="fas fa-check-circle text-success" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2 mb-0">@Model.Data.TotalTestsCompleted</h3>
+                    <small class="text-muted">Тестов пройдено</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center p-3">
+                    <i class="fas fa-list text-primary" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2 mb-0">@Model.Data.TotalTestsAvailable</h3>
+                    <small class="text-muted">Доступно тестов</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center p-3">
+                    <i class="fas fa-percent text-warning" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2 mb-0">@Model.Data.AveragePercentage.ToString("F1")%</h3>
+                    <small class="text-muted">Средний результат</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center p-3">
+                    <i class="fas fa-star text-danger" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2 mb-0">@Model.Data.TotalPoints</h3>
+                    <small class="text-muted">Баллов набрано</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Последние результаты -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock text-primary"></i> Последние результаты
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Data.RecentResults.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Тест</th>
+                                        <th>Тип</th>
+                                        <th class="text-center">Результат</th>
+                                        <th class="text-center">Дата</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var result in Model.Data.RecentResults)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <small class="fw-bold">@result.TestTitle</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@result.TestType</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge @(result.Percentage >= 80 ? "bg-success" : result.Percentage >= 60 ? "bg-warning" : "bg-danger")">
+                                                    @result.Score/@result.MaxScore (@result.Percentage.ToString("F1")%)
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <small class="text-muted">@result.CompletedAt.ToString("dd.MM.yyyy")</small>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">Пока нет завершенных тестов</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Ближайшие дедлайны -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-alt text-warning"></i> Ближайшие дедлайны
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Data.UpcomingDeadlines.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var deadline in Model.Data.UpcomingDeadlines)
+                            {
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">@deadline.Title</h6>
+                                            <p class="mb-1 text-muted small">
+                                                <i class="fas fa-book"></i> @deadline.SubjectName
+                                            </p>
+                                            <small class="text-muted">
+                                                <i class="fas fa-tasks"></i> Тестов: @deadline.CompletedTestsCount/@deadline.TestsCount
+                                            </small>
+                                        </div>
+                                        <div class="text-end">
+                                            @if (deadline.DueDate.HasValue)
+                                            {
+                                                var daysLeft = (deadline.DueDate.Value - DateTime.Now).Days;
+                                                <span class="badge @(daysLeft <= 3 ? "bg-danger" : daysLeft <= 7 ? "bg-warning" : "bg-info")">
+                                                    @deadline.DueDate.Value.ToString("dd.MM.yyyy")
+                                                </span>
+                                                <br>
+                                                <small class="text-muted">@daysLeft дн.</small>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">Нет ближайших дедлайнов</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

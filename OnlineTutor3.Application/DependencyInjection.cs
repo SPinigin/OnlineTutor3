@@ -25,6 +25,7 @@ namespace OnlineTutor3.Application
             services.AddScoped<IAnswerService, AnswerService>();
             services.AddScoped<ITestEvaluationService, TestEvaluationService>();
             services.AddScoped<IStudentTestService, StudentTestService>();
+            services.AddScoped<IStudentStatisticsService, StudentStatisticsService>();
             
             return services;
         }
