@@ -1,5 +1,6 @@
 using NLog;
 using NLog.Web;
+using OfficeOpenXml;
 using OnlineTutor3.Application;
 using OnlineTutor3.Infrastructure;
 using OnlineTutor3.Infrastructure.Data;
@@ -19,6 +20,17 @@ try
     builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddApplication();
     builder.Services.AddWeb();
+
+    // Настройка EPPlus лицензии
+    try
+    {
+        OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+        logger.Info("EPPlus license configured successfully");
+    }
+    catch (Exception ex)
+    {
+        logger.Error(ex, "EPPlus license configuration failed");
+    }
 
 // Регистрация сервисов импорта вопросов
 builder.Services.AddScoped<OnlineTutor3.Web.Services.SpellingQuestionImportService>();

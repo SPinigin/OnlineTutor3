@@ -21,7 +21,8 @@ namespace OnlineTutor3.Web.Services
         {
             try
             {
-                if (ExcelPackage.LicenseContext == LicenseContext.Commercial)
+                // Всегда устанавливаем лицензию (если еще не установлена)
+                if (ExcelPackage.LicenseContext != LicenseContext.NonCommercial)
                 {
                     ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 }
@@ -30,6 +31,15 @@ namespace OnlineTutor3.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка настройки EPPlus license");
+                // Устанавливаем лицензию принудительно, даже если была ошибка
+                try
+                {
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                }
+                catch
+                {
+                    // Игнорируем повторную ошибку
+                }
             }
         }
 
