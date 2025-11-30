@@ -14,9 +14,12 @@
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
-                <a class="dropdown-item" asp-controller="Account" asp-action="Logout">
-                    <i class="fas fa-sign-out-alt"></i> Выйти
-                </a>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="dropdown-item text-danger border-0 bg-transparent w-100 text-start">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </button>
+                </form>
             </li>
         </ul>
     </li>
@@ -35,9 +38,12 @@ else
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
-                <a class="dropdown-item" asp-controller="Account" asp-action="Logout">
-                    <i class="fas fa-sign-out-alt"></i> Выйти
-                </a>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="dropdown-item text-danger border-0 bg-transparent w-100 text-start">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </button>
+                </form>
             </li>
         </ul>
     </li>
