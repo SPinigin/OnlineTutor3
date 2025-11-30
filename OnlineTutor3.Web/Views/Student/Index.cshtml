@@ -91,37 +91,37 @@
     <div class="row g-2 g-md-3 mb-4">
         <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm">
-                <div class="card-body text-center p-3">
-                    <i class="fas fa-check-circle text-success" style="font-size: 2rem;"></i>
-                    <h3 class="mt-2 mb-0">@Model.Data.TotalTestsCompleted</h3>
-                    <small class="text-muted">Тестов пройдено</small>
+                <div class="card-body text-center p-2">
+                    <i class="fas fa-check-circle text-success" style="font-size: 1.5rem;"></i>
+                    <h4 class="mt-1 mb-0" style="font-size: 1.5rem;">@Model.Data.TotalTestsCompleted</h4>
+                    <small class="text-muted" style="font-size: 0.75rem;">Тестов пройдено</small>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm">
-                <div class="card-body text-center p-3">
-                    <i class="fas fa-list text-primary" style="font-size: 2rem;"></i>
-                    <h3 class="mt-2 mb-0">@Model.Data.TotalTestsAvailable</h3>
-                    <small class="text-muted">Доступно тестов</small>
+                <div class="card-body text-center p-2">
+                    <i class="fas fa-list text-primary" style="font-size: 1.5rem;"></i>
+                    <h4 class="mt-1 mb-0" style="font-size: 1.5rem;">@Model.Data.TotalTestsAvailable</h4>
+                    <small class="text-muted" style="font-size: 0.75rem;">Доступно тестов</small>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm">
-                <div class="card-body text-center p-3">
-                    <i class="fas fa-percent text-warning" style="font-size: 2rem;"></i>
-                    <h3 class="mt-2 mb-0">@Model.Data.AveragePercentage.ToString("F1")%</h3>
-                    <small class="text-muted">Средний результат</small>
+                <div class="card-body text-center p-2">
+                    <i class="fas fa-percent text-warning" style="font-size: 1.5rem;"></i>
+                    <h4 class="mt-1 mb-0" style="font-size: 1.5rem;">@Model.Data.AveragePercentage.ToString("F1")%</h4>
+                    <small class="text-muted" style="font-size: 0.75rem;">Средний результат</small>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm">
-                <div class="card-body text-center p-3">
-                    <i class="fas fa-star text-danger" style="font-size: 2rem;"></i>
-                    <h3 class="mt-2 mb-0">@Model.Data.TotalPoints</h3>
-                    <small class="text-muted">Баллов набрано</small>
+                <div class="card-body text-center p-2">
+                    <i class="fas fa-star text-danger" style="font-size: 1.5rem;"></i>
+                    <h4 class="mt-1 mb-0" style="font-size: 1.5rem;">@Model.Data.TotalPoints</h4>
+                    <small class="text-muted" style="font-size: 0.75rem;">Баллов набрано</small>
                 </div>
             </div>
         </div>
@@ -131,35 +131,35 @@
         <!-- Последние результаты -->
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0" style="font-size: 0.95rem;">
                         <i class="fas fa-clock text-primary"></i> Последние результаты
-                    </h5>
+                    </h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-2">
                     @if (Model.Data.RecentResults.Any())
                     {
                         <div class="table-responsive">
-                            <table class="table table-sm table-hover">
+                            <table class="table table-sm table-hover mb-0">
                                 <thead>
                                     <tr>
-                                        <th>Тест</th>
-                                        <th>Тип</th>
-                                        <th class="text-center">Оценка / Результат</th>
-                                        <th class="text-center">Дата</th>
+                                        <th style="font-size: 0.85rem; padding: 0.4rem;">Тест</th>
+                                        <th style="font-size: 0.85rem; padding: 0.4rem;">Тип</th>
+                                        <th class="text-center" style="font-size: 0.85rem; padding: 0.4rem;">Оценка / Результат</th>
+                                        <th class="text-center" style="font-size: 0.85rem; padding: 0.4rem;">Дата</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var result in Model.Data.RecentResults)
                                     {
                                         <tr>
-                                            <td>
-                                                <small class="fw-bold">@result.TestTitle</small>
+                                            <td style="padding: 0.4rem;">
+                                                <small class="fw-bold" style="font-size: 0.8rem;">@result.TestTitle</small>
                                             </td>
-                                            <td>
-                                                <span class="badge bg-secondary">@result.TestType</span>
+                                            <td style="padding: 0.4rem;">
+                                                <span class="badge bg-secondary" style="font-size: 0.7rem;">@result.TestType</span>
                                             </td>
-                                            <td class="text-center">
+                                            <td class="text-center" style="padding: 0.4rem;">
                                                 @if (result.Grade.HasValue)
                                                 {
                                                     var gradeColor = result.Grade.Value switch
@@ -171,28 +171,28 @@
                                                         _ => "secondary"
                                                     };
                                                     <div>
-                                                        <span class="badge bg-@gradeColor rounded-pill" style="font-size: 0.9rem; min-width: 2rem;">
+                                                        <span class="badge bg-@gradeColor rounded-pill" style="font-size: 0.75rem; min-width: 1.5rem;">
                                                             @result.Grade.Value
                                                         </span>
                                                         <br>
-                                                        <small class="text-muted mt-1 d-block">
+                                                        <small class="text-muted d-block" style="font-size: 0.7rem; margin-top: 0.2rem;">
                                                             @result.Percentage.ToString("F1")% (@result.Score/@result.MaxScore)
                                                         </small>
                                                     </div>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge @(result.Percentage >= 80 ? "bg-success" : result.Percentage >= 60 ? "bg-warning" : "bg-danger")">
+                                                    <span class="badge @(result.Percentage >= 80 ? "bg-success" : result.Percentage >= 60 ? "bg-warning" : "bg-danger")" style="font-size: 0.75rem;">
                                                         @result.Percentage.ToString("F1")%
                                                     </span>
                                                     <br>
-                                                    <small class="text-muted mt-1 d-block">
+                                                    <small class="text-muted d-block" style="font-size: 0.7rem; margin-top: 0.2rem;">
                                                         @result.Score/@result.MaxScore
                                                     </small>
                                                 }
                                             </td>
-                                            <td class="text-center">
-                                                <small class="text-muted">@result.CompletedAt.ToString("dd.MM.yyyy")</small>
+                                            <td class="text-center" style="padding: 0.4rem;">
+                                                <small class="text-muted" style="font-size: 0.75rem;">@result.CompletedAt.ToString("dd.MM.yyyy")</small>
                                             </td>
                                         </tr>
                                     }
@@ -202,7 +202,7 @@
                     }
                     else
                     {
-                        <p class="text-muted text-center mb-0">Пока нет завершенных тестов</p>
+                        <p class="text-muted text-center mb-0" style="font-size: 0.85rem; padding: 0.5rem;">Пока нет завершенных тестов</p>
                     }
                 </div>
             </div>
@@ -211,25 +211,25 @@
         <!-- Ближайшие дедлайны -->
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0" style="font-size: 0.95rem;">
                         <i class="fas fa-calendar-alt text-warning"></i> Ближайшие дедлайны
-                    </h5>
+                    </h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-2">
                     @if (Model.Data.UpcomingDeadlines.Any())
                     {
                         <div class="list-group list-group-flush">
                             @foreach (var deadline in Model.Data.UpcomingDeadlines)
                             {
-                                <div class="list-group-item px-0">
+                                <div class="list-group-item px-0 py-2">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div class="flex-grow-1">
-                                            <h6 class="mb-1">@deadline.Title</h6>
-                                            <p class="mb-1 text-muted small">
+                                            <h6 class="mb-1" style="font-size: 0.9rem;">@deadline.Title</h6>
+                                            <p class="mb-1 text-muted" style="font-size: 0.75rem;">
                                                 <i class="fas fa-book"></i> @deadline.SubjectName
                                             </p>
-                                            <small class="text-muted">
+                                            <small class="text-muted" style="font-size: 0.7rem;">
                                                 <i class="fas fa-tasks"></i> Тестов: @deadline.CompletedTestsCount/@deadline.TestsCount
                                             </small>
                                         </div>
@@ -237,11 +237,11 @@
                                             @if (deadline.DueDate.HasValue)
                                             {
                                                 var daysLeft = (deadline.DueDate.Value - DateTime.Now).Days;
-                                                <span class="badge @(daysLeft <= 3 ? "bg-danger" : daysLeft <= 7 ? "bg-warning" : "bg-info")">
+                                                <span class="badge @(daysLeft <= 3 ? "bg-danger" : daysLeft <= 7 ? "bg-warning" : "bg-info")" style="font-size: 0.75rem;">
                                                     @deadline.DueDate.Value.ToString("dd.MM.yyyy")
                                                 </span>
                                                 <br>
-                                                <small class="text-muted">@daysLeft дн.</small>
+                                                <small class="text-muted" style="font-size: 0.7rem;">@daysLeft дн.</small>
                                             }
                                         </div>
                                     </div>
@@ -251,7 +251,7 @@
                     }
                     else
                     {
-                        <p class="text-muted text-center mb-0">Нет ближайших дедлайнов</p>
+                        <p class="text-muted text-center mb-0" style="font-size: 0.85rem; padding: 0.5rem;">Нет ближайших дедлайнов</p>
                     }
                 </div>
             </div>
