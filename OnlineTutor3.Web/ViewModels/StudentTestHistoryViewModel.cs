@@ -8,7 +8,7 @@ namespace OnlineTutor3.Web.ViewModels
     public class StudentTestHistoryViewModel
     {
         public Student Student { get; set; } = null!;
-        public string? CurrentTestType { get; set; }
+        public string? SearchQuery { get; set; }
         
         public List<SpellingTestResult> SpellingResults { get; set; } = new();
         public List<PunctuationTestResult> PunctuationResults { get; set; } = new();

@@ -280,7 +280,7 @@ namespace OnlineTutor3.Web.Controllers
         }
 
         // GET: StudentTest/History
-        public async Task<IActionResult> History(string? testType)
+        public async Task<IActionResult> History(string? search)
         {
             try
             {
@@ -298,14 +298,14 @@ namespace OnlineTutor3.Web.Controllers
                     return RedirectToAction("Index", "Student");
                 }
 
-                // Получаем историю через сервис
-                var historyData = await _studentTestService.GetTestHistoryAsync(student.Id, testType);
+                // Получаем историю через сервис (без фильтра по типу)
+                var historyData = await _studentTestService.GetTestHistoryAsync(student.Id, null);
 
                 // Создаем ViewModel для Web слоя
                 var viewModel = new ViewModels.StudentTestHistoryViewModel
                 {
                     Student = student,
-                    CurrentTestType = testType,
+                    SearchQuery = search,
                     SpellingResults = historyData.SpellingResults,
                     PunctuationResults = historyData.PunctuationResults,
                     OrthoeopyResults = historyData.OrthoeopyResults,
@@ -314,6 +314,12 @@ namespace OnlineTutor3.Web.Controllers
 
                 // Загружаем связанные данные (тесты) для каждого результата
                 await LoadTestDataForResultsAsync(viewModel);
+
+                // Применяем поиск, если указан
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    ApplySearchFilter(viewModel, search);
+                }
 
                 // Группируем результаты по заданиям
                 await GroupResultsByAssignmentsAsync(viewModel);
@@ -326,6 +332,36 @@ namespace OnlineTutor3.Web.Controllers
                 TempData["ErrorMessage"] = "Произошла ошибка при загрузке истории. Попробуйте обновить страницу.";
                 return RedirectToAction("Index", "Student");
             }
+        }
+
+        private void ApplySearchFilter(ViewModels.StudentTestHistoryViewModel viewModel, string searchQuery)
+        {
+            var searchLower = searchQuery.ToLowerInvariant().Trim();
+
+            // Фильтруем результаты по названию теста
+            viewModel.SpellingResults = viewModel.SpellingResults
+                .Where(r => r.SpellingTest != null && 
+                           (r.SpellingTest.Title.ToLowerInvariant().Contains(searchLower) ||
+                            r.SpellingTest.Description?.ToLowerInvariant().Contains(searchLower) == true))
+                .ToList();
+
+            viewModel.PunctuationResults = viewModel.PunctuationResults
+                .Where(r => r.PunctuationTest != null && 
+                           (r.PunctuationTest.Title.ToLowerInvariant().Contains(searchLower) ||
+                            r.PunctuationTest.Description?.ToLowerInvariant().Contains(searchLower) == true))
+                .ToList();
+
+            viewModel.OrthoeopyResults = viewModel.OrthoeopyResults
+                .Where(r => r.OrthoeopyTest != null && 
+                           (r.OrthoeopyTest.Title.ToLowerInvariant().Contains(searchLower) ||
+                            r.OrthoeopyTest.Description?.ToLowerInvariant().Contains(searchLower) == true))
+                .ToList();
+
+            viewModel.RegularResults = viewModel.RegularResults
+                .Where(r => r.RegularTest != null && 
+                           (r.RegularTest.Title.ToLowerInvariant().Contains(searchLower) ||
+                            r.RegularTest.Description?.ToLowerInvariant().Contains(searchLower) == true))
+                .ToList();
         }
 
         private async Task LoadTestDataForResultsAsync(ViewModels.StudentTestHistoryViewModel viewModel)
