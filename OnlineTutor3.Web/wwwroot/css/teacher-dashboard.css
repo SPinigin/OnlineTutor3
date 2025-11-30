@@ -1,0 +1,133 @@
+/* Панель мониторинга учителя */
+
+.stat-card-compact {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card-compact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.stat-icon {
+    font-size: 2rem;
+}
+
+.stat-number {
+    font-size: 1.75rem;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+}
+
+/* Уведомления */
+.dashboard-notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1050;
+    min-width: 300px;
+    max-width: 500px;
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification-timeout {
+    border-left: 4px solid #ffc107 !important;
+}
+
+/* Статус подключения SignalR */
+.signalr-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    background-color: #f8f9fa;
+}
+
+.signalr-status.status-connected {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.signalr-status.status-reconnecting {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.signalr-status.status-disconnected {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.signalr-status.status-error {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+/* Таблицы */
+.table-compact {
+    font-size: 0.9rem;
+}
+
+.table-compact th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.5rem;
+}
+
+.table-compact td {
+    padding: 0.5rem;
+    vertical-align: middle;
+}
+
+.test-type-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Анимация пульсации для бейджей */
+@keyframes badgePulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.badge-pulse {
+    animation: badgePulse 0.6s ease-in-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .dashboard-notification {
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        max-width: none;
+    }
+
+    .stat-icon {
+        font-size: 1.5rem;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+    }
+}
+

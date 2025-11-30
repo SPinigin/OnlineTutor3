@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using OnlineTutor3.Application.Interfaces;
 using OnlineTutor3.Application.Services;
 using OnlineTutor3.Domain.Entities;
+using OnlineTutor3.Web.Hubs;
 using OnlineTutor3.Web.ViewModels;
 
 namespace OnlineTutor3.Web.Controllers
@@ -33,6 +35,7 @@ namespace OnlineTutor3.Web.Controllers
         private readonly IPunctuationQuestionRepository _punctuationQuestionRepository;
         private readonly IOrthoeopyQuestionRepository _orthoeopyQuestionRepository;
         private readonly IRegularQuestionRepository _regularQuestionRepository;
+        private readonly IHubContext<TestAnalyticsHub> _hubContext;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<StudentTestController> _logger;
 
@@ -59,6 +62,7 @@ namespace OnlineTutor3.Web.Controllers
             IPunctuationQuestionRepository punctuationQuestionRepository,
             IOrthoeopyQuestionRepository orthoeopyQuestionRepository,
             IRegularQuestionRepository regularQuestionRepository,
+            IHubContext<TestAnalyticsHub> hubContext,
             UserManager<ApplicationUser> userManager,
             ILogger<StudentTestController> logger)
         {
@@ -84,6 +88,7 @@ namespace OnlineTutor3.Web.Controllers
             _punctuationQuestionRepository = punctuationQuestionRepository;
             _orthoeopyQuestionRepository = orthoeopyQuestionRepository;
             _regularQuestionRepository = regularQuestionRepository;
+            _hubContext = hubContext;
             _userManager = userManager;
             _logger = logger;
         }
@@ -786,6 +791,9 @@ namespace OnlineTutor3.Web.Controllers
                 _logger.LogInformation("Студент {StudentId} завершил тест по орфографии {ResultId}. Баллы: {Score}/{MaxScore}, Процент: {Percentage}",
                     student.Id, testResult.Id, testResult.Score, testResult.MaxScore, testResult.Percentage);
 
+                // Отправляем уведомление через SignalR
+                await SendTestCompletedNotificationAsync(testResult, "spelling", currentUser.FullName ?? currentUser.Email ?? "Студент");
+
                 return RedirectToAction("SpellingResult", new { id = testResult.Id });
             }
             catch (Exception ex)
@@ -1046,6 +1054,9 @@ namespace OnlineTutor3.Web.Controllers
                 _logger.LogInformation("Студент {StudentId} завершил тест по пунктуации {ResultId}. Баллы: {Score}/{MaxScore}, Процент: {Percentage}",
                     student.Id, testResult.Id, testResult.Score, testResult.MaxScore, testResult.Percentage);
 
+                // Отправляем уведомление через SignalR
+                await SendTestCompletedNotificationAsync(testResult, "punctuation", currentUser.FullName ?? currentUser.Email ?? "Студент");
+
                 return RedirectToAction("PunctuationResult", new { id = testResult.Id });
             }
             catch (Exception ex)
@@ -1305,6 +1316,9 @@ namespace OnlineTutor3.Web.Controllers
 
                 _logger.LogInformation("Студент {StudentId} завершил тест по орфоэпии {ResultId}. Баллы: {Score}/{MaxScore}, Процент: {Percentage}",
                     student.Id, testResult.Id, testResult.Score, testResult.MaxScore, testResult.Percentage);
+
+                // Отправляем уведомление через SignalR
+                await SendTestCompletedNotificationAsync(testResult, "orthoeopy", currentUser.FullName ?? currentUser.Email ?? "Студент");
 
                 return RedirectToAction("OrthoeopyResult", new { id = testResult.Id });
             }
@@ -1598,6 +1612,9 @@ namespace OnlineTutor3.Web.Controllers
 
                 _logger.LogInformation("Студент {StudentId} завершил классический тест {ResultId}. Баллы: {Score}/{MaxScore}, Процент: {Percentage}",
                     student.Id, testResult.Id, testResult.Score, testResult.MaxScore, testResult.Percentage);
+
+                // Отправляем уведомление через SignalR
+                await SendTestCompletedNotificationAsync(testResult, "regular", currentUser.FullName ?? currentUser.Email ?? "Студент");
 
                 return RedirectToAction("RegularResult", new { id = testResult.Id });
             }
@@ -2020,6 +2037,105 @@ namespace OnlineTutor3.Web.Controllers
                 _logger.LogError(ex, "Ошибка при загрузке результата классического теста. ResultId: {ResultId}", id);
                 TempData["ErrorMessage"] = "Произошла ошибка при загрузке результата.";
                 return RedirectToAction("Index");
+            }
+        }
+
+        /// <summary>
+        /// Отправка уведомления о завершении теста через SignalR
+        /// </summary>
+        private async Task SendTestCompletedNotificationAsync(TestResult testResult, string testType, string studentName)
+        {
+            try
+            {
+                // Получаем тест для определения TeacherId
+                string? teacherId = null;
+                string? testTitle = null;
+                int testId = 0;
+
+                switch (testType)
+                {
+                    case "spelling":
+                        if (testResult is SpellingTestResult spellingResult)
+                        {
+                            testId = spellingResult.SpellingTestId;
+                            var spellingTest = await _spellingTestRepository.GetByIdAsync(testId);
+                            if (spellingTest != null)
+                            {
+                                teacherId = spellingTest.TeacherId;
+                                testTitle = spellingTest.Title;
+                            }
+                        }
+                        break;
+                    case "punctuation":
+                        if (testResult is PunctuationTestResult punctuationResult)
+                        {
+                            testId = punctuationResult.PunctuationTestId;
+                            var punctuationTest = await _punctuationTestRepository.GetByIdAsync(testId);
+                            if (punctuationTest != null)
+                            {
+                                teacherId = punctuationTest.TeacherId;
+                                testTitle = punctuationTest.Title;
+                            }
+                        }
+                        break;
+                    case "orthoeopy":
+                        if (testResult is OrthoeopyTestResult orthoeopyResult)
+                        {
+                            testId = orthoeopyResult.OrthoeopyTestId;
+                            var orthoeopyTest = await _orthoeopyTestRepository.GetByIdAsync(testId);
+                            if (orthoeopyTest != null)
+                            {
+                                teacherId = orthoeopyTest.TeacherId;
+                                testTitle = orthoeopyTest.Title;
+                            }
+                        }
+                        break;
+                    case "regular":
+                        if (testResult is RegularTestResult regularResult)
+                        {
+                            testId = regularResult.RegularTestId;
+                            var regularTest = await _regularTestRepository.GetByIdAsync(testId);
+                            if (regularTest != null)
+                            {
+                                teacherId = regularTest.TeacherId;
+                                testTitle = regularTest.Title;
+                            }
+                        }
+                        break;
+                }
+
+                if (string.IsNullOrEmpty(teacherId) || string.IsNullOrEmpty(testTitle) || testId == 0)
+                {
+                    _logger.LogWarning("Не удалось определить TeacherId или TestTitle для отправки уведомления. TestType: {TestType}, TestResultId: {TestResultId}", 
+                        testType, testResult.Id);
+                    return;
+                }
+
+                var notificationData = new
+                {
+                    testId = testId,
+                    testTitle = testTitle,
+                    testType = testType,
+                    studentId = testResult.StudentId,
+                    studentName = studentName,
+                    score = testResult.Score,
+                    maxScore = testResult.MaxScore,
+                    percentage = testResult.Percentage,
+                    timestamp = DateTime.Now,
+                    action = "completed",
+                    isAutoCompleted = false,
+                    testResultId = testResult.Id
+                };
+
+                await _hubContext.Clients.Group($"teacher_{teacherId}")
+                    .SendAsync("StudentTestActivity", notificationData);
+
+                _logger.LogInformation("SignalR: Отправлено уведомление о завершении теста {TestType} {TestId} студентом {StudentName}",
+                    testType, testId, studentName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка отправки SignalR уведомления о завершении теста");
             }
         }
     }

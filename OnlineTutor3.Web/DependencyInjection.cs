@@ -17,6 +17,9 @@ namespace OnlineTutor3.Web
                 options.Cookie.IsEssential = true;
             });
 
+            // Настройка SignalR
+            services.AddSignalR();
+
             return services;
         }
 
@@ -44,6 +47,9 @@ namespace OnlineTutor3.Web
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            // Настройка SignalR Hub
+            app.MapHub<Hubs.TestAnalyticsHub>("/hubs/testAnalytics");
 
             return app;
         }
