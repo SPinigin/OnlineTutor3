@@ -320,9 +320,9 @@ class TeacherDashboardSignalR {
     getTestTypeIcon(type) {
         var icons = {
             'spelling': 'fa-spell-check',
-            'punctuation': 'fa-exclamation',
+            'punctuation': 'fa-quote-right',
             'orthoeopy': 'fa-volume-up',
-            'regular': 'fa-list-ul'
+            'regular': 'fa-clipboard-check'
         };
         return icons[type] || 'fa-clipboard-list';
     }
