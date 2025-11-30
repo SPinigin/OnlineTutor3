@@ -12,6 +12,10 @@ namespace OnlineTutor3.Application.Interfaces
         Task<List<RegularTest>> GetActiveByTeacherIdAsync(string teacherId);
         Task<int> GetCountByTeacherIdAsync(string teacherId);
         Task<int> GetCountByAssignmentIdAsync(int assignmentId);
+        /// <summary>
+        /// Получает доступные тесты для студента с JOIN для оптимизации (один запрос вместо N+1)
+        /// </summary>
+        Task<List<RegularTest>> GetAvailableForStudentAsync(int studentId, int classId, string teacherId);
     }
 }
 

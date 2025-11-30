@@ -44,6 +44,33 @@ namespace OnlineTutor3.Infrastructure.Repositories
             var result = await _db.QueryScalarAsync<int?>(sql, new { AssignmentId = assignmentId });
             return result ?? 0;
         }
+
+        /// <summary>
+        /// Получает доступные тесты для студента с JOIN для оптимизации (один запрос вместо N+1)
+        /// </summary>
+        public async Task<List<PunctuationTest>> GetAvailableForStudentAsync(int studentId, int classId, string teacherId)
+        {
+            var now = DateTime.Now;
+            var sql = @"
+                SELECT DISTINCT pt.*
+                FROM PunctuationTests pt
+                INNER JOIN Assignments a ON pt.AssignmentId = a.Id
+                INNER JOIN AssignmentClasses ac ON a.Id = ac.AssignmentId
+                WHERE pt.TeacherId = @TeacherId
+                  AND pt.IsActive = 1
+                  AND a.IsActive = 1
+                  AND ac.ClassId = @ClassId
+                  AND (pt.StartDate IS NULL OR pt.StartDate <= @Now)
+                  AND (pt.EndDate IS NULL OR pt.EndDate >= @Now)
+                ORDER BY pt.CreatedAt DESC";
+            
+            return await _db.QueryAsync<PunctuationTest>(sql, new 
+            { 
+                TeacherId = teacherId,
+                ClassId = classId,
+                Now = now
+            });
+        }
     }
 }
 

@@ -194,26 +194,8 @@ namespace OnlineTutor3.Application.Services
                 var @class = await _classRepository.GetByIdAsync(student.ClassId.Value);
                 if (@class == null) return new List<SpellingTest>();
 
-                var allTests = await _spellingTestRepository.GetByTeacherIdAsync(@class.TeacherId);
-                var now = DateTime.Now;
-                var availableTests = new List<SpellingTest>();
-
-                foreach (var test in allTests.Where(t => t.IsActive))
-                {
-                    if (test.StartDate.HasValue && test.StartDate.Value > now) continue;
-                    if (test.EndDate.HasValue && test.EndDate.Value < now) continue;
-
-                    var assignment = await _assignmentRepository.GetByIdAsync(test.AssignmentId);
-                    if (assignment == null || !assignment.IsActive) continue;
-
-                    var assignmentClasses = await _assignmentClassRepository.GetByAssignmentIdAsync(assignment.Id);
-                    if (assignmentClasses.Any(ac => ac.ClassId == student.ClassId.Value))
-                    {
-                        availableTests.Add(test);
-                    }
-                }
-
-                return availableTests;
+                // Используем оптимизированный метод с JOIN вместо N+1 запросов
+                return await _spellingTestRepository.GetAvailableForStudentAsync(studentId, student.ClassId.Value, @class.TeacherId);
             }
             catch (Exception ex)
             {
@@ -232,26 +214,8 @@ namespace OnlineTutor3.Application.Services
                 var @class = await _classRepository.GetByIdAsync(student.ClassId.Value);
                 if (@class == null) return new List<PunctuationTest>();
 
-                var allTests = await _punctuationTestRepository.GetByTeacherIdAsync(@class.TeacherId);
-                var now = DateTime.Now;
-                var availableTests = new List<PunctuationTest>();
-
-                foreach (var test in allTests.Where(t => t.IsActive))
-                {
-                    if (test.StartDate.HasValue && test.StartDate.Value > now) continue;
-                    if (test.EndDate.HasValue && test.EndDate.Value < now) continue;
-
-                    var assignment = await _assignmentRepository.GetByIdAsync(test.AssignmentId);
-                    if (assignment == null || !assignment.IsActive) continue;
-
-                    var assignmentClasses = await _assignmentClassRepository.GetByAssignmentIdAsync(assignment.Id);
-                    if (assignmentClasses.Any(ac => ac.ClassId == student.ClassId.Value))
-                    {
-                        availableTests.Add(test);
-                    }
-                }
-
-                return availableTests;
+                // Используем оптимизированный метод с JOIN вместо N+1 запросов
+                return await _punctuationTestRepository.GetAvailableForStudentAsync(studentId, student.ClassId.Value, @class.TeacherId);
             }
             catch (Exception ex)
             {
@@ -270,26 +234,8 @@ namespace OnlineTutor3.Application.Services
                 var @class = await _classRepository.GetByIdAsync(student.ClassId.Value);
                 if (@class == null) return new List<OrthoeopyTest>();
 
-                var allTests = await _orthoeopyTestRepository.GetByTeacherIdAsync(@class.TeacherId);
-                var now = DateTime.Now;
-                var availableTests = new List<OrthoeopyTest>();
-
-                foreach (var test in allTests.Where(t => t.IsActive))
-                {
-                    if (test.StartDate.HasValue && test.StartDate.Value > now) continue;
-                    if (test.EndDate.HasValue && test.EndDate.Value < now) continue;
-
-                    var assignment = await _assignmentRepository.GetByIdAsync(test.AssignmentId);
-                    if (assignment == null || !assignment.IsActive) continue;
-
-                    var assignmentClasses = await _assignmentClassRepository.GetByAssignmentIdAsync(assignment.Id);
-                    if (assignmentClasses.Any(ac => ac.ClassId == student.ClassId.Value))
-                    {
-                        availableTests.Add(test);
-                    }
-                }
-
-                return availableTests;
+                // Используем оптимизированный метод с JOIN вместо N+1 запросов
+                return await _orthoeopyTestRepository.GetAvailableForStudentAsync(studentId, student.ClassId.Value, @class.TeacherId);
             }
             catch (Exception ex)
             {
@@ -308,26 +254,8 @@ namespace OnlineTutor3.Application.Services
                 var @class = await _classRepository.GetByIdAsync(student.ClassId.Value);
                 if (@class == null) return new List<RegularTest>();
 
-                var allTests = await _regularTestRepository.GetByTeacherIdAsync(@class.TeacherId);
-                var now = DateTime.Now;
-                var availableTests = new List<RegularTest>();
-
-                foreach (var test in allTests.Where(t => t.IsActive))
-                {
-                    if (test.StartDate.HasValue && test.StartDate.Value > now) continue;
-                    if (test.EndDate.HasValue && test.EndDate.Value < now) continue;
-
-                    var assignment = await _assignmentRepository.GetByIdAsync(test.AssignmentId);
-                    if (assignment == null || !assignment.IsActive) continue;
-
-                    var assignmentClasses = await _assignmentClassRepository.GetByAssignmentIdAsync(assignment.Id);
-                    if (assignmentClasses.Any(ac => ac.ClassId == student.ClassId.Value))
-                    {
-                        availableTests.Add(test);
-                    }
-                }
-
-                return availableTests;
+                // Используем оптимизированный метод с JOIN вместо N+1 запросов
+                return await _regularTestRepository.GetAvailableForStudentAsync(studentId, student.ClassId.Value, @class.TeacherId);
             }
             catch (Exception ex)
             {

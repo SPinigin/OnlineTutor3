@@ -17,6 +17,7 @@ try
     builder.Host.UseNLog();
 
     // Настройка сервисов
+    builder.Services.AddMemoryCache(); // Добавляем кэширование в память
     builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddApplication();
     builder.Services.AddWeb();

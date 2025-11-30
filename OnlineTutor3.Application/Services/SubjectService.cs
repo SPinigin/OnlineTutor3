@@ -10,13 +10,20 @@ namespace OnlineTutor3.Application.Services
     public class SubjectService : ISubjectService
     {
         private readonly ISubjectRepository _subjectRepository;
+        private readonly ICacheService _cacheService;
         private readonly ILogger<SubjectService> _logger;
+        private const string CACHE_KEY_ALL_SUBJECTS = "subjects:all";
+        private const string CACHE_KEY_ACTIVE_SUBJECTS = "subjects:active";
+        private const string CACHE_KEY_SUBJECT_PREFIX = "subjects:id:";
+        private static readonly TimeSpan CacheExpiration = TimeSpan.FromHours(1);
 
         public SubjectService(
             ISubjectRepository subjectRepository,
+            ICacheService cacheService,
             ILogger<SubjectService> logger)
         {
             _subjectRepository = subjectRepository;
+            _cacheService = cacheService;
             _logger = logger;
         }
 
@@ -24,7 +31,19 @@ namespace OnlineTutor3.Application.Services
         {
             try
             {
-                return await _subjectRepository.GetByIdAsync(id);
+                var cacheKey = $"{CACHE_KEY_SUBJECT_PREFIX}{id}";
+                var cached = await _cacheService.GetAsync<Subject>(cacheKey);
+                if (cached != null)
+                {
+                    return cached;
+                }
+
+                var subject = await _subjectRepository.GetByIdAsync(id);
+                if (subject != null)
+                {
+                    await _cacheService.SetAsync(cacheKey, subject, CacheExpiration);
+                }
+                return subject;
             }
             catch (Exception ex)
             {
@@ -37,7 +56,15 @@ namespace OnlineTutor3.Application.Services
         {
             try
             {
-                return await _subjectRepository.GetAllAsync();
+                var cached = await _cacheService.GetAsync<List<Subject>>(CACHE_KEY_ALL_SUBJECTS);
+                if (cached != null)
+                {
+                    return cached;
+                }
+
+                var subjects = await _subjectRepository.GetAllAsync();
+                await _cacheService.SetAsync(CACHE_KEY_ALL_SUBJECTS, subjects, CacheExpiration);
+                return subjects;
             }
             catch (Exception ex)
             {
@@ -50,7 +77,15 @@ namespace OnlineTutor3.Application.Services
         {
             try
             {
-                return await _subjectRepository.GetActiveAsync();
+                var cached = await _cacheService.GetAsync<List<Subject>>(CACHE_KEY_ACTIVE_SUBJECTS);
+                if (cached != null)
+                {
+                    return cached;
+                }
+
+                var subjects = await _subjectRepository.GetActiveAsync();
+                await _cacheService.SetAsync(CACHE_KEY_ACTIVE_SUBJECTS, subjects, CacheExpiration);
+                return subjects;
             }
             catch (Exception ex)
             {
@@ -68,7 +103,13 @@ namespace OnlineTutor3.Application.Services
                     throw new ArgumentException("Название предмета не может быть пустым", nameof(subject));
                 }
 
-                return await _subjectRepository.CreateAsync(subject);
+                var id = await _subjectRepository.CreateAsync(subject);
+                
+                // Инвалидируем кэш
+                await _cacheService.RemoveAsync(CACHE_KEY_ALL_SUBJECTS);
+                await _cacheService.RemoveAsync(CACHE_KEY_ACTIVE_SUBJECTS);
+                
+                return id;
             }
             catch (Exception ex)
             {
@@ -86,7 +127,14 @@ namespace OnlineTutor3.Application.Services
                     throw new ArgumentException("Название предмета не может быть пустым", nameof(subject));
                 }
 
-                return await _subjectRepository.UpdateAsync(subject);
+                var result = await _subjectRepository.UpdateAsync(subject);
+                
+                // Инвалидируем кэш
+                await _cacheService.RemoveAsync(CACHE_KEY_ALL_SUBJECTS);
+                await _cacheService.RemoveAsync(CACHE_KEY_ACTIVE_SUBJECTS);
+                await _cacheService.RemoveAsync($"{CACHE_KEY_SUBJECT_PREFIX}{subject.Id}");
+                
+                return result;
             }
             catch (Exception ex)
             {
@@ -99,7 +147,14 @@ namespace OnlineTutor3.Application.Services
         {
             try
             {
-                return await _subjectRepository.DeleteAsync(id);
+                var result = await _subjectRepository.DeleteAsync(id);
+                
+                // Инвалидируем кэш
+                await _cacheService.RemoveAsync(CACHE_KEY_ALL_SUBJECTS);
+                await _cacheService.RemoveAsync(CACHE_KEY_ACTIVE_SUBJECTS);
+                await _cacheService.RemoveAsync($"{CACHE_KEY_SUBJECT_PREFIX}{id}");
+                
+                return result;
             }
             catch (Exception ex)
             {

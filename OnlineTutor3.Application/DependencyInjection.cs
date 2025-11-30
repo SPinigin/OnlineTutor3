@@ -27,6 +27,9 @@ namespace OnlineTutor3.Application
             services.AddScoped<IStudentTestService, StudentTestService>();
             services.AddScoped<IStudentStatisticsService, StudentStatisticsService>();
             
+            // Кэширование
+            services.AddSingleton<ICacheService, MemoryCacheService>();
+            
             return services;
         }
     }
