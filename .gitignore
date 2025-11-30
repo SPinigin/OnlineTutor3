@@ -184,3 +184,5 @@ FodyWeavers.xsd
 .idea/
 *.sln.iml
 
+/README.md
+/OnlineTutor3.Infrastructure/Data/CreateDatabase.sql
