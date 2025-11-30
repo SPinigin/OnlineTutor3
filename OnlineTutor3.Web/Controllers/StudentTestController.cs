@@ -26,6 +26,7 @@ namespace OnlineTutor3.Web.Controllers
         private readonly IRegularTestRepository _regularTestRepository;
         private readonly ISpellingTestResultRepository _spellingTestResultRepository;
         private readonly IPunctuationTestResultRepository _punctuationTestResultRepository;
+        private readonly IOrthoeopyTestResultRepository _orthoeopyTestResultRepository;
         private readonly ISpellingQuestionRepository _spellingQuestionRepository;
         private readonly IPunctuationQuestionRepository _punctuationQuestionRepository;
         private readonly IOrthoeopyQuestionRepository _orthoeopyQuestionRepository;
@@ -49,6 +50,7 @@ namespace OnlineTutor3.Web.Controllers
             IRegularTestRepository regularTestRepository,
             ISpellingTestResultRepository spellingTestResultRepository,
             IPunctuationTestResultRepository punctuationTestResultRepository,
+            IOrthoeopyTestResultRepository orthoeopyTestResultRepository,
             ISpellingQuestionRepository spellingQuestionRepository,
             IPunctuationQuestionRepository punctuationQuestionRepository,
             IOrthoeopyQuestionRepository orthoeopyQuestionRepository,
@@ -71,6 +73,7 @@ namespace OnlineTutor3.Web.Controllers
             _regularTestRepository = regularTestRepository;
             _spellingTestResultRepository = spellingTestResultRepository;
             _punctuationTestResultRepository = punctuationTestResultRepository;
+            _orthoeopyTestResultRepository = orthoeopyTestResultRepository;
             _spellingQuestionRepository = spellingQuestionRepository;
             _punctuationQuestionRepository = punctuationQuestionRepository;
             _orthoeopyQuestionRepository = orthoeopyQuestionRepository;
@@ -1042,6 +1045,266 @@ namespace OnlineTutor3.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при завершении теста по пунктуации. ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при завершении теста.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: StudentTest/StartOrthoeopy/{id}
+        public async Task<IActionResult> StartOrthoeopy(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    _logger.LogWarning("Студент не найден для пользователя {UserId}", currentUser.Id);
+                    TempData["ErrorMessage"] = "Профиль студента не найден.";
+                    return RedirectToAction("Index");
+                }
+
+                // Используем сервис для начала теста
+                var testResult = await _studentTestService.StartOrthoeopyTestAsync(student.Id, id);
+                
+                _logger.LogInformation("Студент {StudentId} начал тест по орфоэпии {TestId}", student.Id, id);
+                
+                return RedirectToAction(nameof(TakeOrthoeopy), new { id = testResult.Id });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Попытка доступа к недоступному тесту. TestId: {TestId}", id);
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при начале теста по орфоэпии. TestId: {TestId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при начале теста. Попробуйте позже.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: StudentTest/TakeOrthoeopy/{id}
+        public async Task<IActionResult> TakeOrthoeopy(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                // Получаем результат теста через репозиторий
+                var testResult = await _orthoeopyTestResultRepository.GetByIdAsync(id);
+                
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                // Проверяем, не завершен ли тест
+                if (testResult.IsCompleted)
+                {
+                    return RedirectToAction("OrthoeopyResult", new { id = testResult.Id });
+                }
+
+                // Загружаем тест
+                var test = await _orthoeopyTestRepository.GetByIdAsync(testResult.OrthoeopyTestId);
+                if (test == null)
+                {
+                    return NotFound();
+                }
+
+                // Загружаем вопросы
+                var questions = await _orthoeopyQuestionRepository.GetByTestIdOrderedAsync(test.Id);
+                if (!questions.Any())
+                {
+                    TempData["ErrorMessage"] = "В тесте нет вопросов.";
+                    return RedirectToAction("Index");
+                }
+
+                // Загружаем ответы
+                var answers = await _answerService.GetOrthoeopyAnswersAsync(testResult.Id);
+
+                // Вычисляем оставшееся время
+                var timeElapsed = DateTime.Now - testResult.StartedAt;
+                var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                var timeRemaining = timeLimit - timeElapsed;
+
+                // Если время истекло, завершаем тест автоматически
+                if (timeRemaining <= TimeSpan.Zero)
+                {
+                    // Вычисляем результат
+                    var (score, maxScore, percentage) = await _testEvaluationService.CalculateOrthoeopyTestResultAsync(testResult.Id, test.Id);
+                    
+                    // Вычисляем оценку
+                    var grade = TestEvaluationService.CalculateGrade(percentage);
+                    
+                    // Обновляем результат теста
+                    testResult.Score = score;
+                    testResult.MaxScore = maxScore;
+                    testResult.Percentage = percentage;
+                    testResult.Grade = grade;
+                    
+                    // Завершаем тест
+                    await _testResultService.CompleteTestResultAsync(testResult);
+                    
+                    return RedirectToAction("OrthoeopyResult", new { id = testResult.Id });
+                }
+
+                var viewModel = new TakeOrthoeopyTestViewModel
+                {
+                    TestResult = testResult,
+                    Test = test,
+                    Questions = questions,
+                    Answers = answers,
+                    TimeRemaining = timeRemaining,
+                    CurrentQuestionIndex = 0
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке теста по орфоэпии. ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при загрузке теста.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // POST: StudentTest/SubmitOrthoeopyAnswer
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> SubmitOrthoeopyAnswer([FromBody] SubmitOrthoeopyAnswerViewModel model)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Пользователь не авторизован" });
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return Json(new { success = false, message = "Студент не найден" });
+                }
+
+                // Получаем результат теста
+                var testResult = await _orthoeopyTestResultRepository.GetByIdAsync(model.TestResultId);
+                if (testResult == null || testResult.StudentId != student.Id || testResult.IsCompleted)
+                {
+                    return Json(new { success = false, message = "Тест не найден или уже завершен" });
+                }
+
+                // Получаем вопрос
+                var question = await _orthoeopyQuestionRepository.GetByIdAsync(model.QuestionId);
+                if (question == null || question.OrthoeopyTestId != testResult.OrthoeopyTestId)
+                {
+                    return Json(new { success = false, message = "Вопрос не найден" });
+                }
+
+                // Сохраняем ответ
+                var answer = await _answerService.SaveOrthoeopyAnswerAsync(
+                    testResult.Id, 
+                    question.Id, 
+                    model.SelectedStressPosition);
+
+                // Оцениваем ответ
+                var (isCorrect, points) = await _testEvaluationService.EvaluateOrthoeopyAnswerAsync(
+                    question, 
+                    model.SelectedStressPosition, 
+                    question.Points);
+
+                // Обновляем ответ с результатом оценки
+                answer.IsCorrect = isCorrect;
+                answer.Points = points;
+                await _answerService.UpdateAnswerAsync(answer);
+
+                return Json(new 
+                { 
+                    success = true, 
+                    isCorrect = isCorrect,
+                    points = points
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при сохранении ответа. QuestionId: {QuestionId}, TestResultId: {TestResultId}", 
+                    model.QuestionId, model.TestResultId);
+                return Json(new { success = false, message = "Произошла ошибка при сохранении ответа" });
+            }
+        }
+
+        // POST: StudentTest/CompleteOrthoeopyTest/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompleteOrthoeopyTest(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                // Получаем результат теста через репозиторий
+                var testResult = await _orthoeopyTestResultRepository.GetByIdAsync(id);
+                
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                if (testResult.IsCompleted)
+                {
+                    return RedirectToAction("OrthoeopyResult", new { id = testResult.Id });
+                }
+
+                // Вычисляем результат
+                var (score, maxScore, percentage) = await _testEvaluationService.CalculateOrthoeopyTestResultAsync(testResult.Id, testResult.OrthoeopyTestId);
+                
+                // Вычисляем оценку
+                var grade = TestEvaluationService.CalculateGrade(percentage);
+                
+                // Обновляем результат теста
+                testResult.Score = score;
+                testResult.MaxScore = maxScore;
+                testResult.Percentage = percentage;
+                testResult.Grade = grade;
+                
+                // Завершаем тест (устанавливает CompletedAt и IsCompleted)
+                await _testResultService.CompleteTestResultAsync(testResult);
+
+                _logger.LogInformation("Студент {StudentId} завершил тест по орфоэпии {ResultId}. Баллы: {Score}/{MaxScore}, Процент: {Percentage}",
+                    student.Id, testResult.Id, testResult.Score, testResult.MaxScore, testResult.Percentage);
+
+                return RedirectToAction("OrthoeopyResult", new { id = testResult.Id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при завершении теста по орфоэпии. ResultId: {ResultId}", id);
                 TempData["ErrorMessage"] = "Произошла ошибка при завершении теста.";
                 return RedirectToAction("Index");
             }
