@@ -287,6 +287,114 @@ namespace OnlineTutor3.Web.Controllers
                 }
                 ViewBag.Classes = classes;
 
+                // Загружаем тесты для задания
+                List<SpellingTest> spellingTests = new List<SpellingTest>();
+                List<PunctuationTest> punctuationTests = new List<PunctuationTest>();
+                List<OrthoeopyTest> orthoeopyTests = new List<OrthoeopyTest>();
+                List<RegularTest> regularTests = new List<RegularTest>();
+
+                try
+                {
+                    spellingTests = await _spellingTestService.GetByAssignmentIdAsync(id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Ошибка при загрузке тестов по орфографии для задания {AssignmentId}", id);
+                }
+
+                try
+                {
+                    punctuationTests = await _punctuationTestService.GetByAssignmentIdAsync(id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Ошибка при загрузке тестов по пунктуации для задания {AssignmentId}", id);
+                }
+
+                try
+                {
+                    orthoeopyTests = await _orthoeopyTestService.GetByAssignmentIdAsync(id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Ошибка при загрузке тестов по орфоэпии для задания {AssignmentId}", id);
+                }
+
+                try
+                {
+                    regularTests = await _regularTestService.GetByAssignmentIdAsync(id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Ошибка при загрузке классических тестов для задания {AssignmentId}", id);
+                }
+
+                // Загружаем количество вопросов для каждого теста
+                var spellingQuestionCounts = new Dictionary<int, int>();
+                foreach (var test in spellingTests)
+                {
+                    try
+                    {
+                        spellingQuestionCounts[test.Id] = await _spellingQuestionRepository.GetCountByTestIdAsync(test.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Ошибка при получении количества вопросов для теста по орфографии {TestId}", test.Id);
+                        spellingQuestionCounts[test.Id] = 0;
+                    }
+                }
+
+                var punctuationQuestionCounts = new Dictionary<int, int>();
+                foreach (var test in punctuationTests)
+                {
+                    try
+                    {
+                        punctuationQuestionCounts[test.Id] = await _punctuationQuestionRepository.GetCountByTestIdAsync(test.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Ошибка при получении количества вопросов для теста по пунктуации {TestId}", test.Id);
+                        punctuationQuestionCounts[test.Id] = 0;
+                    }
+                }
+
+                var orthoeopyQuestionCounts = new Dictionary<int, int>();
+                foreach (var test in orthoeopyTests)
+                {
+                    try
+                    {
+                        orthoeopyQuestionCounts[test.Id] = await _orthoeopyQuestionRepository.GetCountByTestIdAsync(test.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Ошибка при получении количества вопросов для теста по орфоэпии {TestId}", test.Id);
+                        orthoeopyQuestionCounts[test.Id] = 0;
+                    }
+                }
+
+                var regularQuestionCounts = new Dictionary<int, int>();
+                foreach (var test in regularTests)
+                {
+                    try
+                    {
+                        regularQuestionCounts[test.Id] = await _regularQuestionRepository.GetCountByTestIdAsync(test.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Ошибка при получении количества вопросов для классического теста {TestId}", test.Id);
+                        regularQuestionCounts[test.Id] = 0;
+                    }
+                }
+
+                ViewBag.SpellingTests = spellingTests;
+                ViewBag.PunctuationTests = punctuationTests;
+                ViewBag.OrthoeopyTests = orthoeopyTests;
+                ViewBag.RegularTests = regularTests;
+                ViewBag.SpellingTestQuestionCounts = spellingQuestionCounts;
+                ViewBag.PunctuationTestQuestionCounts = punctuationQuestionCounts;
+                ViewBag.OrthoeopyTestQuestionCounts = orthoeopyQuestionCounts;
+                ViewBag.RegularTestQuestionCounts = regularQuestionCounts;
+
                 return View(assignment);
             }
             catch (Exception ex)

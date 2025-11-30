@@ -3,6 +3,16 @@
     ViewData["Title"] = $"Задание: {Model.Title}";
     var subject = ViewBag.Subject as OnlineTutor3.Domain.Entities.Subject;
     var classes = ViewBag.Classes as List<OnlineTutor3.Domain.Entities.Class> ?? new List<OnlineTutor3.Domain.Entities.Class>();
+    var spellingTests = ViewBag.SpellingTests as List<OnlineTutor3.Domain.Entities.SpellingTest> ?? new List<OnlineTutor3.Domain.Entities.SpellingTest>();
+    var punctuationTests = ViewBag.PunctuationTests as List<OnlineTutor3.Domain.Entities.PunctuationTest> ?? new List<OnlineTutor3.Domain.Entities.PunctuationTest>();
+    var orthoeopyTests = ViewBag.OrthoeopyTests as List<OnlineTutor3.Domain.Entities.OrthoeopyTest> ?? new List<OnlineTutor3.Domain.Entities.OrthoeopyTest>();
+    var regularTests = ViewBag.RegularTests as List<OnlineTutor3.Domain.Entities.RegularTest> ?? new List<OnlineTutor3.Domain.Entities.RegularTest>();
+    var spellingQuestionCounts = ViewBag.SpellingTestQuestionCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+    var punctuationQuestionCounts = ViewBag.PunctuationTestQuestionCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+    var orthoeopyQuestionCounts = ViewBag.OrthoeopyTestQuestionCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+    var regularQuestionCounts = ViewBag.RegularTestQuestionCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+    var totalTests = spellingTests.Count + punctuationTests.Count + orthoeopyTests.Count + regularTests.Count;
+    var isRussianLanguage = subject?.Name?.Equals("Русский язык", StringComparison.OrdinalIgnoreCase) == true;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -68,71 +78,271 @@
 </div>
 
 <div class="card mb-3">
-    <div class="card-header">
-        <h5 class="mb-0">
+    <div class="card-header py-2">
+        <h6 class="mb-0">
             <i class="fas fa-graduation-cap"></i> Назначено классам (@classes.Count)
-        </h5>
+        </h6>
     </div>
-    <div class="card-body">
+    <div class="card-body p-2">
         @if (classes.Any())
         {
-            <div class="list-group">
-                @foreach (var classItem in classes)
-                {
-                    <div class="list-group-item">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">@classItem.Name</h6>
-                                @if (!string.IsNullOrEmpty(classItem.Description))
-                                {
-                                    <p class="mb-1 text-muted small">@classItem.Description</p>
-                                }
-                            </div>
-                            <span class="badge bg-@(classItem.IsActive ? "success" : "secondary")">
-                                @(classItem.IsActive ? "Активен" : "Неактивен")
-                            </span>
-                        </div>
-                    </div>
-                }
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 40%;">Название</th>
+                            <th style="width: 40%;">Описание</th>
+                            <th style="width: 10%;">Статус</th>
+                            <th style="width: 10%;" class="text-center">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var classItem in classes)
+                        {
+                            <tr>
+                                <td><small><strong>@classItem.Name</strong></small></td>
+                                <td><small class="text-muted">@(string.IsNullOrEmpty(classItem.Description) ? "-" : (classItem.Description.Length > 50 ? classItem.Description.Substring(0, 50) + "..." : classItem.Description))</small></td>
+                                <td>
+                                    <span class="badge bg-@(classItem.IsActive ? "success" : "secondary") badge-sm">
+                                        @(classItem.IsActive ? "Активен" : "Неактивен")
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <a asp-controller="Class" asp-action="Details" asp-route-id="@classItem.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         }
         else
         {
-            <div class="text-center py-4">
-                <i class="fas fa-graduation-cap text-muted" style="font-size: 3rem;"></i>
-                <p class="text-muted mt-3">Задание пока не назначено ни одному классу</p>
+            <div class="text-center py-3">
+                <small class="text-muted">Задание пока не назначено ни одному классу</small>
             </div>
         }
     </div>
 </div>
 
 <div class="card mb-3">
-    <div class="card-header">
-        <h5 class="mb-0">
-            <i class="fas fa-clipboard-list"></i> Тесты в задании
-        </h5>
-    </div>
-    <div class="card-body">
-        <div class="text-center py-4">
-            <i class="fas fa-tasks text-muted" style="font-size: 3rem;"></i>
-            <p class="text-muted mt-3">В этом задании пока нет тестов</p>
-            <div class="btn-group" role="group">
-                <div class="d-flex gap-1 flex-wrap">
-                    <a asp-controller="SpellingTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-plus"></i> Тест по орфографии
-                    </a>
-                    <a asp-controller="PunctuationTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-plus"></i> Тест по пунктуации
-                    </a>
-                    <a asp-controller="OrthoeopyTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-plus"></i> Тест по орфоэпии
-                    </a>
-                    <a asp-controller="RegularTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-plus"></i> Классический тест
-                    </a>
-                </div>
-            </div>
+    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">
+            <i class="fas fa-clipboard-list"></i> Тесты в задании (@totalTests)
+        </h6>
+        <div class="d-flex gap-1">
+            @if (isRussianLanguage)
+            {
+                <a asp-controller="SpellingTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-outline-success" title="Орфография">
+                    <i class="fas fa-plus"></i> <i class="fas fa-spell-check"></i>
+                </a>
+                <a asp-controller="PunctuationTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-outline-info" title="Пунктуация">
+                    <i class="fas fa-plus"></i> <i class="fas fa-quote-right"></i>
+                </a>
+                <a asp-controller="OrthoeopyTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-outline-warning" title="Орфоэпия">
+                    <i class="fas fa-plus"></i> <i class="fas fa-volume-up"></i>
+                </a>
+            }
+            <a asp-controller="RegularTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-outline-primary" title="Классический">
+                <i class="fas fa-plus"></i> <i class="fas fa-clipboard-check"></i>
+            </a>
         </div>
+    </div>
+    <div class="card-body p-2">
+        @if (totalTests > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 5%;">Тип</th>
+                            <th style="width: 35%;">Название</th>
+                            <th style="width: 15%;">Вопросов</th>
+                            <th style="width: 10%;">Время</th>
+                            <th style="width: 10%;">Статус</th>
+                            <th style="width: 25%;" class="text-center">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @* Тесты по орфографии *@
+                        @foreach (var test in spellingTests)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-spell-check"></i>
+                                    </span>
+                                </td>
+                                <td>
+                                    <small><strong>@test.Title</strong></small>
+                                    @if (!string.IsNullOrEmpty(test.Description))
+                                    {
+                                        <br>
+                                        <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@(spellingQuestionCounts.ContainsKey(test.Id) ? spellingQuestionCounts[test.Id] : 0)</small>
+                                </td>
+                                <td><small>@test.TimeLimit мин</small></td>
+                                <td>
+                                    <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                        @(test.IsActive ? "Активен" : "Неактивен")
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <a asp-controller="SpellingTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-controller="SpellingTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-controller="SpellingTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+
+                        @* Тесты по пунктуации *@
+                        @foreach (var test in punctuationTests)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-quote-right"></i>
+                                    </span>
+                                </td>
+                                <td>
+                                    <small><strong>@test.Title</strong></small>
+                                    @if (!string.IsNullOrEmpty(test.Description))
+                                    {
+                                        <br>
+                                        <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@(punctuationQuestionCounts.ContainsKey(test.Id) ? punctuationQuestionCounts[test.Id] : 0)</small>
+                                </td>
+                                <td><small>@test.TimeLimit мин</small></td>
+                                <td>
+                                    <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                        @(test.IsActive ? "Активен" : "Неактивен")
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <a asp-controller="PunctuationTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-controller="PunctuationTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-controller="PunctuationTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+
+                        @* Тесты по орфоэпии *@
+                        @foreach (var test in orthoeopyTests)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-volume-up"></i>
+                                    </span>
+                                </td>
+                                <td>
+                                    <small><strong>@test.Title</strong></small>
+                                    @if (!string.IsNullOrEmpty(test.Description))
+                                    {
+                                        <br>
+                                        <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@(orthoeopyQuestionCounts.ContainsKey(test.Id) ? orthoeopyQuestionCounts[test.Id] : 0)</small>
+                                </td>
+                                <td><small>@test.TimeLimit мин</small></td>
+                                <td>
+                                    <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                        @(test.IsActive ? "Активен" : "Неактивен")
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <a asp-controller="OrthoeopyTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-controller="OrthoeopyTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-controller="OrthoeopyTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+
+                        @* Классические тесты *@
+                        @foreach (var test in regularTests)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-clipboard-check"></i>
+                                    </span>
+                                </td>
+                                <td>
+                                    <small><strong>@test.Title</strong></small>
+                                    @if (!string.IsNullOrEmpty(test.Description))
+                                    {
+                                        <br>
+                                        <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@(regularQuestionCounts.ContainsKey(test.Id) ? regularQuestionCounts[test.Id] : 0)</small>
+                                </td>
+                                <td><small>@test.TimeLimit мин</small></td>
+                                <td>
+                                    <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                        @(test.IsActive ? "Активен" : "Неактивен")
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <a asp-controller="RegularTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-controller="RegularTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-controller="RegularTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-3">
+                <small class="text-muted">В этом задании пока нет тестов</small>
+            </div>
+        }
     </div>
 </div>
 
