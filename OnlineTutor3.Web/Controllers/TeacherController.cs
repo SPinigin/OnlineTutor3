@@ -19,6 +19,10 @@ namespace OnlineTutor3.Web.Controllers
         private readonly IPunctuationTestService _punctuationTestService;
         private readonly IOrthoeopyTestService _orthoeopyTestService;
         private readonly IRegularTestService _regularTestService;
+        private readonly ISpellingTestResultRepository _spellingTestResultRepository;
+        private readonly IPunctuationTestResultRepository _punctuationTestResultRepository;
+        private readonly IOrthoeopyTestResultRepository _orthoeopyTestResultRepository;
+        private readonly IRegularTestResultRepository _regularTestResultRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<TeacherController> _logger;
 
@@ -32,6 +36,10 @@ namespace OnlineTutor3.Web.Controllers
             IPunctuationTestService punctuationTestService,
             IOrthoeopyTestService orthoeopyTestService,
             IRegularTestService regularTestService,
+            ISpellingTestResultRepository spellingTestResultRepository,
+            IPunctuationTestResultRepository punctuationTestResultRepository,
+            IOrthoeopyTestResultRepository orthoeopyTestResultRepository,
+            IRegularTestResultRepository regularTestResultRepository,
             UserManager<ApplicationUser> userManager,
             ILogger<TeacherController> logger)
         {
@@ -44,6 +52,10 @@ namespace OnlineTutor3.Web.Controllers
             _punctuationTestService = punctuationTestService;
             _orthoeopyTestService = orthoeopyTestService;
             _regularTestService = regularTestService;
+            _spellingTestResultRepository = spellingTestResultRepository;
+            _punctuationTestResultRepository = punctuationTestResultRepository;
+            _orthoeopyTestResultRepository = orthoeopyTestResultRepository;
+            _regularTestResultRepository = regularTestResultRepository;
             _userManager = userManager;
             _logger = logger;
         }
@@ -85,6 +97,9 @@ namespace OnlineTutor3.Web.Controllers
                 var totalActiveTests = spellingTests.Count() + punctuationTests.Count() + 
                                       orthoeopyTests.Count() + regularTests.Count();
 
+                // Получаем последние 10 завершенных прохождений тестов
+                var recentCompletions = await GetRecentTestCompletionsAsync(currentUser.Id, subjectsDict);
+
                 var viewModel = new TeacherIndexViewModel
                 {
                     Teacher = currentUser,
@@ -92,10 +107,7 @@ namespace OnlineTutor3.Web.Controllers
                     TotalStudents = students.Count,
                     TotalActiveAssignments = activeAssignments.Count,
                     TotalActiveTests = totalActiveTests,
-                    RecentAssignments = activeAssignments
-                        .OrderByDescending(a => a.CreatedAt)
-                        .Take(5)
-                        .ToList(),
+                    RecentCompletions = recentCompletions,
                     SubjectsDict = subjectsDict
                 };
 
@@ -107,6 +119,209 @@ namespace OnlineTutor3.Web.Controllers
                 TempData["ErrorMessage"] = "Произошла ошибка при загрузке данных. Попробуйте обновить страницу.";
                 return RedirectToAction("Index", "Home");
             }
+        }
+
+        /// <summary>
+        /// Получает последние 10 завершенных прохождений тестов учениками учителя
+        /// </summary>
+        private async Task<List<RecentTestCompletionViewModel>> GetRecentTestCompletionsAsync(
+            string teacherId, 
+            Dictionary<int, string> subjectsDict)
+        {
+            var completions = new List<RecentTestCompletionViewModel>();
+
+            // Получаем тесты учителя
+            var spellingTests = await _spellingTestService.GetByTeacherIdAsync(teacherId);
+            var punctuationTests = await _punctuationTestService.GetByTeacherIdAsync(teacherId);
+            var orthoeopyTests = await _orthoeopyTestService.GetByTeacherIdAsync(teacherId);
+            var regularTests = await _regularTestService.GetByTeacherIdAsync(teacherId);
+
+            var spellingTestsDict = spellingTests.ToDictionary(t => t.Id);
+            var punctuationTestsDict = punctuationTests.ToDictionary(t => t.Id);
+            var orthoeopyTestsDict = orthoeopyTests.ToDictionary(t => t.Id);
+            var regularTestsDict = regularTests.ToDictionary(t => t.Id);
+
+            // Получаем все задания для получения предметов
+            var allAssignments = await _assignmentService.GetByTeacherSubjectsAsync(teacherId);
+            var assignmentsDict = allAssignments.ToDictionary(a => a.Id);
+
+            // Получаем результаты тестов по орфографии
+            foreach (var test in spellingTests)
+            {
+                var testResults = await _spellingTestResultRepository.GetByTestIdAsync(test.Id);
+                var completedResults = testResults.Where(r => r.IsCompleted && r.CompletedAt.HasValue).ToList();
+
+                var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
+                    ? assignmentsDict[test.AssignmentId] 
+                    : null;
+                var subjectName = assignment != null && subjectsDict.ContainsKey(assignment.SubjectId)
+                    ? subjectsDict[assignment.SubjectId]
+                    : "Не указан";
+
+                foreach (var result in completedResults)
+                {
+                    var student = await _studentService.GetByIdAsync(result.StudentId);
+                    if (student != null)
+                    {
+                        var user = await _userManager.FindByIdAsync(student.UserId);
+                        var className = student.ClassId.HasValue 
+                            ? (await _classService.GetByIdAsync(student.ClassId.Value))?.Name 
+                            : null;
+
+                        completions.Add(new RecentTestCompletionViewModel
+                        {
+                            TestResultId = result.Id,
+                            TestId = result.SpellingTestId,
+                            TestTitle = test.Title,
+                            TestType = "spelling",
+                            StudentId = result.StudentId,
+                            StudentName = user?.FullName ?? "Неизвестный студент",
+                            ClassName = className,
+                            Score = result.Score,
+                            MaxScore = result.MaxScore,
+                            Percentage = result.Percentage,
+                            Grade = result.Grade,
+                            CompletedAt = result.CompletedAt!.Value,
+                            SubjectName = subjectName
+                        });
+                    }
+                }
+            }
+
+            // Получаем результаты тестов по пунктуации
+            foreach (var test in punctuationTests)
+            {
+                var testResults = await _punctuationTestResultRepository.GetByTestIdAsync(test.Id);
+                var completedResults = testResults.Where(r => r.IsCompleted && r.CompletedAt.HasValue).ToList();
+
+                var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
+                    ? assignmentsDict[test.AssignmentId] 
+                    : null;
+                var subjectName = assignment != null && subjectsDict.ContainsKey(assignment.SubjectId)
+                    ? subjectsDict[assignment.SubjectId]
+                    : "Не указан";
+
+                foreach (var result in completedResults)
+                {
+                    var student = await _studentService.GetByIdAsync(result.StudentId);
+                    if (student != null)
+                    {
+                        var user = await _userManager.FindByIdAsync(student.UserId);
+                        var className = student.ClassId.HasValue 
+                            ? (await _classService.GetByIdAsync(student.ClassId.Value))?.Name 
+                            : null;
+
+                        completions.Add(new RecentTestCompletionViewModel
+                        {
+                            TestResultId = result.Id,
+                            TestId = result.PunctuationTestId,
+                            TestTitle = test.Title,
+                            TestType = "punctuation",
+                            StudentId = result.StudentId,
+                            StudentName = user?.FullName ?? "Неизвестный студент",
+                            ClassName = className,
+                            Score = result.Score,
+                            MaxScore = result.MaxScore,
+                            Percentage = result.Percentage,
+                            Grade = result.Grade,
+                            CompletedAt = result.CompletedAt!.Value,
+                            SubjectName = subjectName
+                        });
+                    }
+                }
+            }
+
+            // Получаем результаты тестов по орфоэпии
+            foreach (var test in orthoeopyTests)
+            {
+                var testResults = await _orthoeopyTestResultRepository.GetByTestIdAsync(test.Id);
+                var completedResults = testResults.Where(r => r.IsCompleted && r.CompletedAt.HasValue).ToList();
+
+                var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
+                    ? assignmentsDict[test.AssignmentId] 
+                    : null;
+                var subjectName = assignment != null && subjectsDict.ContainsKey(assignment.SubjectId)
+                    ? subjectsDict[assignment.SubjectId]
+                    : "Не указан";
+
+                foreach (var result in completedResults)
+                {
+                    var student = await _studentService.GetByIdAsync(result.StudentId);
+                    if (student != null)
+                    {
+                        var user = await _userManager.FindByIdAsync(student.UserId);
+                        var className = student.ClassId.HasValue 
+                            ? (await _classService.GetByIdAsync(student.ClassId.Value))?.Name 
+                            : null;
+
+                        completions.Add(new RecentTestCompletionViewModel
+                        {
+                            TestResultId = result.Id,
+                            TestId = result.OrthoeopyTestId,
+                            TestTitle = test.Title,
+                            TestType = "orthoeopy",
+                            StudentId = result.StudentId,
+                            StudentName = user?.FullName ?? "Неизвестный студент",
+                            ClassName = className,
+                            Score = result.Score,
+                            MaxScore = result.MaxScore,
+                            Percentage = result.Percentage,
+                            Grade = result.Grade,
+                            CompletedAt = result.CompletedAt!.Value,
+                            SubjectName = subjectName
+                        });
+                    }
+                }
+            }
+
+            // Получаем результаты классических тестов
+            foreach (var test in regularTests)
+            {
+                var testResults = await _regularTestResultRepository.GetByTestIdAsync(test.Id);
+                var completedResults = testResults.Where(r => r.IsCompleted && r.CompletedAt.HasValue).ToList();
+
+                var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
+                    ? assignmentsDict[test.AssignmentId] 
+                    : null;
+                var subjectName = assignment != null && subjectsDict.ContainsKey(assignment.SubjectId)
+                    ? subjectsDict[assignment.SubjectId]
+                    : "Не указан";
+
+                foreach (var result in completedResults)
+                {
+                    var student = await _studentService.GetByIdAsync(result.StudentId);
+                    if (student != null)
+                    {
+                        var user = await _userManager.FindByIdAsync(student.UserId);
+                        var className = student.ClassId.HasValue 
+                            ? (await _classService.GetByIdAsync(student.ClassId.Value))?.Name 
+                            : null;
+
+                        completions.Add(new RecentTestCompletionViewModel
+                        {
+                            TestResultId = result.Id,
+                            TestId = result.RegularTestId,
+                            TestTitle = test.Title,
+                            TestType = "regular",
+                            StudentId = result.StudentId,
+                            StudentName = user?.FullName ?? "Неизвестный студент",
+                            ClassName = className,
+                            Score = result.Score,
+                            MaxScore = result.MaxScore,
+                            Percentage = result.Percentage,
+                            Grade = result.Grade,
+                            CompletedAt = result.CompletedAt!.Value,
+                            SubjectName = subjectName
+                        });
+                    }
+                }
+            }
+
+            // Сортируем по дате завершения (от новых к старым) и берем последние 10
+            return completions
+                .OrderByDescending(c => c.CompletedAt)
+                .Take(10)
+                .ToList();
         }
     }
 }
