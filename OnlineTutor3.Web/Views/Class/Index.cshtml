@@ -109,7 +109,11 @@ else
                             }
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-primary rounded-pill">0</span>
+                            @{
+                                var studentsCountDict = ViewBag.StudentsCountDict as Dictionary<int, int> ?? new Dictionary<int, int>();
+                                var studentsCount = studentsCountDict.ContainsKey(item.Id) ? studentsCountDict[item.Id] : 0;
+                            }
+                            <span class="badge bg-primary rounded-pill">@studentsCount</span>
                         </td>
                         <td>
                             <small>

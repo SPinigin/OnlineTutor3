@@ -40,6 +40,16 @@ namespace OnlineTutor3.Web.Controllers
                 }
 
                 var classes = await _classService.GetByTeacherIdAsync(currentUser.Id);
+                
+                // Загружаем количество учеников для каждого класса
+                var studentsCountDict = new Dictionary<int, int>();
+                foreach (var @class in classes)
+                {
+                    var students = await _studentService.GetByClassIdAsync(@class.Id);
+                    studentsCountDict[@class.Id] = students?.Count ?? 0;
+                }
+                ViewBag.StudentsCountDict = studentsCountDict;
+                
                 return View(classes);
             }
             catch (Exception ex)
