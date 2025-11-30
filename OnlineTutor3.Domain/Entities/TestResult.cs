@@ -22,6 +22,8 @@ namespace OnlineTutor3.Domain.Entities
 
         public int MaxScore { get; set; } = 0;
 
+        public double Percentage { get; set; } = 0.0;
+
         public bool IsCompleted { get; set; } = false;
     }
 
