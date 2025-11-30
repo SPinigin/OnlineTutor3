@@ -283,10 +283,10 @@ namespace OnlineTutor3.Web.Services
                     }
                 }
 
-                // Сравниваем результат с полным словом
+                // Сравниваем результат с полным словом (без учета регистра)
                 if (!reconstructed.Equals(question.FullWord, StringComparison.OrdinalIgnoreCase))
                 {
-                    question.Errors.Add("Полное слово не соответствует слову с заменёнными буквами");
+                    question.Errors.Add($"Полное слово \"{question.FullWord}\" не соответствует слову с заменёнными буквами \"{reconstructed}\". Проверьте правильность данных.");
                 }
             }
         }
