@@ -254,8 +254,8 @@ namespace OnlineTutor3.Application.Services
                     testResult.Percentage = (double)testResult.Score / testResult.MaxScore * 100;
                 }
 
-                // Вычисляем оценку (если еще не вычислена)
-                if (testResult.Grade == null && testResult.Percentage > 0)
+                // Всегда пересчитываем оценку на основе актуального процента
+                if (testResult.Percentage > 0)
                 {
                     testResult.Grade = TestEvaluationService.CalculateGrade(testResult.Percentage);
                 }

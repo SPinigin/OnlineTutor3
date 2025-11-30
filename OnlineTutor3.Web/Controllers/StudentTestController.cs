@@ -582,8 +582,20 @@ namespace OnlineTutor3.Web.Controllers
                 // Если время истекло, завершаем тест автоматически
                 if (timeRemaining <= TimeSpan.Zero)
                 {
+                    // Вычисляем результат
+                    var (score, maxScore, percentage) = await _testEvaluationService.CalculateSpellingTestResultAsync(testResult.Id, test.Id);
+                    
+                    // Вычисляем оценку
+                    var grade = TestEvaluationService.CalculateGrade(percentage);
+                    
+                    // Обновляем результат теста
+                    testResult.Score = score;
+                    testResult.MaxScore = maxScore;
+                    testResult.Percentage = percentage;
+                    testResult.Grade = grade;
+                    
+                    // Завершаем тест
                     await _testResultService.CompleteTestResultAsync(testResult);
-                    await _testEvaluationService.CalculateSpellingTestResultAsync(testResult.Id, test.Id);
                     return RedirectToAction("SpellingResult", new { id = testResult.Id });
                 }
 
