@@ -5,14 +5,11 @@
     var inactiveClasses = Model.Count(c => !c.IsActive);
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item active">Управление классами</li>
-            </ol>
-        </nav>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h4 class="mb-0 d-flex align-items-center gap-2">
+        <i class="fas fa-graduation-cap text-primary"></i>
+        <span>Управление классами</span>
+    </h4>
     <div>
         <a asp-action="Create" class="btn btn-success">
             <i class="fas fa-plus"></i> Создать класс
