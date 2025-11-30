@@ -99,7 +99,7 @@ namespace OnlineTutor3.Web.Controllers
                     }
 
                     _logger.LogInformation("Успешный вход пользователя. UserId: {UserId}, Email: {Email}", user.Id, model.Email);
-                    return RedirectToLocal(returnUrl);
+                    return await RedirectToLocalAsync(returnUrl, user);
                 }
             }
 
@@ -270,12 +270,42 @@ namespace OnlineTutor3.Web.Controllers
 
         #region Helper Methods
 
-        private IActionResult RedirectToLocal(string? returnUrl)
+        private async Task<IActionResult> RedirectToLocalAsync(string? returnUrl, ApplicationUser? user = null)
         {
             if (Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
             }
+
+            // Перенаправляем на главную страницу в зависимости от роли
+            if (user != null)
+            {
+                if (await _userManager.IsInRoleAsync(user, ApplicationRoles.Teacher))
+                {
+                    return RedirectToAction("Index", "Teacher");
+                }
+                else if (await _userManager.IsInRoleAsync(user, ApplicationRoles.Student))
+                {
+                    return RedirectToAction("Index", "Student");
+                }
+            }
+            else
+            {
+                // Если user не передан, пытаемся получить из контекста (fallback)
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser != null)
+                {
+                    if (await _userManager.IsInRoleAsync(currentUser, ApplicationRoles.Teacher))
+                    {
+                        return RedirectToAction("Index", "Teacher");
+                    }
+                    else if (await _userManager.IsInRoleAsync(currentUser, ApplicationRoles.Student))
+                    {
+                        return RedirectToAction("Index", "Student");
+                    }
+                }
+            }
+
             return RedirectToAction("Index", "Home");
         }
 
