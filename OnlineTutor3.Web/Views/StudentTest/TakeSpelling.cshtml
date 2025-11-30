@@ -170,11 +170,11 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
                     <button type="button" 
-                            class="btn btn-success btn-sm d-none" 
+                            class="btn btn-success btn-sm" 
                             id="finishButton" 
                             onclick="showFinishModal()">
                         <i class="fas fa-check"></i>
-                        <span class="d-none d-sm-inline ms-1">Завершить</span>
+                        <span class="d-none d-sm-inline ms-1">Завершить тест</span>
                     </button>
                 </div>
             </div>
@@ -208,6 +208,14 @@
                         Вы ответили на <strong><span id="answeredCountModal">0</span></strong> 
                         из <strong>@Model.Questions.Count</strong> вопросов.
                     </p>
+                    @if (Model.Questions.Count > 1)
+                    {
+                        <p class="mb-2 small text-warning">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Вы находитесь на вопросе <strong><span id="currentQuestionModal">1</span></strong> из <strong>@Model.Questions.Count</strong>.
+                            <span>Неотвеченные вопросы будут засчитаны как неправильные.</span>
+                        </p>
+                    }
                     <p class="mb-0 small text-muted">Вы уверены, что хотите завершить тест?</p>
                 </div>
             </div>
@@ -405,13 +413,15 @@
         function updateNavigation() {
             $('#prevButton').prop('disabled', currentQuestionIndex === 0);
 
+            // Кнопка "Следующий" скрывается только на последнем вопросе
             if (currentQuestionIndex === totalQuestions - 1) {
                 $('#nextButton').addClass('d-none');
-                $('#finishButton').removeClass('d-none');
             } else {
                 $('#nextButton').removeClass('d-none');
-                $('#finishButton').addClass('d-none');
             }
+            
+            // Кнопка "Завершить тест" всегда видна
+            $('#finishButton').removeClass('d-none');
         }
 
         function toggleHint(questionIndex) {
@@ -437,6 +447,10 @@
         }
 
         function showFinishModal() {
+            // Обновляем информацию в модальном окне
+            $('#currentQuestionModal').text(currentQuestionIndex + 1);
+            $('#answeredCountModal').text(Object.keys(answers).length);
+            
             const modal = new bootstrap.Modal(document.getElementById('finishTestModal'));
             modal.show();
         }
