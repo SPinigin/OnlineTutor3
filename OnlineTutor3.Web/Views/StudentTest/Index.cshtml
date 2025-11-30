@@ -1,0 +1,324 @@
+@model OnlineTutor3.Web.ViewModels.StudentTestIndexViewModel
+@{
+    ViewData["Title"] = "Доступные тесты";
+}
+
+<div class="container-fluid">
+    <!-- Заголовок -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h4 class="mb-0 d-flex align-items-center gap-2">
+                <i class="fas fa-tasks text-primary"></i>
+                <span>Доступные тесты</span>
+            </h4>
+            @if (Model.Class != null)
+            {
+                <p class="text-muted mb-0 mt-1">
+                    <i class="fas fa-users"></i> Класс: <strong>@Model.Class.Name</strong>
+                </p>
+            }
+        </div>
+        <div>
+            <a asp-action="History" class="btn btn-outline-info">
+                <i class="fas fa-history"></i> 
+                <span class="d-none d-md-inline">История прохождения</span>
+                <span class="d-md-none">История</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Фильтры по категориям -->
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-body">
+            <div class="d-none d-md-block">
+                <div class="btn-group w-100" role="group">
+                    <a asp-action="Index" 
+                       class="btn btn-@(string.IsNullOrEmpty(Model.CurrentCategory) ? "primary" : "outline-primary")">
+                        <i class="fas fa-list"></i> Все тесты
+                    </a>
+                    <a asp-action="Index" asp-route-category="spelling" 
+                       class="btn btn-@(Model.CurrentCategory == "spelling" ? "primary" : "outline-primary")">
+                        <i class="fas fa-spell-check"></i> Орфография
+                    </a>
+                    <a asp-action="Index" asp-route-category="punctuation" 
+                       class="btn btn-@(Model.CurrentCategory == "punctuation" ? "warning" : "outline-warning")">
+                        <i class="fas fa-quote-right"></i> Пунктуация
+                    </a>
+                    <a asp-action="Index" asp-route-category="orthoepy" 
+                       class="btn btn-@(Model.CurrentCategory == "orthoepy" ? "success" : "outline-success")">
+                        <i class="fas fa-volume-up"></i> Орфоэпия
+                    </a>
+                    <a asp-action="Index" asp-route-category="regular" 
+                       class="btn btn-@(Model.CurrentCategory == "regular" ? "info" : "outline-info")">
+                        <i class="fas fa-list-ul"></i> Классические
+                    </a>
+                </div>
+            </div>
+
+            <!-- Мобильная версия фильтров -->
+            <div class="d-md-none">
+                <div class="d-grid gap-2">
+                    <a asp-action="Index" 
+                       class="btn btn-@(string.IsNullOrEmpty(Model.CurrentCategory) ? "primary" : "outline-primary") btn-sm">
+                        <i class="fas fa-list"></i> Все тесты
+                    </a>
+                    <a asp-action="Index" asp-route-category="spelling" 
+                       class="btn btn-@(Model.CurrentCategory == "spelling" ? "primary" : "outline-primary") btn-sm">
+                        <i class="fas fa-spell-check"></i> Орфография
+                    </a>
+                    <a asp-action="Index" asp-route-category="punctuation" 
+                       class="btn btn-@(Model.CurrentCategory == "punctuation" ? "warning" : "outline-warning") btn-sm">
+                        <i class="fas fa-quote-right"></i> Пунктуация
+                    </a>
+                    <a asp-action="Index" asp-route-category="orthoepy" 
+                       class="btn btn-@(Model.CurrentCategory == "orthoepy" ? "success" : "outline-success") btn-sm">
+                        <i class="fas fa-volume-up"></i> Орфоэпия
+                    </a>
+                    <a asp-action="Index" asp-route-category="regular" 
+                       class="btn btn-@(Model.CurrentCategory == "regular" ? "info" : "outline-info") btn-sm">
+                        <i class="fas fa-list-ul"></i> Классические
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @{
+        var totalTests = Model.SpellingTests.Count + Model.PunctuationTests.Count + 
+                         Model.OrthoeopyTests.Count + Model.RegularTests.Count;
+    }
+
+    @if (totalTests > 0)
+    {
+        <!-- Поиск и фильтры -->
+        <div class="row mb-3 align-items-center">
+            <div class="col-12 col-md-6 mb-2 mb-md-0">
+                <h6 class="mb-0">
+                    <i class="fas fa-list-check"></i>
+                    <span id="testsCount">Всего тестов: @totalTests</span>
+                </h6>
+            </div>
+            <div class="col-12 col-md-6">
+                <form method="get" class="d-flex gap-2">
+                    <input type="hidden" name="category" value="@Model.CurrentCategory" />
+                    <input type="hidden" name="assignment" value="@Model.AssignmentFilter" />
+                    <div class="input-group input-group-sm flex-grow-1">
+                        <span class="input-group-text bg-white">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" 
+                               name="search"
+                               id="searchInput" 
+                               class="form-control" 
+                               placeholder="Поиск по названию..."
+                               value="@Model.SearchQuery"
+                               autocomplete="off">
+                        @if (!string.IsNullOrEmpty(Model.SearchQuery))
+                        {
+                            <a asp-action="Index" 
+                               asp-route-category="@Model.CurrentCategory"
+                               asp-route-assignment="@Model.AssignmentFilter"
+                               class="btn btn-outline-secondary" 
+                               type="button">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        }
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="noResultsMessage" class="alert alert-info" style="display: none;">
+            <i class="fas fa-info-circle"></i> 
+            По вашему запросу ничего не найдено. Попробуйте изменить критерии поиска.
+        </div>
+    }
+
+    @if (totalTests == 0)
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-tasks text-muted" style="font-size: 4rem;"></i>
+            <h4 class="mt-3 text-muted">Нет доступных тестов</h4>
+            <p class="text-muted">В данный момент нет тестов, доступных для прохождения</p>
+        </div>
+    }
+    else
+    {
+        <!-- Тесты по орфографии -->
+        @if (Model.SpellingTests.Any() && (string.IsNullOrEmpty(Model.CurrentCategory) || Model.CurrentCategory == "spelling"))
+        {
+            <div class="test-section mb-4" data-category="spelling">
+                <h5 class="mb-3">
+                    <i class="fas fa-spell-check text-primary"></i> Тесты по орфографии
+                </h5>
+                @await Html.PartialAsync("_TestTable", Model.SpellingTests, new ViewDataDictionary(ViewData) { { "TestType", "Spelling" } })
+            </div>
+        }
+
+        <!-- Тесты по пунктуации -->
+        @if (Model.PunctuationTests.Any() && (string.IsNullOrEmpty(Model.CurrentCategory) || Model.CurrentCategory == "punctuation"))
+        {
+            <div class="test-section mb-4" data-category="punctuation">
+                <h5 class="mb-3">
+                    <i class="fas fa-quote-right text-warning"></i> Тесты по пунктуации
+                </h5>
+                @await Html.PartialAsync("_TestTable", Model.PunctuationTests, new ViewDataDictionary(ViewData) { { "TestType", "Punctuation" } })
+            </div>
+        }
+
+        <!-- Тесты по орфоэпии -->
+        @if (Model.OrthoeopyTests.Any() && (string.IsNullOrEmpty(Model.CurrentCategory) || Model.CurrentCategory == "orthoepy"))
+        {
+            <div class="test-section mb-4" data-category="orthoepy">
+                <h5 class="mb-3">
+                    <i class="fas fa-volume-up text-success"></i> Тесты по орфоэпии
+                </h5>
+                @await Html.PartialAsync("_TestTable", Model.OrthoeopyTests, new ViewDataDictionary(ViewData) { { "TestType", "Orthoeopy" } })
+            </div>
+        }
+
+        <!-- Классические тесты -->
+        @if (Model.RegularTests.Any() && (string.IsNullOrEmpty(Model.CurrentCategory) || Model.CurrentCategory == "regular"))
+        {
+            <div class="test-section mb-4" data-category="regular">
+                <h5 class="mb-3">
+                    <i class="fas fa-list-ul text-info"></i> Классические тесты
+                </h5>
+                @await Html.PartialAsync("_TestTable", Model.RegularTests, new ViewDataDictionary(ViewData) { { "TestType", "Regular" } })
+            </div>
+        }
+    }
+</div>
+
+<!-- Модальное окно подтверждения начала теста -->
+<div class="modal fade" id="confirmStartModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-play text-success"></i> Начать тест
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Внимание!</strong> После начала теста у вас будет ограниченное время на выполнение.
+                </div>
+                <p>Тест: <strong id="testTitle"></strong></p>
+                <p>Время на выполнение: <strong id="testTime"></strong> минут</p>
+                
+                <div id="punctuationInfo" class="alert alert-warning" style="display: none;">
+                    <h6><i class="fas fa-exclamation-triangle"></i> Особенности теста по пунктуации:</h6>
+                    <ul class="mb-0">
+                        <li>В предложениях вместо запятых стоят номера позиций</li>
+                        <li>Укажите номера без пробелов и знаков препинания, где должны быть запятые</li>
+                        <li>Если запятые не нужны, оставьте поле пустым</li>
+                        <li>Пример ответа: 135</li>
+                    </ul>
+                </div>
+                
+                <div id="orthoeopyInfo" class="alert alert-success" style="display: none;">
+                    <h6><i class="fas fa-info-circle"></i> Особенности теста по орфоэпии:</h6>
+                    <ul class="mb-0">
+                        <li>В каждом вопросе нужно выбрать правильное ударение в слове</li>
+                        <li>Будут предложены варианты с ударением на разных слогах</li>
+                        <li>Выберите один правильный вариант</li>
+                        <li>Обратите внимание на символ ударения: ́</li>
+                    </ul>
+                </div>
+                
+                <p class="text-warning mb-0">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Убедитесь, что у вас есть стабильное интернет-соединение и достаточно времени.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Отмена
+                </button>
+                <a id="startTestButton" href="#" class="btn btn-success">
+                    <i class="fas fa-play"></i> Начать тест
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Функция подтверждения начала теста
+        function confirmStartTest(testId, testTitle, timeLimit, testType) {
+            document.getElementById('testTitle').textContent = testTitle;
+            document.getElementById('testTime').textContent = timeLimit;
+
+            const punctuationInfo = document.getElementById('punctuationInfo');
+            const orthoeopyInfo = document.getElementById('orthoeopyInfo');
+
+            // Скрываем все информационные блоки
+            if (punctuationInfo) punctuationInfo.style.display = 'none';
+            if (orthoeopyInfo) orthoeopyInfo.style.display = 'none';
+
+            // Формируем URL для начала теста
+            let actionUrl = '';
+            if (testType === 'spelling') {
+                actionUrl = '@Url.Action("StartSpelling")/' + testId;
+            } else if (testType === 'punctuation') {
+                if (punctuationInfo) punctuationInfo.style.display = 'block';
+                actionUrl = '@Url.Action("StartPunctuation")/' + testId;
+            } else if (testType === 'orthoepy' || testType === 'orthoeopy') {
+                if (orthoeopyInfo) orthoeopyInfo.style.display = 'block';
+                actionUrl = '@Url.Action("StartOrthoeopy")/' + testId;
+            } else if (testType === 'regular') {
+                actionUrl = '@Url.Action("StartRegular")/' + testId;
+            }
+
+            document.getElementById('startTestButton').href = actionUrl;
+
+            const modal = new bootstrap.Modal(document.getElementById('confirmStartModal'));
+            modal.show();
+        }
+
+        // Поиск по тестам (клиентская фильтрация)
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const testsCount = document.getElementById('testsCount');
+            const noResultsMessage = document.getElementById('noResultsMessage');
+            const totalTests = @totalTests;
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const query = e.target.value.toLowerCase().trim();
+                    const testRows = document.querySelectorAll('.test-row');
+                    let visibleCount = 0;
+
+                    testRows.forEach(row => {
+                        const title = row.dataset.testTitle || '';
+                        if (title.includes(query)) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // Обновляем счетчик
+                    if (visibleCount === totalTests) {
+                        testsCount.textContent = `Всего тестов: ${totalTests}`;
+                        if (noResultsMessage) noResultsMessage.style.display = 'none';
+                    } else if (visibleCount === 0) {
+                        testsCount.textContent = `Показано: 0 из ${totalTests}`;
+                        if (noResultsMessage) noResultsMessage.style.display = 'block';
+                    } else {
+                        testsCount.textContent = `Показано: ${visibleCount} из ${totalTests}`;
+                        if (noResultsMessage) noResultsMessage.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+}
+

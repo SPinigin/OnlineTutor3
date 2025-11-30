@@ -1,0 +1,151 @@
+@model List<OnlineTutor3.Web.ViewModels.AvailableTestInfo>
+@{
+    var testType = ViewData["TestType"] as string ?? "Regular";
+}
+
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 30%;">Название</th>
+                    <th class="d-none d-md-table-cell" style="width: 25%;">Описание</th>
+                    <th class="text-center" style="width: 8%;">
+                        <i class="fas fa-question-circle d-none d-md-inline"></i>
+                        <span class="d-md-none">Вопр.</span>
+                        <span class="d-none d-md-inline">Вопросы</span>
+                    </th>
+                    <th class="d-none d-md-table-cell text-center" style="width: 8%;">
+                        <i class="fas fa-clock"></i> Время
+                    </th>
+                    <th class="text-center" style="width: 10%;">
+                        <span class="d-none d-md-inline">Попытки</span>
+                        <span class="d-md-none">Поп.</span>
+                    </th>
+                    <th class="d-none d-md-table-cell text-center" style="width: 10%;">Лучший результат</th>
+                    <th class="text-center" style="width: 15%;">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var test in Model)
+                {
+                    <tr class="test-row" data-test-title="@test.Title.ToLower()">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-@(testType == "Spelling" ? "spell-check text-primary" : testType == "Punctuation" ? "quote-right text-warning" : testType == "Orthoeopy" ? "volume-up text-success" : "list-ul text-info") me-2 d-none d-md-inline"></i>
+                                <div>
+                                    <strong class="d-block">@test.Title</strong>
+                                    @if (test.BestPercentage.HasValue)
+                                    {
+                                        <small class="d-md-none">
+                                            <span class="badge bg-@(test.BestPercentage >= 80 ? "success" : test.BestPercentage >= 60 ? "warning" : "danger")">
+                                                @test.BestPercentage.Value.ToString("F1")%
+                                            </span>
+                                        </small>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="d-none d-md-table-cell">
+                            @if (!string.IsNullOrEmpty(test.Description))
+                            {
+                                <small class="text-muted">@test.Description</small>
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+
+                        <td class="text-center">
+                            <span class="badge bg-@(testType == "Spelling" ? "primary" : testType == "Punctuation" ? "warning" : testType == "Orthoeopy" ? "success" : "info") rounded-pill">
+                                @test.QuestionsCount
+                            </span>
+                        </td>
+
+                        <td class="text-center d-none d-md-table-cell">
+                            <span class="badge bg-info rounded-pill">
+                                @test.TimeLimit мин
+                            </span>
+                        </td>
+
+                        <td class="text-center">
+                            <span class="badge bg-@(test.AttemptsUsed >= test.MaxAttempts ? "danger" : "warning") rounded-pill">
+                                @test.AttemptsUsed/@test.MaxAttempts
+                            </span>
+                        </td>
+
+                        <td class="text-center d-none d-md-table-cell">
+                            @if (test.BestPercentage.HasValue)
+                            {
+                                <span class="badge bg-@(test.BestPercentage >= 80 ? "success" : test.BestPercentage >= 60 ? "warning" : "danger") rounded-pill">
+                                    @test.BestPercentage.Value.ToString("F1")%
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+
+                        <td class="text-center">
+                            @if (test.Status == TestStatus.Ongoing && test.OngoingTestResultId.HasValue)
+                            {
+                                @if (testType == "Spelling")
+                                {
+                                    <a asp-action="TakeSpelling" asp-route-id="@test.OngoingTestResultId.Value" 
+                                       class="btn btn-warning btn-sm">
+                                        <i class="fas fa-play"></i>
+                                        <span class="d-none d-md-inline">Продолжить</span>
+                                    </a>
+                                }
+                                else if (testType == "Punctuation")
+                                {
+                                    <a asp-action="TakePunctuation" asp-route-id="@test.OngoingTestResultId.Value" 
+                                       class="btn btn-warning btn-sm">
+                                        <i class="fas fa-play"></i>
+                                        <span class="d-none d-md-inline">Продолжить</span>
+                                    </a>
+                                }
+                                else if (testType == "Orthoeopy")
+                                {
+                                    <a asp-action="TakeOrthoeopy" asp-route-id="@test.OngoingTestResultId.Value" 
+                                       class="btn btn-warning btn-sm">
+                                        <i class="fas fa-play"></i>
+                                        <span class="d-none d-md-inline">Продолжить</span>
+                                    </a>
+                                }
+                                else if (testType == "Regular")
+                                {
+                                    <a asp-action="TakeRegular" asp-route-id="@test.OngoingTestResultId.Value" 
+                                       class="btn btn-warning btn-sm">
+                                        <i class="fas fa-play"></i>
+                                        <span class="d-none d-md-inline">Продолжить</span>
+                                    </a>
+                                }
+                            }
+                            else if (test.Status == TestStatus.CanStart)
+                            {
+                                <button type="button" class="btn btn-success btn-sm"
+                                        onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, '@testType.ToLower()')">
+                                    <i class="fas fa-play"></i>
+                                    <span class="d-none d-md-inline">Начать</span>
+                                </button>
+                            }
+                            else if (test.Status == TestStatus.Exhausted)
+                            {
+                                <button type="button" class="btn btn-secondary btn-sm" disabled>
+                                    <i class="fas fa-ban"></i>
+                                    <span class="d-none d-md-inline">Исчерпано</span>
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
