@@ -11,15 +11,18 @@ namespace OnlineTutor3.Application.Services
     {
         private readonly IAssignmentRepository _assignmentRepository;
         private readonly ITeacherService _teacherService;
+        private readonly IMaterialRepository _materialRepository;
         private readonly ILogger<AssignmentService> _logger;
 
         public AssignmentService(
             IAssignmentRepository assignmentRepository,
             ITeacherService teacherService,
+            IMaterialRepository materialRepository,
             ILogger<AssignmentService> logger)
         {
             _assignmentRepository = assignmentRepository;
             _teacherService = teacherService;
+            _materialRepository = materialRepository;
             _logger = logger;
         }
 
@@ -162,6 +165,15 @@ namespace OnlineTutor3.Application.Services
         {
             try
             {
+                // Перед удалением задания обнуляем AssignmentId у связанных материалов
+                var materials = await _materialRepository.GetByAssignmentIdAsync(id);
+                foreach (var material in materials)
+                {
+                    material.AssignmentId = null;
+                    await _materialRepository.UpdateAsync(material);
+                    _logger.LogInformation("Обнулен AssignmentId у материала {MaterialId} при удалении задания {AssignmentId}", material.Id, id);
+                }
+
                 return await _assignmentRepository.DeleteAsync(id);
             }
             catch (Exception ex)
