@@ -248,10 +248,16 @@ namespace OnlineTutor3.Application.Services
                 testResult.CompletedAt = DateTime.Now;
                 testResult.IsCompleted = true;
 
-                // Вычисляем процент
-                if (testResult.MaxScore > 0)
+                // Вычисляем процент (если еще не вычислен)
+                if (testResult.MaxScore > 0 && testResult.Percentage == 0)
                 {
                     testResult.Percentage = (double)testResult.Score / testResult.MaxScore * 100;
+                }
+
+                // Вычисляем оценку (если еще не вычислена)
+                if (testResult.Grade == null && testResult.Percentage > 0)
+                {
+                    testResult.Grade = TestEvaluationService.CalculateGrade(testResult.Percentage);
                 }
 
                 // Обновляем в зависимости от типа

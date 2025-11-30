@@ -24,6 +24,11 @@ namespace OnlineTutor3.Domain.Entities
 
         public double Percentage { get; set; } = 0.0;
 
+        /// <summary>
+        /// Оценка по 5-балльной шкале (2-5)
+        /// </summary>
+        public int? Grade { get; set; }
+
         public bool IsCompleted { get; set; } = false;
     }
 

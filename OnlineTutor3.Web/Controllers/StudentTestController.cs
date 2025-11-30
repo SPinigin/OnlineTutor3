@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OnlineTutor3.Application.Interfaces;
+using OnlineTutor3.Application.Services;
 using OnlineTutor3.Domain.Entities;
 using OnlineTutor3.Web.ViewModels;
 
@@ -710,10 +711,14 @@ namespace OnlineTutor3.Web.Controllers
                 // Вычисляем результат
                 var (score, maxScore, percentage) = await _testEvaluationService.CalculateSpellingTestResultAsync(testResult.Id, testResult.SpellingTestId);
                 
+                // Вычисляем оценку
+                var grade = TestEvaluationService.CalculateGrade(percentage);
+                
                 // Обновляем результат теста
                 testResult.Score = score;
                 testResult.MaxScore = maxScore;
                 testResult.Percentage = percentage;
+                testResult.Grade = grade;
                 
                 // Завершаем тест (устанавливает CompletedAt и IsCompleted)
                 await _testResultService.CompleteTestResultAsync(testResult);

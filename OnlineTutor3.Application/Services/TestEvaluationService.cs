@@ -168,6 +168,22 @@ namespace OnlineTutor3.Application.Services
             }
         }
 
+        /// <summary>
+        /// Вычисляет оценку по 5-балльной шкале на основе процента выполнения
+        /// </summary>
+        /// <param name="percentage">Процент выполнения (0-100)</param>
+        /// <returns>Оценка: 5 (100%), 4 (91-99%), 3 (80-90%), 2 (<80%)</returns>
+        public static int CalculateGrade(double percentage)
+        {
+            if (percentage >= 100.0)
+                return 5;
+            if (percentage >= 91.0)
+                return 4;
+            if (percentage >= 80.0)
+                return 3;
+            return 2;
+        }
+
         public async Task<(int Score, int MaxScore, double Percentage)> CalculatePunctuationTestResultAsync(int testResultId, int testId)
         {
             try
