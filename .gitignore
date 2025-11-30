@@ -184,6 +184,7 @@ FodyWeavers.xsd
 .idea/
 *.sln.iml
 
+/OnlineTutor3.Infrastructure/Data/AddPercentageToTestResults.sql
 /OnlineTutor3.Infrastructure/Data/CreateDatabase.sql
 /README.md
 /STUDENT_PART_PLAN.md
