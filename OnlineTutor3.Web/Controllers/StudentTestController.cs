@@ -27,6 +27,8 @@ namespace OnlineTutor3.Web.Controllers
         private readonly ISpellingTestResultRepository _spellingTestResultRepository;
         private readonly IPunctuationTestResultRepository _punctuationTestResultRepository;
         private readonly IOrthoeopyTestResultRepository _orthoeopyTestResultRepository;
+        private readonly IRegularTestResultRepository _regularTestResultRepository;
+        private readonly IRegularQuestionOptionRepository _regularQuestionOptionRepository;
         private readonly ISpellingQuestionRepository _spellingQuestionRepository;
         private readonly IPunctuationQuestionRepository _punctuationQuestionRepository;
         private readonly IOrthoeopyQuestionRepository _orthoeopyQuestionRepository;
@@ -51,6 +53,8 @@ namespace OnlineTutor3.Web.Controllers
             ISpellingTestResultRepository spellingTestResultRepository,
             IPunctuationTestResultRepository punctuationTestResultRepository,
             IOrthoeopyTestResultRepository orthoeopyTestResultRepository,
+            IRegularTestResultRepository regularTestResultRepository,
+            IRegularQuestionOptionRepository regularQuestionOptionRepository,
             ISpellingQuestionRepository spellingQuestionRepository,
             IPunctuationQuestionRepository punctuationQuestionRepository,
             IOrthoeopyQuestionRepository orthoeopyQuestionRepository,
@@ -74,6 +78,8 @@ namespace OnlineTutor3.Web.Controllers
             _spellingTestResultRepository = spellingTestResultRepository;
             _punctuationTestResultRepository = punctuationTestResultRepository;
             _orthoeopyTestResultRepository = orthoeopyTestResultRepository;
+            _regularTestResultRepository = regularTestResultRepository;
+            _regularQuestionOptionRepository = regularQuestionOptionRepository;
             _spellingQuestionRepository = spellingQuestionRepository;
             _punctuationQuestionRepository = punctuationQuestionRepository;
             _orthoeopyQuestionRepository = orthoeopyQuestionRepository;
@@ -1305,6 +1311,299 @@ namespace OnlineTutor3.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при завершении теста по орфоэпии. ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при завершении теста.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: StudentTest/StartRegular/{id}
+        public async Task<IActionResult> StartRegular(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    _logger.LogWarning("Студент не найден для пользователя {UserId}", currentUser.Id);
+                    TempData["ErrorMessage"] = "Профиль студента не найден.";
+                    return RedirectToAction("Index");
+                }
+
+                // Используем сервис для начала теста
+                var testResult = await _studentTestService.StartRegularTestAsync(student.Id, id);
+                
+                _logger.LogInformation("Студент {StudentId} начал классический тест {TestId}", student.Id, id);
+                
+                return RedirectToAction(nameof(TakeRegular), new { id = testResult.Id });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Попытка доступа к недоступному тесту. TestId: {TestId}", id);
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при начале классического теста. TestId: {TestId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при начале теста. Попробуйте позже.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: StudentTest/TakeRegular/{id}
+        public async Task<IActionResult> TakeRegular(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                // Получаем результат теста через репозиторий
+                var testResult = await _regularTestResultRepository.GetByIdAsync(id);
+                
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                // Проверяем, не завершен ли тест
+                if (testResult.IsCompleted)
+                {
+                    return RedirectToAction("RegularResult", new { id = testResult.Id });
+                }
+
+                // Загружаем тест
+                var test = await _regularTestRepository.GetByIdAsync(testResult.RegularTestId);
+                if (test == null)
+                {
+                    return NotFound();
+                }
+
+                // Загружаем вопросы
+                var questions = await _regularQuestionRepository.GetByTestIdOrderedAsync(test.Id);
+                if (!questions.Any())
+                {
+                    TempData["ErrorMessage"] = "В тесте нет вопросов.";
+                    return RedirectToAction("Index");
+                }
+
+                // Загружаем опции для всех вопросов
+                var options = new List<RegularQuestionOption>();
+                foreach (var question in questions)
+                {
+                    var questionOptions = await _regularQuestionOptionRepository.GetByQuestionIdOrderedAsync(question.Id);
+                    options.AddRange(questionOptions);
+                }
+
+                // Загружаем ответы
+                var answers = await _answerService.GetRegularAnswersAsync(testResult.Id);
+
+                // Вычисляем оставшееся время
+                var timeElapsed = DateTime.Now - testResult.StartedAt;
+                var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                var timeRemaining = timeLimit - timeElapsed;
+
+                // Если время истекло, завершаем тест автоматически
+                if (timeRemaining <= TimeSpan.Zero)
+                {
+                    // Вычисляем результат
+                    var (score, maxScore, percentage) = await _testEvaluationService.CalculateRegularTestResultAsync(testResult.Id, test.Id);
+                    
+                    // Вычисляем оценку
+                    var grade = TestEvaluationService.CalculateGrade(percentage);
+                    
+                    // Обновляем результат теста
+                    testResult.Score = score;
+                    testResult.MaxScore = maxScore;
+                    testResult.Percentage = percentage;
+                    testResult.Grade = grade;
+                    
+                    // Завершаем тест
+                    await _testResultService.CompleteTestResultAsync(testResult);
+                    
+                    return RedirectToAction("RegularResult", new { id = testResult.Id });
+                }
+
+                var viewModel = new TakeRegularTestViewModel
+                {
+                    TestResult = testResult,
+                    Test = test,
+                    Questions = questions,
+                    Options = options,
+                    Answers = answers,
+                    TimeRemaining = timeRemaining,
+                    CurrentQuestionIndex = 0
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке классического теста. ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при загрузке теста.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // POST: StudentTest/SubmitRegularAnswer
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> SubmitRegularAnswer([FromBody] SubmitRegularAnswerViewModel model)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Пользователь не авторизован" });
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return Json(new { success = false, message = "Студент не найден" });
+                }
+
+                // Получаем результат теста
+                var testResult = await _regularTestResultRepository.GetByIdAsync(model.TestResultId);
+                if (testResult == null || testResult.StudentId != student.Id || testResult.IsCompleted)
+                {
+                    return Json(new { success = false, message = "Тест не найден или уже завершен" });
+                }
+
+                // Получаем вопрос
+                var question = await _regularQuestionRepository.GetByIdAsync(model.QuestionId);
+                if (question == null || question.RegularTestId != testResult.RegularTestId)
+                {
+                    return Json(new { success = false, message = "Вопрос не найден" });
+                }
+
+                // Обрабатываем ответ в зависимости от типа вопроса
+                string? studentAnswerStr = null;
+                int? selectedOptionId = null;
+
+                if (question.Type == QuestionType.MultipleChoice && model.SelectedOptionIds != null && model.SelectedOptionIds.Any())
+                {
+                    // Для множественного выбора сохраняем ID через запятую в StudentAnswer
+                    var sortedIds = new List<int>(model.SelectedOptionIds);
+                    sortedIds.Sort();
+                    studentAnswerStr = string.Join(",", sortedIds);
+                }
+                else if (model.SelectedOptionId.HasValue)
+                {
+                    // Для одиночного выбора и TrueFalse
+                    selectedOptionId = model.SelectedOptionId.Value;
+                }
+                else if (!string.IsNullOrEmpty(model.StudentAnswer))
+                {
+                    // Для текстовых ответов
+                    studentAnswerStr = model.StudentAnswer;
+                }
+
+                // Сохраняем ответ
+                var answer = await _answerService.SaveRegularAnswerAsync(
+                    testResult.Id, 
+                    question.Id, 
+                    studentAnswerStr, 
+                    selectedOptionId);
+
+                // Оцениваем ответ
+                var (isCorrect, points) = await _testEvaluationService.EvaluateRegularAnswerAsync(
+                    question, 
+                    studentAnswerStr, 
+                    selectedOptionId, 
+                    question.Points);
+
+                // Обновляем ответ с результатом оценки
+                answer.IsCorrect = isCorrect;
+                answer.Points = points;
+                await _answerService.UpdateAnswerAsync(answer);
+
+                return Json(new 
+                { 
+                    success = true, 
+                    isCorrect = isCorrect,
+                    points = points
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при сохранении ответа. QuestionId: {QuestionId}, TestResultId: {TestResultId}", 
+                    model.QuestionId, model.TestResultId);
+                return Json(new { success = false, message = "Произошла ошибка при сохранении ответа" });
+            }
+        }
+
+        // POST: StudentTest/CompleteRegularTest/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompleteRegularTest(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                // Получаем результат теста через репозиторий
+                var testResult = await _regularTestResultRepository.GetByIdAsync(id);
+                
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                if (testResult.IsCompleted)
+                {
+                    return RedirectToAction("RegularResult", new { id = testResult.Id });
+                }
+
+                // Вычисляем результат
+                var (score, maxScore, percentage) = await _testEvaluationService.CalculateRegularTestResultAsync(testResult.Id, testResult.RegularTestId);
+                
+                // Вычисляем оценку
+                var grade = TestEvaluationService.CalculateGrade(percentage);
+                
+                // Обновляем результат теста
+                testResult.Score = score;
+                testResult.MaxScore = maxScore;
+                testResult.Percentage = percentage;
+                testResult.Grade = grade;
+                
+                // Завершаем тест (устанавливает CompletedAt и IsCompleted)
+                await _testResultService.CompleteTestResultAsync(testResult);
+
+                _logger.LogInformation("Студент {StudentId} завершил классический тест {ResultId}. Баллы: {Score}/{MaxScore}, Процент: {Percentage}",
+                    student.Id, testResult.Id, testResult.Score, testResult.MaxScore, testResult.Percentage);
+
+                return RedirectToAction("RegularResult", new { id = testResult.Id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при завершении классического теста. ResultId: {ResultId}", id);
                 TempData["ErrorMessage"] = "Произошла ошибка при завершении теста.";
                 return RedirectToAction("Index");
             }

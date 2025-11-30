@@ -1,0 +1,544 @@
+@model OnlineTutor3.Web.ViewModels.TakeRegularTestViewModel
+@using OnlineTutor3.Domain.Entities
+@{
+    ViewData["Title"] = $"Прохождение теста: {Model.Test.Title}";
+}
+
+<div class="mb-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-compact">
+            <li class="breadcrumb-item">
+                <a asp-controller="StudentTest" asp-action="Index">Доступные тесты</a>
+            </li>
+            <li class="breadcrumb-item active">@Model.Test.Title</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="test-container">
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-info text-white py-2">
+            <div class="d-flex justify-content-between align-items-center gap-2">
+                <div class="flex-grow-1 min-w-0">
+                    <h6 class="mb-0 d-flex align-items-center">
+                        <i class="fas fa-list-ul me-2 flex-shrink-0"></i>
+                        <span class="text-truncate">@Model.Test.Title</span>
+                    </h6>
+                </div>
+                <div class="flex-shrink-0">
+                    <div id="timer" class="d-flex align-items-center">
+                        <i class="fas fa-clock me-2"></i>
+                        <span id="timeRemaining" class="h6 mb-0 font-monospace">
+                            @($"{Model.TimeRemaining.Minutes:D2}:{Model.TimeRemaining.Seconds:D2}")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body p-2 p-md-3">
+            <div class="progress mb-2" style="height: 8px;">
+                <div class="progress-bar bg-info" role="progressbar" style="width: 0%" id="progressBar"></div>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <small class="text-muted mb-0">
+                    <i class="fas fa-redo-alt"></i>
+                    Попытка @Model.TestResult.AttemptNumber из @Model.Test.MaxAttempts
+                </small>
+                <small class="text-muted mb-0">
+                    <i class="fas fa-question-circle"></i>
+                    Вопрос <span id="currentQuestion" class="fw-bold">1</span> из @Model.Questions.Count
+                </small>
+                <small class="text-muted mb-0" id="answeredInfo">
+                    <i class="fas fa-check-circle text-success"></i>
+                    Отвечено: <span id="answeredCount">0</span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div id="questionsContainer">
+        @for (int i = 0; i < Model.Questions.Count; i++)
+        {
+            var question = Model.Questions[i];
+            var existingAnswer = Model.Answers.FirstOrDefault(a => a.RegularQuestionId == question.Id);
+            var questionOptions = Model.Options.Where(o => o.RegularQuestionId == question.Id).OrderBy(o => o.OrderIndex).ToList();
+
+            <div class="question-card @(i == 0 ? "active" : "d-none")" data-question-index="@i" data-question-id="@question.Id" data-question-type="@((int)question.Type)">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light py-2">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <span class="badge bg-secondary">Вопрос @(i + 1)/@Model.Questions.Count</span>
+                                <span class="badge bg-@(question.Type == QuestionType.SingleChoice ? "primary" : question.Type == QuestionType.MultipleChoice ? "success" : "warning")">
+                                    @if (question.Type == QuestionType.SingleChoice)
+                                    {
+                                        <i class="fas fa-dot-circle"></i> <text>Одиночный выбор</text>
+                                    }
+                                    else if (question.Type == QuestionType.MultipleChoice)
+                                    {
+                                        <i class="fas fa-check-square"></i> <text>Множественный выбор</text>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-toggle-on"></i> <text>Верно/Неверно</text>
+                                    }
+                                </span>
+                                <span class="badge bg-info">@question.Points б.</span>
+                            </div>
+                            <span class="answer-status" id="answerStatus_@i"></span>
+                        </div>
+                    </div>
+                    <div class="card-body p-3 p-md-4">
+                        <h5 class="mb-4">@question.Text</h5>
+
+                        @if (Model.Test.ShowHints && !string.IsNullOrEmpty(question.Hint))
+                        {
+                            <div class="alert alert-info alert-sm mb-3">
+                                <i class="fas fa-lightbulb"></i>
+                                <strong>Подсказка:</strong> @question.Hint
+                            </div>
+                        }
+
+                        <div class="question-options">
+                            @if (question.Type == QuestionType.SingleChoice)
+                            {
+                                @foreach (var option in questionOptions)
+                                {
+                                    var isSelected = existingAnswer?.SelectedOptionId == option.Id;
+                                    
+                                    <div class="form-check option-item mb-3 p-3 border rounded">
+                                        <input class="form-check-input" 
+                                               type="radio" 
+                                               name="question_@question.Id" 
+                                               id="option_@option.Id"
+                                               value="@option.Id"
+                                               @(isSelected ? "checked" : "")
+                                               onchange="selectSingleOption(@question.Id, @option.Id)">
+                                        <label class="form-check-label w-100" for="option_@option.Id">
+                                            <div class="option-text">@option.Text</div>
+                                        </label>
+                                    </div>
+                                }
+                            }
+                            else if (question.Type == QuestionType.MultipleChoice)
+                            {
+                                var selectedIds = existingAnswer?.StudentAnswer?.Split(',').Select(id => int.TryParse(id, out var parsed) ? parsed : 0).Where(id => id > 0).ToList() ?? new List<int>();
+                                
+                                @foreach (var option in questionOptions)
+                                {
+                                    var isSelected = selectedIds.Contains(option.Id);
+                                    
+                                    <div class="form-check option-item mb-3 p-3 border rounded">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               name="question_@question.Id" 
+                                               id="option_@option.Id"
+                                               value="@option.Id"
+                                               @(isSelected ? "checked" : "")
+                                               onchange="selectMultipleOptions(@question.Id)">
+                                        <label class="form-check-label w-100" for="option_@option.Id">
+                                            <div class="option-text">@option.Text</div>
+                                        </label>
+                                    </div>
+                                }
+                            }
+                            else if (question.Type == QuestionType.TrueFalse)
+                            {
+                                @foreach (var option in questionOptions)
+                                {
+                                    var isSelected = existingAnswer?.SelectedOptionId == option.Id;
+                                    var btnClass = option.Text.ToLower().Contains("верно") && !option.Text.ToLower().Contains("не") ? "success" : "danger";
+                                    
+                                    <button type="button" 
+                                            class="btn btn-outline-@btnClass btn-lg w-100 mb-2 trueFalseBtn @(isSelected ? "active" : "")"
+                                            onclick="selectTrueFalse(@question.Id, @option.Id, this)">
+                                        <i class="fas @(option.Text.ToLower().Contains("верно") && !option.Text.ToLower().Contains("не") ? "fa-check" : "fa-times")"></i>
+                                        @option.Text
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="card shadow-sm mt-3 navigation-card">
+        <div class="card-body p-2 p-md-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <button type="button" 
+                        class="btn btn-outline-secondary btn-sm" 
+                        id="prevButton" 
+                        onclick="previousQuestion()" 
+                        disabled>
+                    <i class="fas fa-arrow-left"></i>
+                    <span class="d-none d-sm-inline ms-1">Предыдущий</span>
+                </button>
+                
+                <div class="question-navigator d-flex gap-1 flex-wrap justify-content-center">
+                    @for (int i = 0; i < Model.Questions.Count; i++)
+                    {
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-secondary question-nav-btn" 
+                                data-question-index="@i"
+                                onclick="goToQuestion(@i)">
+                            @(i + 1)
+                        </button>
+                    }
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="button" 
+                            class="btn btn-info btn-sm" 
+                            id="nextButton" 
+                            onclick="nextQuestion()">
+                        <span class="d-none d-sm-inline me-1">Следующий</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="button" 
+                            class="btn btn-success btn-sm" 
+                            id="finishButton" 
+                            onclick="showFinishModal()">
+                        <i class="fas fa-check"></i>
+                        <span class="d-none d-sm-inline ms-1">Завершить</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="finishTestModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header py-2 bg-light">
+                <h6 class="modal-title mb-0">
+                    <i class="fas fa-check-circle text-success"></i> Завершить тест
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="alert alert-warning alert-sm py-2 mb-3">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-triangle mt-1 me-2"></i>
+                        <div>
+                            <strong class="small">Внимание!</strong>
+                            <p class="mb-0 small">После завершения теста вы не сможете изменить ответы.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <p class="mb-2 small">
+                        <i class="fas fa-clipboard-check text-primary"></i>
+                        Вы ответили на <strong><span id="answeredCountModal">0</span></strong> 
+                        из <strong>@Model.Questions.Count</strong> вопросов.
+                    </p>
+                    @if (Model.Questions.Count > 1)
+                    {
+                        <p class="mb-2 small text-warning">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Вы находитесь на вопросе <strong><span id="currentQuestionModal">1</span></strong> из <strong>@Model.Questions.Count</strong>.
+                            <span>Неотвеченные вопросы будут засчитаны как неправильные.</span>
+                        </p>
+                    }
+                    <p class="mb-0 small text-muted">Вы уверены, что хотите завершить тест?</p>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Продолжить
+                </button>
+                <form asp-action="CompleteRegularTest" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.TestResult.Id" />
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="fas fa-check"></i> Завершить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .timer-warning {
+            color: #ffc107 !important;
+        }
+        .timer-danger {
+            color: #dc3545 !important;
+            animation: pulse 1s infinite;
+        }
+        @@keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .option-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .option-item:hover {
+            border-color: #007bff !important;
+            background-color: #f8f9fa;
+        }
+        .option-item .form-check-input:checked ~ .form-check-label {
+            font-weight: 600;
+        }
+        .option-item .form-check-input:checked ~ .form-check-label .option-text {
+            color: #007bff;
+        }
+        .option-text {
+            font-size: 1.1rem;
+        }
+        .question-nav-btn {
+            min-width: 40px;
+        }
+        .trueFalseBtn {
+            height: 80px;
+            font-size: 1.2rem;
+            border-width: 2px;
+        }
+        .trueFalseBtn.active {
+            transform: scale(1.05);
+        }
+        .trueFalseBtn.btn-outline-success.active {
+            background-color: #28a745;
+            color: white;
+        }
+        .trueFalseBtn.btn-outline-danger.active {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+    
+    <script>
+        let currentQuestionIndex = 0;
+        let totalQuestions = @Model.Questions.Count;
+        let timeRemaining = @((int)Model.TimeRemaining.TotalSeconds);
+        let answers = {};
+        let timerInterval;
+        let testCompleting = false;
+
+        $(document).ready(function() {
+            initializeTest();
+            startTimer();
+            loadExistingAnswers();
+
+            // Обработчик завершения теста
+            $('form[action*="CompleteRegularTest"]').on('submit', function() {
+                testCompleting = true;
+            });
+        });
+
+        function initializeTest() {
+            updateProgress();
+            updateNavigation();
+        }
+
+        function loadExistingAnswers() {
+            @foreach (var answer in Model.Answers)
+            {
+                <text>
+                answers[@answer.RegularQuestionId] = {
+                    selectedOptionId: @(answer.SelectedOptionId?.ToString() ?? "null"),
+                    studentAnswer: '@(answer.StudentAnswer ?? "")'
+                };
+                </text>
+            }
+            updateProgress();
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(function() {
+                timeRemaining--;
+                updateTimerDisplay();
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    autoSubmitTest();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            $('#timeRemaining').text(display);
+
+            // Изменение цвета таймера
+            const timerElement = $('#timer');
+            timerElement.removeClass('timer-warning timer-danger');
+            
+            if (timeRemaining <= 60) {
+                timerElement.addClass('timer-danger');
+            } else if (timeRemaining <= 300) {
+                timerElement.addClass('timer-warning');
+            }
+        }
+
+        function selectSingleOption(questionId, optionId) {
+            submitAnswer(questionId, optionId, null);
+        }
+
+        function selectMultipleOptions(questionId) {
+            const checkboxes = $(`input[name="question_${questionId}"]:checked`);
+            const selectedIds = Array.from(checkboxes).map(cb => parseInt($(cb).val()));
+            
+            if (selectedIds.length > 0) {
+                submitAnswer(questionId, null, selectedIds);
+            } else {
+                // Если ничего не выбрано, удаляем ответ
+                delete answers[questionId];
+                updateProgress();
+            }
+        }
+
+        function selectTrueFalse(questionId, optionId, button) {
+            // Снимаем активность со всех кнопок в этой группе
+            const container = $(button).closest('.question-options');
+            container.find('.trueFalseBtn').removeClass('active');
+            
+            // Активируем выбранную
+            $(button).addClass('active');
+            
+            submitAnswer(questionId, optionId, null);
+        }
+
+        function submitAnswer(questionId, singleOptionId, multipleOptionIds) {
+            $.ajax({
+                url: '@Url.Action("SubmitRegularAnswer")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    TestResultId: @Model.TestResult.Id,
+                    QuestionId: questionId,
+                    SelectedOptionId: singleOptionId,
+                    SelectedOptionIds: multipleOptionIds
+                }),
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        if (multipleOptionIds) {
+                            answers[questionId] = { studentAnswer: multipleOptionIds.sort().join(',') };
+                        } else {
+                            answers[questionId] = { selectedOptionId: singleOptionId };
+                        }
+                        updateProgress();
+                    } else {
+                        console.error('Ошибка сохранения:', response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Ошибка AJAX:', error);
+                }
+            });
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < totalQuestions - 1) {
+                showQuestion(currentQuestionIndex + 1);
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                showQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        function goToQuestion(index) {
+            showQuestion(index);
+        }
+
+        function showQuestion(index) {
+            $('.question-card').addClass('d-none').removeClass('active');
+            $(`.question-card[data-question-index="${index}"]`).removeClass('d-none').addClass('active');
+
+            currentQuestionIndex = index;
+            updateProgress();
+            updateNavigation();
+
+            // Прокрутка вверх на мобильных
+            if ($(window).width() < 768) {
+                $('html, body').animate({
+                    scrollTop: $('.question-card.active').offset().top - 100
+                }, 300);
+            }
+        }
+
+        function updateProgress() {
+            const answeredCount = Object.keys(answers).length;
+            const percentage = (answeredCount / totalQuestions) * 100;
+
+            $('#progressBar').css('width', percentage + '%');
+            $('#currentQuestion').text(currentQuestionIndex + 1);
+            $('#answeredCount, #answeredCountModal').text(answeredCount);
+
+            // Обновляем индикаторы в навигаторе
+            $('.question-nav-btn').each(function() {
+                const idx = $(this).data('question-index');
+                const questionId = $(`.question-card[data-question-index="${idx}"]`).data('question-id');
+                if (answers[questionId]) {
+                    $(this).removeClass('btn-outline-secondary').addClass('btn-success');
+                } else {
+                    $(this).removeClass('btn-success').addClass('btn-outline-secondary');
+                }
+            });
+
+            // Подсвечиваем текущий вопрос
+            $('.question-nav-btn').removeClass('active btn-primary');
+            $(`.question-nav-btn[data-question-index="${currentQuestionIndex}"]`).addClass('active btn-primary');
+        }
+
+        function updateNavigation() {
+            $('#prevButton').prop('disabled', currentQuestionIndex === 0);
+
+            if (currentQuestionIndex === totalQuestions - 1) {
+                $('#nextButton').addClass('d-none');
+            } else {
+                $('#nextButton').removeClass('d-none');
+            }
+            
+            // Кнопка "Завершить тест" всегда видна
+            $('#finishButton').removeClass('d-none');
+        }
+
+        function showFinishModal() {
+            // Обновляем информацию в модальном окне
+            $('#currentQuestionModal').text(currentQuestionIndex + 1);
+            $('#answeredCountModal').text(Object.keys(answers).length);
+            
+            const modal = new bootstrap.Modal(document.getElementById('finishTestModal'));
+            modal.show();
+        }
+
+        function autoSubmitTest() {
+            testCompleting = true;
+            
+            alert('Время вышло! Тест будет автоматически завершен.');
+            $('form[action*="CompleteRegularTest"]').submit();
+        }
+
+        // Предотвращение случайного закрытия страницы
+        window.addEventListener('beforeunload', function(e) {
+            if (testCompleting) {
+                return;
+            }
+
+            e.preventDefault();
+            e.returnValue = '';
+        });
+    </script>
+    @Html.AntiForgeryToken()
+}
+

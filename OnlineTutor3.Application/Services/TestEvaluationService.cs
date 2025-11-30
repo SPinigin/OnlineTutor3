@@ -105,8 +105,27 @@ namespace OnlineTutor3.Application.Services
                         break;
 
                     case QuestionType.MultipleChoice:
-                        // TODO: Реализовать логику для множественного выбора
-                        isCorrect = false;
+                        if (!string.IsNullOrEmpty(studentAnswer))
+                        {
+                            // Парсим выбранные ID из строки (через запятую)
+                            var selectedIds = studentAnswer.Split(',')
+                                .Select(id => int.TryParse(id.Trim(), out var parsed) ? parsed : 0)
+                                .Where(id => id > 0)
+                                .OrderBy(id => id)
+                                .ToList();
+
+                            // Получаем правильные опции
+                            var correctOptions = await _regularQuestionOptionRepository.GetByQuestionIdAsync(question.Id);
+                            var correctIds = correctOptions
+                                .Where(o => o.IsCorrect)
+                                .Select(o => o.Id)
+                                .OrderBy(id => id)
+                                .ToList();
+
+                            // Сравниваем множества
+                            isCorrect = correctIds.Count == selectedIds.Count && 
+                                       correctIds.SequenceEqual(selectedIds);
+                        }
                         break;
 
                     case QuestionType.TrueFalse:
