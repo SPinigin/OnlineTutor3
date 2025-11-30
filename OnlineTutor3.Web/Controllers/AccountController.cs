@@ -268,6 +268,88 @@ namespace OnlineTutor3.Web.Controllers
 
         #endregion
 
+        #region Change Password
+
+        // GET: Account/ChangePassword
+        [HttpGet]
+        [Authorize]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        // POST: Account/ChangePassword
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound($"Невозможно загрузить пользователя с ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            // Проверяем текущий пароль
+            var checkPassword = await _userManager.CheckPasswordAsync(user, model.CurrentPassword);
+            if (!checkPassword)
+            {
+                ModelState.AddModelError(nameof(model.CurrentPassword), "Текущий пароль неверен.");
+                return View(model);
+            }
+
+            // Меняем пароль
+            var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (!changePasswordResult.Succeeded)
+            {
+                foreach (var error in changePasswordResult.Errors)
+                {
+                    if (error.Code == "PasswordTooShort")
+                    {
+                        ModelState.AddModelError(nameof(model.NewPassword), error.Description);
+                    }
+                    else if (error.Code == "PasswordRequiresNonAlphanumeric")
+                    {
+                        ModelState.AddModelError(nameof(model.NewPassword), error.Description);
+                    }
+                    else if (error.Code == "PasswordRequiresDigit")
+                    {
+                        ModelState.AddModelError(nameof(model.NewPassword), error.Description);
+                    }
+                    else if (error.Code == "PasswordRequiresLower")
+                    {
+                        ModelState.AddModelError(nameof(model.NewPassword), error.Description);
+                    }
+                    else if (error.Code == "PasswordRequiresUpper")
+                    {
+                        ModelState.AddModelError(nameof(model.NewPassword), error.Description);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                }
+                return View(model);
+            }
+
+            // Обновляем метку времени смены пароля (если есть такое поле)
+            // Или просто логируем успешную смену
+            _logger.LogInformation("Пароль успешно изменен. UserId: {UserId}", user.Id);
+
+            // Перезаходим пользователя, чтобы обновить cookie
+            await _signInManager.RefreshSignInAsync(user);
+
+            TempData["SuccessMessage"] = "Пароль успешно изменен.";
+            return RedirectToAction(nameof(Profile));
+        }
+
+        #endregion
+
         #region Helper Methods
 
         private async Task<IActionResult> RedirectToLocalAsync(string? returnUrl, ApplicationUser? user = null)
