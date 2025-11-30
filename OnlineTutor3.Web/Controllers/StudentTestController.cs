@@ -269,6 +269,91 @@ namespace OnlineTutor3.Web.Controllers
             }
         }
 
+        // GET: StudentTest/History
+        public async Task<IActionResult> History(string? testType)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    _logger.LogWarning("Студент не найден для пользователя {UserId}", currentUser.Id);
+                    TempData["ErrorMessage"] = "Профиль студента не найден. Обратитесь к администратору.";
+                    return RedirectToAction("Index", "Student");
+                }
+
+                // Получаем историю через сервис
+                var historyData = await _studentTestService.GetTestHistoryAsync(student.Id, testType);
+
+                // Создаем ViewModel для Web слоя
+                var viewModel = new ViewModels.StudentTestHistoryViewModel
+                {
+                    Student = student,
+                    CurrentTestType = testType,
+                    SpellingResults = historyData.SpellingResults,
+                    PunctuationResults = historyData.PunctuationResults,
+                    OrthoeopyResults = historyData.OrthoeopyResults,
+                    RegularResults = historyData.RegularResults
+                };
+
+                // Загружаем связанные данные (тесты) для каждого результата
+                await LoadTestDataForResultsAsync(viewModel);
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке истории тестов");
+                TempData["ErrorMessage"] = "Произошла ошибка при загрузке истории. Попробуйте обновить страницу.";
+                return RedirectToAction("Index", "Student");
+            }
+        }
+
+        private async Task LoadTestDataForResultsAsync(ViewModels.StudentTestHistoryViewModel viewModel)
+        {
+            // Загружаем тесты для результатов по орфографии
+            foreach (var result in viewModel.SpellingResults)
+            {
+                if (result.SpellingTest == null && result.SpellingTestId > 0)
+                {
+                    result.SpellingTest = await _spellingTestRepository.GetByIdAsync(result.SpellingTestId);
+                }
+            }
+
+            // Загружаем тесты для результатов по пунктуации
+            foreach (var result in viewModel.PunctuationResults)
+            {
+                if (result.PunctuationTest == null && result.PunctuationTestId > 0)
+                {
+                    result.PunctuationTest = await _punctuationTestRepository.GetByIdAsync(result.PunctuationTestId);
+                }
+            }
+
+            // Загружаем тесты для результатов по орфоэпии
+            foreach (var result in viewModel.OrthoeopyResults)
+            {
+                if (result.OrthoeopyTest == null && result.OrthoeopyTestId > 0)
+                {
+                    result.OrthoeopyTest = await _orthoeopyTestRepository.GetByIdAsync(result.OrthoeopyTestId);
+                }
+            }
+
+            // Загружаем тесты для классических результатов
+            foreach (var result in viewModel.RegularResults)
+            {
+                if (result.RegularTest == null && result.RegularTestId > 0)
+                {
+                    result.RegularTest = await _regularTestRepository.GetByIdAsync(result.RegularTestId);
+                }
+            }
+        }
+
         private async Task<AvailableTestInfo?> BuildSpellingTestInfoAsync(SpellingTest test, int studentId)
         {
             return await BuildTestInfoAsync(test.Id, "Spelling", studentId, test, async () =>

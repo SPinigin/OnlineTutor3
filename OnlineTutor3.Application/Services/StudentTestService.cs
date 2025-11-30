@@ -87,22 +87,38 @@ namespace OnlineTutor3.Application.Services
 
                 if (testType == null || testType == "spelling")
                 {
-                    viewModel.SpellingResults = await _testResultService.GetStudentResultsAsync<SpellingTestResult>(studentId);
+                    var allSpelling = await _testResultService.GetStudentResultsAsync<SpellingTestResult>(studentId);
+                    viewModel.SpellingResults = allSpelling
+                        .Where(r => r.IsCompleted)
+                        .OrderByDescending(r => r.CompletedAt ?? r.StartedAt)
+                        .ToList();
                 }
 
                 if (testType == null || testType == "punctuation")
                 {
-                    viewModel.PunctuationResults = await _testResultService.GetStudentResultsAsync<PunctuationTestResult>(studentId);
+                    var allPunctuation = await _testResultService.GetStudentResultsAsync<PunctuationTestResult>(studentId);
+                    viewModel.PunctuationResults = allPunctuation
+                        .Where(r => r.IsCompleted)
+                        .OrderByDescending(r => r.CompletedAt ?? r.StartedAt)
+                        .ToList();
                 }
 
                 if (testType == null || testType == "orthoepy")
                 {
-                    viewModel.OrthoeopyResults = await _testResultService.GetStudentResultsAsync<OrthoeopyTestResult>(studentId);
+                    var allOrthoeopy = await _testResultService.GetStudentResultsAsync<OrthoeopyTestResult>(studentId);
+                    viewModel.OrthoeopyResults = allOrthoeopy
+                        .Where(r => r.IsCompleted)
+                        .OrderByDescending(r => r.CompletedAt ?? r.StartedAt)
+                        .ToList();
                 }
 
                 if (testType == null || testType == "regular")
                 {
-                    viewModel.RegularResults = await _testResultService.GetStudentResultsAsync<RegularTestResult>(studentId);
+                    var allRegular = await _testResultService.GetStudentResultsAsync<RegularTestResult>(studentId);
+                    viewModel.RegularResults = allRegular
+                        .Where(r => r.IsCompleted)
+                        .OrderByDescending(r => r.CompletedAt ?? r.StartedAt)
+                        .ToList();
                 }
 
                 return viewModel;

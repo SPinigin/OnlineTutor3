@@ -1,0 +1,129 @@
+@using OnlineTutor3.Domain.Entities
+@{
+    var model = (dynamic)Model;
+    var testType = (string)model.TestType;
+    
+    List<TestResult> results = new();
+    if (testType == "Spelling")
+    {
+        results = ((List<SpellingTestResult>)model.Results).Cast<TestResult>().ToList();
+    }
+    else if (testType == "Punctuation")
+    {
+        results = ((List<PunctuationTestResult>)model.Results).Cast<TestResult>().ToList();
+    }
+    else if (testType == "Orthoeopy")
+    {
+        results = ((List<OrthoeopyTestResult>)model.Results).Cast<TestResult>().ToList();
+    }
+    else if (testType == "Regular")
+    {
+        results = ((List<RegularTestResult>)model.Results).Cast<TestResult>().ToList();
+    }
+}
+
+@if (results.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 30%;">Тест</th>
+                    <th class="d-none d-md-table-cell" style="width: 15%;">Дата</th>
+                    <th class="text-center" style="width: 10%;">Попытка</th>
+                    <th class="text-center" style="width: 15%;">Результат</th>
+                    <th class="d-none d-md-table-cell text-center" style="width: 10%;">Время</th>
+                    <th class="text-center" style="width: 20%;">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var result in results)
+                {
+                    var duration = result.CompletedAt.HasValue
+                        ? (result.CompletedAt.Value - result.StartedAt).ToString(@"mm\:ss")
+                        : "-";
+
+                    string testTitle = "Неизвестный тест";
+                    int resultId = result.Id;
+                    string resultAction = "";
+
+                    if (testType == "Spelling" && result is SpellingTestResult spellingResult)
+                    {
+                        testTitle = spellingResult.SpellingTest?.Title ?? "Неизвестный тест";
+                        resultAction = "SpellingResult";
+                    }
+                    else if (testType == "Punctuation" && result is PunctuationTestResult punctuationResult)
+                    {
+                        testTitle = punctuationResult.PunctuationTest?.Title ?? "Неизвестный тест";
+                        resultAction = "PunctuationResult";
+                    }
+                    else if (testType == "Orthoeopy" && result is OrthoeopyTestResult orthoeopyResult)
+                    {
+                        testTitle = orthoeopyResult.OrthoeopyTest?.Title ?? "Неизвестный тест";
+                        resultAction = "OrthoeopyResult";
+                    }
+                    else if (testType == "Regular" && result is RegularTestResult regularResult)
+                    {
+                        testTitle = regularResult.RegularTest?.Title ?? "Неизвестный тест";
+                        resultAction = "RegularResult";
+                    }
+
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-@(testType == "Spelling" ? "spell-check text-primary" : testType == "Punctuation" ? "quote-right text-warning" : testType == "Orthoeopy" ? "volume-up text-success" : "list-ul text-info") me-2 d-none d-md-inline"></i>
+                                <div>
+                                    <strong class="d-block">@testTitle</strong>
+                                    <small class="text-muted d-md-none">
+                                        @result.CompletedAt?.ToString("dd.MM.yy HH:mm")
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="d-none d-md-table-cell">
+                            <div>
+                                @result.CompletedAt?.ToString("dd.MM.yyyy")
+                                <br>
+                                <small class="text-muted">
+                                    @result.CompletedAt?.ToString("HH:mm")
+                                </small>
+                            </div>
+                        </td>
+
+                        <td class="text-center">
+                            <span class="badge bg-info rounded-pill">
+                                @result.AttemptNumber
+                            </span>
+                        </td>
+
+                        <td class="text-center">
+                            <span class="badge bg-@(result.Percentage >= 80 ? "success" : result.Percentage >= 60 ? "warning" : "danger") rounded-pill">
+                                @result.Percentage.ToString("F1")%
+                            </span>
+                            <small class="text-muted d-none d-md-block mt-1">
+                                @result.Score/@result.MaxScore
+                            </small>
+                        </td>
+
+                        <td class="text-center d-none d-md-table-cell">
+                            <span class="small">@duration</span>
+                        </td>
+
+                        <td class="text-center">
+                            @if (!string.IsNullOrEmpty(resultAction))
+                            {
+                                <a asp-action="@resultAction" asp-route-id="@resultId"
+                                   class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                    <span class="d-none d-md-inline">Подробно</span>
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+

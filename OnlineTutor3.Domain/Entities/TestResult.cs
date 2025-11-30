@@ -34,6 +34,9 @@ namespace OnlineTutor3.Domain.Entities
     {
         [Required]
         public int SpellingTestId { get; set; }
+
+        // Навигационное свойство
+        public SpellingTest? SpellingTest { get; set; }
     }
 
     /// <summary>
@@ -43,6 +46,9 @@ namespace OnlineTutor3.Domain.Entities
     {
         [Required]
         public int PunctuationTestId { get; set; }
+
+        // Навигационное свойство
+        public PunctuationTest? PunctuationTest { get; set; }
     }
 
     /// <summary>
@@ -52,6 +58,9 @@ namespace OnlineTutor3.Domain.Entities
     {
         [Required]
         public int OrthoeopyTestId { get; set; }
+
+        // Навигационное свойство
+        public OrthoeopyTest? OrthoeopyTest { get; set; }
     }
 
     /// <summary>
@@ -61,6 +70,9 @@ namespace OnlineTutor3.Domain.Entities
     {
         [Required]
         public int RegularTestId { get; set; }
+
+        // Навигационное свойство
+        public RegularTest? RegularTest { get; set; }
     }
 }
 
