@@ -198,12 +198,21 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            $('#showErrorsOnly').on('change', function() {
-                if ($(this).is(':checked')) {
+            // Применяем фильтр при загрузке страницы
+            function applyFilter() {
+                if ($('#showErrorsOnly').is(':checked')) {
                     $('.question-result[data-correct="true"]').hide();
                 } else {
                     $('.question-result').show();
                 }
+            }
+            
+            // Применяем фильтр сразу при загрузке
+            applyFilter();
+            
+            // Обработчик изменения переключателя
+            $('#showErrorsOnly').on('change', function() {
+                applyFilter();
             });
         });
     </script>
