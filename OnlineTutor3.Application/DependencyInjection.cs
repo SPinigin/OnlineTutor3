@@ -19,6 +19,13 @@ namespace OnlineTutor3.Application
             services.AddScoped<IOrthoeopyTestService, OrthoeopyTestService>();
             services.AddScoped<IRegularTestService, RegularTestService>();
             
+            // Студентские сервисы
+            services.AddScoped<ITestAccessService, TestAccessService>();
+            services.AddScoped<ITestResultService, TestResultService>();
+            services.AddScoped<IAnswerService, AnswerService>();
+            services.AddScoped<ITestEvaluationService, TestEvaluationService>();
+            services.AddScoped<IStudentTestService, StudentTestService>();
+            
             return services;
         }
     }
