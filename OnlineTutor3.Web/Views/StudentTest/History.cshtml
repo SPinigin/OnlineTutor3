@@ -168,7 +168,7 @@ else
                                     <span class="badge bg-primary badge-sm">
                                         <i class="fas fa-clipboard-list"></i> @totalResults
                                     </span>
-                                    @if (assignment.DueDate.HasValue)
+                                    @if (assignment != null && assignment.DueDate.HasValue)
                                     {
                                         var isOverdue = assignment.DueDate.Value < DateTime.Now;
                                         <span class="badge bg-@(isOverdue ? "danger" : "warning") badge-sm">

@@ -46,7 +46,8 @@
                         <label asp-for="DueDate" class="form-label">
                             <i class="fas fa-calendar-alt"></i> Срок выполнения
                         </label>
-                        <input asp-for="DueDate" type="datetime-local" class="form-control" />
+                        <input asp-for="DueDate" type="datetime-local" class="form-control" 
+                               value="@(Model.DueDate?.ToString("yyyy-MM-ddTHH:mm"))" />
                         <span asp-validation-for="DueDate" class="text-danger"></span>
                     </div>
 

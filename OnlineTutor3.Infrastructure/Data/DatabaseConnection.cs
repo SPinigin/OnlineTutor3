@@ -240,8 +240,17 @@ namespace OnlineTutor3.Infrastructure.Data
             foreach (var property in properties)
             {
                 var value = property.GetValue(parameters);
-                var parameter = sqlCommand.Parameters.AddWithValue($"@{property.Name}", value ?? DBNull.Value);
-                parameter.ParameterName = $"@{property.Name}";
+                // Для nullable типов, если значение null, используем DBNull.Value
+                if (value == null)
+                {
+                    var parameter = sqlCommand.Parameters.AddWithValue($"@{property.Name}", DBNull.Value);
+                    parameter.ParameterName = $"@{property.Name}";
+                }
+                else
+                {
+                    var parameter = sqlCommand.Parameters.AddWithValue($"@{property.Name}", value);
+                    parameter.ParameterName = $"@{property.Name}";
+                }
             }
         }
 
@@ -267,13 +276,28 @@ namespace OnlineTutor3.Infrastructure.Data
                             {
                                 property.SetValue(obj, Enum.ToObject(property.PropertyType, intValue));
                             }
-                            else if (property.PropertyType == typeof(DateTime) && value is DateTime dateValue)
+                            else if (property.PropertyType == typeof(DateTime))
                             {
-                                property.SetValue(obj, dateValue);
+                                if (value is DateTime dateValue)
+                                {
+                                    property.SetValue(obj, dateValue);
+                                }
+                                else if (value != null)
+                                {
+                                    property.SetValue(obj, Convert.ToDateTime(value));
+                                }
                             }
-                            else if (property.PropertyType == typeof(DateTime?) && value is DateTime dateValueNullable)
+                            else if (property.PropertyType == typeof(DateTime?))
                             {
-                                property.SetValue(obj, dateValueNullable);
+                                if (value is DateTime dateValueNullable)
+                                {
+                                    property.SetValue(obj, dateValueNullable);
+                                }
+                                else if (value != null)
+                                {
+                                    property.SetValue(obj, (DateTime?)Convert.ToDateTime(value));
+                                }
+                                // Если value == null или DBNull, оставляем null (уже обработано выше)
                             }
                             else
                             {
