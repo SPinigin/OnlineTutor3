@@ -1,0 +1,287 @@
+/* =============================================
+   Улучшения UX для студентских тестов
+   ============================================= */
+
+/* Плавные переходы при переключении вопросов */
+.question-container {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Анимация для сохранения ответа */
+.answer-saved {
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Улучшенная обратная связь для кнопок */
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Индикатор сохранения */
+.save-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    padding: 12px 20px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: none;
+    animation: slideInDown 0.3s ease-out;
+}
+
+.save-indicator.show {
+    display: block;
+}
+
+.save-indicator.error {
+    background-color: #dc3545;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Улучшенный прогресс-бар */
+.progress {
+    transition: width 0.3s ease-in-out;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.progress-bar {
+    transition: width 0.3s ease-in-out;
+}
+
+/* Анимация для таймера при предупреждении */
+.timer-warning {
+    animation: pulse 1.5s infinite;
+}
+
+.timer-danger {
+    animation: pulse 0.8s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+}
+
+/* Улучшенная мобильная оптимизация */
+@media (max-width: 768px) {
+    .question-container {
+        padding: 1rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        min-height: 44px; /* Минимальный размер для удобного нажатия */
+    }
+    
+    .answer-input {
+        font-size: 1.1rem; /* Увеличенный размер для мобильных */
+        padding: 0.75rem;
+    }
+    
+    .save-indicator {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+    
+    /* Улучшенная навигация на мобильных */
+    .question-navigation {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .question-nav-btn {
+        flex: 1 1 auto;
+        min-width: 50px;
+    }
+}
+
+/* Плавное появление модальных окон */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+    transform: translate(0, -50px);
+}
+
+.modal.show .modal-dialog {
+    transform: translate(0, 0);
+}
+
+/* Анимация для карточек результатов */
+.result-card {
+    transition: all 0.3s ease-in-out;
+}
+
+.result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Индикатор загрузки */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-overlay.show {
+    display: flex;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Улучшенная обратная связь для полей ввода */
+.answer-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    transition: all 0.2s ease-in-out;
+}
+
+.answer-input.valid {
+    border-color: #28a745;
+}
+
+.answer-input.invalid {
+    border-color: #dc3545;
+}
+
+/* Анимация для переключения вопросов */
+.question-transition-enter {
+    opacity: 0;
+    transform: translateX(20px);
+}
+
+.question-transition-enter-active {
+    transition: all 0.3s ease-in-out;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.question-transition-exit {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.question-transition-exit-active {
+    transition: all 0.3s ease-in-out;
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+/* Улучшенные уведомления */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1060;
+}
+
+@media (max-width: 768px) {
+    .toast-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+    }
+}
+
+/* Плавная прокрутка */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Улучшенная визуализация прогресса */
+.progress-circle {
+    transition: stroke-dasharray 0.5s ease-in-out;
+}
+
+/* Анимация для успешного сохранения */
+@keyframes checkmark {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.checkmark-icon {
+    animation: checkmark 0.3s ease-out;
+}
+

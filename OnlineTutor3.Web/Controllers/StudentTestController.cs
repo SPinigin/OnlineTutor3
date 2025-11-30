@@ -37,6 +37,7 @@ namespace OnlineTutor3.Web.Controllers
         private readonly IRegularQuestionRepository _regularQuestionRepository;
         private readonly IHubContext<TestAnalyticsHub> _hubContext;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SecurityValidationService _securityValidation;
         private readonly ILogger<StudentTestController> _logger;
 
         public StudentTestController(
@@ -64,6 +65,7 @@ namespace OnlineTutor3.Web.Controllers
             IRegularQuestionRepository regularQuestionRepository,
             IHubContext<TestAnalyticsHub> hubContext,
             UserManager<ApplicationUser> userManager,
+            SecurityValidationService securityValidation,
             ILogger<StudentTestController> logger)
         {
             _studentTestService = studentTestService;
@@ -90,6 +92,7 @@ namespace OnlineTutor3.Web.Controllers
             _regularQuestionRepository = regularQuestionRepository;
             _hubContext = hubContext;
             _userManager = userManager;
+            _securityValidation = securityValidation;
             _logger = logger;
         }
 
@@ -698,14 +701,28 @@ namespace OnlineTutor3.Web.Controllers
                 // Проверяем результат теста через репозиторий
                 var testResult = await _spellingTestResultRepository.GetByIdAsync(model.TestResultId);
                 
-                if (testResult == null || testResult.StudentId != student.Id)
+                // Проверки безопасности
+                if (!_securityValidation.ValidateStudentAccessToResult(testResult, student.Id))
                 {
                     return Json(new { success = false, message = "Результат теста не найден" });
                 }
 
-                if (testResult.IsCompleted)
+                if (!_securityValidation.ValidateTestNotCompleted(testResult))
                 {
                     return Json(new { success = false, message = "Тест уже завершен" });
+                }
+
+                // Загружаем тест для проверки времени
+                var test = await _spellingTestRepository.GetByIdAsync(testResult.SpellingTestId);
+                if (test == null)
+                {
+                    return Json(new { success = false, message = "Тест не найден" });
+                }
+
+                // Проверяем время (с буфером 30 секунд)
+                if (!_securityValidation.ValidateTimeLimit(testResult.StartedAt, test.TimeLimit, 30))
+                {
+                    return Json(new { success = false, message = "Время теста истекло" });
                 }
 
                 // Проверяем вопрос
@@ -713,6 +730,20 @@ namespace OnlineTutor3.Web.Controllers
                 if (question == null || question.SpellingTestId != testResult.SpellingTestId)
                 {
                     return Json(new { success = false, message = "Вопрос не найден" });
+                }
+
+                // Валидация ответа
+                if (!_securityValidation.ValidateAnswer(model.StudentAnswer, 500))
+                {
+                    return Json(new { success = false, message = "Некорректный ответ" });
+                }
+
+                // Проверяем, что вопрос принадлежит тесту
+                var allQuestionIds = (await _spellingQuestionRepository.GetByTestIdOrderedAsync(test.Id))
+                    .Select(q => q.Id).ToList();
+                if (!_securityValidation.ValidateQuestionId(model.QuestionId, allQuestionIds))
+                {
+                    return Json(new { success = false, message = "Вопрос не принадлежит тесту" });
                 }
 
                 // Сохраняем ответ
@@ -766,14 +797,32 @@ namespace OnlineTutor3.Web.Controllers
                 // Получаем результат теста через репозиторий
                 var testResult = await _spellingTestResultRepository.GetByIdAsync(id);
                 
-                if (testResult == null || testResult.StudentId != student.Id)
+                // Проверки безопасности
+                if (!_securityValidation.ValidateStudentAccessToResult(testResult, student.Id))
+                {
+                    _logger.LogWarning("Попытка завершить тест другого студента. ResultId: {ResultId}, StudentId: {StudentId}", 
+                        id, student.Id);
+                    return NotFound();
+                }
+
+                if (!_securityValidation.ValidateTestNotCompleted(testResult))
+                {
+                    return RedirectToAction("SpellingResult", new { id = testResult.Id });
+                }
+
+                // Загружаем тест для проверки времени
+                var test = await _spellingTestRepository.GetByIdAsync(testResult.SpellingTestId);
+                if (test == null)
                 {
                     return NotFound();
                 }
 
-                if (testResult.IsCompleted)
+                // Проверяем время (с буфером 60 секунд для завершения)
+                if (!_securityValidation.ValidateTimeLimit(testResult.StartedAt, test.TimeLimit, 60))
                 {
-                    return RedirectToAction("SpellingResult", new { id = testResult.Id });
+                    _logger.LogWarning("Попытка завершить тест после истечения времени. ResultId: {ResultId}", id);
+                    TempData["ErrorMessage"] = "Время теста истекло. Тест будет завершен автоматически.";
+                    // Все равно завершаем тест, но логируем
                 }
 
                 // Вычисляем результат

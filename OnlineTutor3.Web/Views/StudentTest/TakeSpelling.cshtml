@@ -235,7 +235,12 @@
     </div>
 </div>
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/student-test-enhancements.css" asp-append-version="true" />
+}
+
 @section Scripts {
+    <script src="~/js/student-test-enhancements.js" asp-append-version="true"></script>
     <style>
         .timer-warning {
             color: #ffc107 !important;
@@ -358,8 +363,17 @@
                     if (response.success) {
                         answers[questionId] = answer;
                         updateProgress();
+                        // Показываем визуальную обратную связь
+                        if (window.StudentTestEnhancements?.showSaveIndicator) {
+                            window.StudentTestEnhancements.showSaveIndicator(true, 'Ответ сохранен');
+                        }
+                        // Сбрасываем флаг изменений для предотвращения предупреждения при закрытии
+                        document.dispatchEvent(new Event('answerSaved'));
                     } else {
                         console.error('Ошибка сохранения:', response.message);
+                        if (window.StudentTestEnhancements?.showSaveIndicator) {
+                            window.StudentTestEnhancements.showSaveIndicator(false, response.message || 'Ошибка сохранения');
+                        }
                     }
                 },
                 error: function(xhr, status, error) {
@@ -381,8 +395,22 @@
         }
 
         function showQuestion(index) {
-            $('.question-card').addClass('d-none').removeClass('active');
-            $(`.question-card[data-question-index="${index}"]`).removeClass('d-none').addClass('active');
+            const direction = index > currentQuestionIndex ? 'next' : 'previous';
+            const currentCard = $('.question-card.active');
+            const nextCard = $(`.question-card[data-question-index="${index}"]`);
+            
+            // Анимация перехода
+            if (window.StudentTestEnhancements?.animateQuestionTransition) {
+                currentCard.fadeOut(150, function() {
+                    currentCard.addClass('d-none').removeClass('active');
+                    nextCard.removeClass('d-none').addClass('active');
+                    window.StudentTestEnhancements.animateQuestionTransition(nextCard[0], direction);
+                    nextCard.fadeIn(150);
+                });
+            } else {
+                $('.question-card').addClass('d-none').removeClass('active');
+                nextCard.removeClass('d-none').addClass('active');
+            }
 
             currentQuestionIndex = index;
             updateProgress();
@@ -390,13 +418,13 @@
 
             // Фокус на поле ввода
             setTimeout(function() {
-                $(`.question-card[data-question-index="${index}"] .answer-input`).focus();
-            }, 100);
+                nextCard.find('.answer-input').focus();
+            }, 200);
 
             // Прокрутка вверх на мобильных
             if ($(window).width() < 768) {
                 $('html, body').animate({
-                    scrollTop: $('.question-card.active').offset().top - 100
+                    scrollTop: nextCard.offset().top - 100
                 }, 300);
             }
         }

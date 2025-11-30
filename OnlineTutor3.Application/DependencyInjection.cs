@@ -30,6 +30,9 @@ namespace OnlineTutor3.Application
             // Кэширование
             services.AddSingleton<ICacheService, MemoryCacheService>();
             
+            // Безопасность
+            services.AddScoped<SecurityValidationService>();
+            
             return services;
         }
     }
