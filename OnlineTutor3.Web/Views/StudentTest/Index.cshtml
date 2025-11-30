@@ -3,195 +3,451 @@
     ViewData["Title"] = "Доступные тесты";
 }
 
-<div class="container-fluid">
-    <!-- Заголовок -->
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <h4 class="mb-0 d-flex align-items-center gap-2">
-                <i class="fas fa-tasks text-primary"></i>
-                <span>Доступные тесты</span>
-            </h4>
-            @if (Model.Class != null)
-            {
-                <p class="text-muted mb-0 mt-1">
-                    <i class="fas fa-users"></i> Класс: <strong>@Model.Class.Name</strong>
-                </p>
-            }
-        </div>
-        <div>
-            <a asp-action="History" class="btn btn-outline-info">
-                <i class="fas fa-history"></i> 
-                <span class="d-none d-md-inline">История прохождения</span>
-                <span class="d-md-none">История</span>
-            </a>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h4 class="mb-0 d-flex align-items-center gap-2">
+        <i class="fas fa-tasks text-primary"></i>
+        <span>Доступные тесты</span>
+    </h4>
+    <div>
+        <a asp-action="History" class="btn btn-outline-info">
+            <i class="fas fa-history"></i> 
+            <span class="d-none d-md-inline">История прохождения</span>
+            <span class="d-md-none">История</span>
+        </a>
     </div>
+</div>
 
-    <!-- Фильтры по категориям -->
-    <div class="card mb-4 shadow-sm border-0">
-        <div class="card-body">
-            <div class="d-none d-md-block">
-                <div class="btn-group w-100" role="group">
-                    <a asp-action="Index" 
-                       class="btn btn-@(string.IsNullOrEmpty(Model.CurrentCategory) ? "primary" : "outline-primary")">
-                        <i class="fas fa-list"></i> Все тесты
-                    </a>
-                    <a asp-action="Index" asp-route-category="spelling" 
-                       class="btn btn-@(Model.CurrentCategory == "spelling" ? "primary" : "outline-primary")">
-                        <i class="fas fa-spell-check"></i> Орфография
-                    </a>
-                    <a asp-action="Index" asp-route-category="punctuation" 
-                       class="btn btn-@(Model.CurrentCategory == "punctuation" ? "warning" : "outline-warning")">
-                        <i class="fas fa-quote-right"></i> Пунктуация
-                    </a>
-                    <a asp-action="Index" asp-route-category="orthoepy" 
-                       class="btn btn-@(Model.CurrentCategory == "orthoepy" ? "success" : "outline-success")">
-                        <i class="fas fa-volume-up"></i> Орфоэпия
-                    </a>
-                    <a asp-action="Index" asp-route-category="regular" 
-                       class="btn btn-@(Model.CurrentCategory == "regular" ? "info" : "outline-info")">
-                        <i class="fas fa-list-ul"></i> Классические
-                    </a>
-                </div>
+@if (Model.Class != null)
+{
+    <div class="mb-3">
+        <small class="text-muted">
+            <i class="fas fa-users"></i> Класс: <strong>@Model.Class.Name</strong>
+        </small>
+    </div>
+}
+
+@if (!Model.AssignmentsWithTests.Any())
+{
+    <div class="text-center py-5">
+        <i class="fas fa-tasks text-muted" style="font-size: 4rem;"></i>
+        <h4 class="mt-3 text-muted">Нет доступных тестов</h4>
+        <p class="text-muted">В данный момент нет тестов, доступных для прохождения</p>
+    </div>
+}
+else
+{
+    <div class="row mb-2 align-items-center">
+        <div class="col-12 col-md-4 mb-2 mb-md-0">
+            <small class="text-muted">
+                <i class="fas fa-tasks"></i> Всего заданий: @Model.AssignmentsWithTests.Count
+            </small>
+        </div>
+        <div class="col-12 col-md-4 mb-2 mb-md-0">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-white">
+                    <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text" 
+                       id="searchInput" 
+                       class="form-control form-control-sm" 
+                       placeholder="Поиск по названию..."
+                       value="@Model.SearchQuery"
+                       autocomplete="off">
             </div>
-
-            <!-- Мобильная версия фильтров -->
-            <div class="d-md-none">
-                <div class="d-grid gap-2">
-                    <a asp-action="Index" 
-                       class="btn btn-@(string.IsNullOrEmpty(Model.CurrentCategory) ? "primary" : "outline-primary") btn-sm">
-                        <i class="fas fa-list"></i> Все тесты
-                    </a>
-                    <a asp-action="Index" asp-route-category="spelling" 
-                       class="btn btn-@(Model.CurrentCategory == "spelling" ? "primary" : "outline-primary") btn-sm">
-                        <i class="fas fa-spell-check"></i> Орфография
-                    </a>
-                    <a asp-action="Index" asp-route-category="punctuation" 
-                       class="btn btn-@(Model.CurrentCategory == "punctuation" ? "warning" : "outline-warning") btn-sm">
-                        <i class="fas fa-quote-right"></i> Пунктуация
-                    </a>
-                    <a asp-action="Index" asp-route-category="orthoepy" 
-                       class="btn btn-@(Model.CurrentCategory == "orthoepy" ? "success" : "outline-success") btn-sm">
-                        <i class="fas fa-volume-up"></i> Орфоэпия
-                    </a>
-                    <a asp-action="Index" asp-route-category="regular" 
-                       class="btn btn-@(Model.CurrentCategory == "regular" ? "info" : "outline-info") btn-sm">
-                        <i class="fas fa-list-ul"></i> Классические
-                    </a>
-                </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-white">
+                    <i class="fas fa-filter text-muted"></i>
+                </span>
+                <select id="subjectFilter" class="form-select form-select-sm">
+                    <option value="">Все предметы</option>
+                    @foreach (var subject in Model.SubjectsDict)
+                    {
+                        <option value="@subject.Key">@subject.Value</option>
+                    }
+                </select>
             </div>
         </div>
     </div>
 
-    @{
-        var totalTests = Model.SpellingTests.Count + Model.PunctuationTests.Count + 
-                         Model.OrthoeopyTests.Count + Model.RegularTests.Count;
-    }
+    <div class="accordion" id="assignmentsAccordion">
+        @foreach (var kvp in Model.AssignmentsWithTests.OrderBy(a => a.Value.Assignment.Title))
+        {
+            var assignmentInfo = kvp.Value;
+            var assignment = assignmentInfo.Assignment;
+            var totalTests = assignmentInfo.TotalTestsCount;
+            var collapseId = $"collapseAssignment{assignment.Id}";
+            var headingId = $"headingAssignment{assignment.Id}";
+            
+            var subjectName = Model.SubjectsDict.ContainsKey(assignment.SubjectId) 
+                ? Model.SubjectsDict[assignment.SubjectId] 
+                : $"Предмет #{assignment.SubjectId}";
 
-    @if (totalTests > 0)
-    {
-        <!-- Поиск и фильтры -->
-        <div class="row mb-3 align-items-center">
-            <div class="col-12 col-md-6 mb-2 mb-md-0">
-                <h6 class="mb-0">
-                    <i class="fas fa-list-check"></i>
-                    <span id="testsCount">Всего тестов: @totalTests</span>
-                </h6>
-            </div>
-            <div class="col-12 col-md-6">
-                <form method="get" class="d-flex gap-2">
-                    <input type="hidden" name="category" value="@Model.CurrentCategory" />
-                    <input type="hidden" name="assignment" value="@Model.AssignmentFilter" />
-                    <div class="input-group input-group-sm flex-grow-1">
-                        <span class="input-group-text bg-white">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input type="text" 
-                               name="search"
-                               id="searchInput" 
-                               class="form-control" 
-                               placeholder="Поиск по названию..."
-                               value="@Model.SearchQuery"
-                               autocomplete="off">
-                        @if (!string.IsNullOrEmpty(Model.SearchQuery))
+            <div class="accordion-item mb-1 assignment-item" data-assignment-id="@assignment.Id" data-subject-id="@assignment.SubjectId">
+                <h2 class="accordion-header" id="@headingId">
+                    <button class="accordion-button collapsed py-2" 
+                            type="button" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#@collapseId" 
+                            aria-expanded="false" 
+                            aria-controls="@collapseId">
+                        <div class="d-flex justify-content-between align-items-center w-100 me-2">
+                            <div class="d-flex align-items-center flex-grow-1 flex-wrap gap-1">
+                                <div class="me-2">
+                                    <strong class="small">@assignment.Title</strong>
+                                </div>
+                                <span class="badge bg-info badge-sm">@subjectName</span>
+                                <span class="badge bg-primary badge-sm">
+                                    <i class="fas fa-clipboard-list"></i> @totalTests
+                                </span>
+                                @if (assignment.DueDate.HasValue)
+                                {
+                                    var isOverdue = assignment.DueDate.Value < DateTime.Now;
+                                    <span class="badge bg-@(isOverdue ? "danger" : "warning") badge-sm">
+                                        <i class="fas fa-calendar"></i> До: @assignment.DueDate.Value.ToString("dd.MM.yyyy")
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </button>
+                </h2>
+                <div id="@collapseId" 
+                     class="accordion-collapse collapse" 
+                     aria-labelledby="@headingId" 
+                     data-bs-parent="#assignmentsAccordion">
+                    <div class="accordion-body p-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <small class="text-muted">
+                                    <i class="fas fa-book"></i> @subjectName
+                                    @if (assignment.DueDate.HasValue)
+                                    {
+                                        <span class="ms-2">
+                                            <i class="fas fa-calendar"></i> До: @assignment.DueDate.Value.ToString("dd.MM.yyyy HH:mm")
+                                        </span>
+                                    }
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-clipboard-list"></i> Тесты (@totalTests)
+                            </small>
+                        </div>
+
+                        @if (totalTests == 0)
                         {
-                            <a asp-action="Index" 
-                               asp-route-category="@Model.CurrentCategory"
-                               asp-route-assignment="@Model.AssignmentFilter"
-                               class="btn btn-outline-secondary" 
-                               type="button">
-                                <i class="fas fa-times"></i>
-                            </a>
+                            <div class="text-center py-3 bg-light rounded">
+                                <small class="text-muted">В этом задании пока нет тестов</small>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 5%;">Тип</th>
+                                            <th style="width: 30%;">Название</th>
+                                            <th style="width: 8%;" class="text-center">Вопросов</th>
+                                            <th style="width: 8%;" class="text-center">Время</th>
+                                            <th style="width: 10%;" class="text-center">Попытки</th>
+                                            <th style="width: 10%;" class="text-center">Лучший результат</th>
+                                            <th style="width: 29%;" class="text-center">Действия</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @* Тесты по орфографии *@
+                                        @if (assignmentInfo.SpellingTests.Any())
+                                        {
+                                            @foreach (var test in assignmentInfo.SpellingTests)
+                                            {
+                                                <tr class="test-row" data-test-title="@test.Title.ToLower()">
+                                                    <td>
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-spell-check"></i>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <small><strong>@test.Title</strong></small>
+                                                        @if (!string.IsNullOrEmpty(test.Description))
+                                                        {
+                                                            <br>
+                                                            <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <small>@test.QuestionsCount</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <small>@test.TimeLimit мин</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-@(test.AttemptsUsed >= test.MaxAttempts ? "danger" : "warning") badge-sm">
+                                                            @test.AttemptsUsed/@test.MaxAttempts
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @if (test.BestPercentage.HasValue)
+                                                        {
+                                                            <span class="badge bg-@(test.BestPercentage >= 80 ? "success" : test.BestPercentage >= 60 ? "warning" : "danger") badge-sm">
+                                                                @test.BestPercentage.Value.ToString("F1")%
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <small class="text-muted">—</small>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center" onclick="event.stopPropagation();">
+                                                        <div class="d-flex gap-1 justify-content-center">
+                                                            @if (test.Status == TestStatus.Ongoing && test.OngoingTestResultId.HasValue)
+                                                            {
+                                                                <a asp-action="TakeSpelling" asp-route-id="@test.OngoingTestResultId.Value" 
+                                                                   class="btn btn-sm btn-warning" title="Продолжить">
+                                                                    <i class="fas fa-play"></i>
+                                                                </a>
+                                                            }
+                                                            else if (test.Status == TestStatus.CanStart)
+                                                            {
+                                                                <button type="button" class="btn btn-sm btn-success"
+                                                                        onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, 'spelling')" title="Начать">
+                                                                    <i class="fas fa-play"></i>
+                                                                </button>
+                                                            }
+                                                            else if (test.Status == TestStatus.Exhausted)
+                                                            {
+                                                                <button type="button" class="btn btn-sm btn-secondary" disabled title="Исчерпано">
+                                                                    <i class="fas fa-ban"></i>
+                                                                </button>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+
+                                        @* Тесты по пунктуации *@
+                                        @if (assignmentInfo.PunctuationTests.Any())
+                                        {
+                                            @foreach (var test in assignmentInfo.PunctuationTests)
+                                            {
+                                                <tr class="test-row" data-test-title="@test.Title.ToLower()">
+                                                    <td>
+                                                        <span class="badge bg-info">
+                                                            <i class="fas fa-quote-right"></i>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <small><strong>@test.Title</strong></small>
+                                                        @if (!string.IsNullOrEmpty(test.Description))
+                                                        {
+                                                            <br>
+                                                            <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <small>@test.QuestionsCount</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <small>@test.TimeLimit мин</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-@(test.AttemptsUsed >= test.MaxAttempts ? "danger" : "warning") badge-sm">
+                                                            @test.AttemptsUsed/@test.MaxAttempts
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @if (test.BestPercentage.HasValue)
+                                                        {
+                                                            <span class="badge bg-@(test.BestPercentage >= 80 ? "success" : test.BestPercentage >= 60 ? "warning" : "danger") badge-sm">
+                                                                @test.BestPercentage.Value.ToString("F1")%
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <small class="text-muted">—</small>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center" onclick="event.stopPropagation();">
+                                                        <div class="d-flex gap-1 justify-content-center">
+                                                            @if (test.Status == TestStatus.Ongoing && test.OngoingTestResultId.HasValue)
+                                                            {
+                                                                <a asp-action="TakePunctuation" asp-route-id="@test.OngoingTestResultId.Value" 
+                                                                   class="btn btn-sm btn-warning" title="Продолжить">
+                                                                    <i class="fas fa-play"></i>
+                                                                </a>
+                                                            }
+                                                            else if (test.Status == TestStatus.CanStart)
+                                                            {
+                                                                <button type="button" class="btn btn-sm btn-success"
+                                                                        onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, 'punctuation')" title="Начать">
+                                                                    <i class="fas fa-play"></i>
+                                                                </button>
+                                                            }
+                                                            else if (test.Status == TestStatus.Exhausted)
+                                                            {
+                                                                <button type="button" class="btn btn-sm btn-secondary" disabled title="Исчерпано">
+                                                                    <i class="fas fa-ban"></i>
+                                                                </button>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+
+                                        @* Тесты по орфоэпии *@
+                                        @if (assignmentInfo.OrthoeopyTests.Any())
+                                        {
+                                            @foreach (var test in assignmentInfo.OrthoeopyTests)
+                                            {
+                                                <tr class="test-row" data-test-title="@test.Title.ToLower()">
+                                                    <td>
+                                                        <span class="badge bg-warning text-dark">
+                                                            <i class="fas fa-volume-up"></i>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <small><strong>@test.Title</strong></small>
+                                                        @if (!string.IsNullOrEmpty(test.Description))
+                                                        {
+                                                            <br>
+                                                            <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <small>@test.QuestionsCount</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <small>@test.TimeLimit мин</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-@(test.AttemptsUsed >= test.MaxAttempts ? "danger" : "warning") badge-sm">
+                                                            @test.AttemptsUsed/@test.MaxAttempts
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @if (test.BestPercentage.HasValue)
+                                                        {
+                                                            <span class="badge bg-@(test.BestPercentage >= 80 ? "success" : test.BestPercentage >= 60 ? "warning" : "danger") badge-sm">
+                                                                @test.BestPercentage.Value.ToString("F1")%
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <small class="text-muted">—</small>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center" onclick="event.stopPropagation();">
+                                                        <div class="d-flex gap-1 justify-content-center">
+                                                            @if (test.Status == TestStatus.Ongoing && test.OngoingTestResultId.HasValue)
+                                                            {
+                                                                <a asp-action="TakeOrthoeopy" asp-route-id="@test.OngoingTestResultId.Value" 
+                                                                   class="btn btn-sm btn-warning" title="Продолжить">
+                                                                    <i class="fas fa-play"></i>
+                                                                </a>
+                                                            }
+                                                            else if (test.Status == TestStatus.CanStart)
+                                                            {
+                                                                <button type="button" class="btn btn-sm btn-success"
+                                                                        onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, 'orthoepy')" title="Начать">
+                                                                    <i class="fas fa-play"></i>
+                                                                </button>
+                                                            }
+                                                            else if (test.Status == TestStatus.Exhausted)
+                                                            {
+                                                                <button type="button" class="btn btn-sm btn-secondary" disabled title="Исчерпано">
+                                                                    <i class="fas fa-ban"></i>
+                                                                </button>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+
+                                        @* Классические тесты *@
+                                        @if (assignmentInfo.RegularTests.Any())
+                                        {
+                                            @foreach (var test in assignmentInfo.RegularTests)
+                                            {
+                                                <tr class="test-row" data-test-title="@test.Title.ToLower()">
+                                                    <td>
+                                                        <span class="badge bg-primary">
+                                                            <i class="fas fa-clipboard-check"></i>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <small><strong>@test.Title</strong></small>
+                                                        @if (!string.IsNullOrEmpty(test.Description))
+                                                        {
+                                                            <br>
+                                                            <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <small>@test.QuestionsCount</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <small>@test.TimeLimit мин</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-@(test.AttemptsUsed >= test.MaxAttempts ? "danger" : "warning") badge-sm">
+                                                            @test.AttemptsUsed/@test.MaxAttempts
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @if (test.BestPercentage.HasValue)
+                                                        {
+                                                            <span class="badge bg-@(test.BestPercentage >= 80 ? "success" : test.BestPercentage >= 60 ? "warning" : "danger") badge-sm">
+                                                                @test.BestPercentage.Value.ToString("F1")%
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <small class="text-muted">—</small>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center" onclick="event.stopPropagation();">
+                                                        <div class="d-flex gap-1 justify-content-center">
+                                                            @if (test.Status == TestStatus.Ongoing && test.OngoingTestResultId.HasValue)
+                                                            {
+                                                                <a asp-action="TakeRegular" asp-route-id="@test.OngoingTestResultId.Value" 
+                                                                   class="btn btn-sm btn-warning" title="Продолжить">
+                                                                    <i class="fas fa-play"></i>
+                                                                </a>
+                                                            }
+                                                            else if (test.Status == TestStatus.CanStart)
+                                                            {
+                                                                <button type="button" class="btn btn-sm btn-success"
+                                                                        onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, 'regular')" title="Начать">
+                                                                    <i class="fas fa-play"></i>
+                                                                </button>
+                                                            }
+                                                            else if (test.Status == TestStatus.Exhausted)
+                                                            {
+                                                                <button type="button" class="btn btn-sm btn-secondary" disabled title="Исчерпано">
+                                                                    <i class="fas fa-ban"></i>
+                                                                </button>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
                         }
                     </div>
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <div id="noResultsMessage" class="alert alert-info" style="display: none;">
-            <i class="fas fa-info-circle"></i> 
-            По вашему запросу ничего не найдено. Попробуйте изменить критерии поиска.
-        </div>
-    }
-
-    @if (totalTests == 0)
-    {
-        <div class="text-center py-5">
-            <i class="fas fa-tasks text-muted" style="font-size: 4rem;"></i>
-            <h4 class="mt-3 text-muted">Нет доступных тестов</h4>
-            <p class="text-muted">В данный момент нет тестов, доступных для прохождения</p>
-        </div>
-    }
-    else
-    {
-        <!-- Тесты по орфографии -->
-        @if (Model.SpellingTests.Any() && (string.IsNullOrEmpty(Model.CurrentCategory) || Model.CurrentCategory == "spelling"))
-        {
-            <div class="test-section mb-4" data-category="spelling">
-                <h5 class="mb-3">
-                    <i class="fas fa-spell-check text-primary"></i> Тесты по орфографии
-                </h5>
-                @await Html.PartialAsync("_TestTable", Model.SpellingTests, new ViewDataDictionary(ViewData) { { "TestType", "Spelling" } })
+                </div>
             </div>
         }
-
-        <!-- Тесты по пунктуации -->
-        @if (Model.PunctuationTests.Any() && (string.IsNullOrEmpty(Model.CurrentCategory) || Model.CurrentCategory == "punctuation"))
-        {
-            <div class="test-section mb-4" data-category="punctuation">
-                <h5 class="mb-3">
-                    <i class="fas fa-quote-right text-warning"></i> Тесты по пунктуации
-                </h5>
-                @await Html.PartialAsync("_TestTable", Model.PunctuationTests, new ViewDataDictionary(ViewData) { { "TestType", "Punctuation" } })
-            </div>
-        }
-
-        <!-- Тесты по орфоэпии -->
-        @if (Model.OrthoeopyTests.Any() && (string.IsNullOrEmpty(Model.CurrentCategory) || Model.CurrentCategory == "orthoepy"))
-        {
-            <div class="test-section mb-4" data-category="orthoepy">
-                <h5 class="mb-3">
-                    <i class="fas fa-volume-up text-success"></i> Тесты по орфоэпии
-                </h5>
-                @await Html.PartialAsync("_TestTable", Model.OrthoeopyTests, new ViewDataDictionary(ViewData) { { "TestType", "Orthoeopy" } })
-            </div>
-        }
-
-        <!-- Классические тесты -->
-        @if (Model.RegularTests.Any() && (string.IsNullOrEmpty(Model.CurrentCategory) || Model.CurrentCategory == "regular"))
-        {
-            <div class="test-section mb-4" data-category="regular">
-                <h5 class="mb-3">
-                    <i class="fas fa-list-ul text-info"></i> Классические тесты
-                </h5>
-                @await Html.PartialAsync("_TestTable", Model.RegularTests, new ViewDataDictionary(ViewData) { { "TestType", "Regular" } })
-            </div>
-        }
-    }
-</div>
+    </div>
+}
 
 <!-- Модальное окно подтверждения начала теста -->
 <div class="modal fade" id="confirmStartModal" tabindex="-1">
@@ -282,43 +538,40 @@
             modal.show();
         }
 
-        // Поиск по тестам (клиентская фильтрация)
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            const testsCount = document.getElementById('testsCount');
-            const noResultsMessage = document.getElementById('noResultsMessage');
-            const totalTests = @totalTests;
-
-            if (searchInput) {
-                searchInput.addEventListener('input', function(e) {
-                    const query = e.target.value.toLowerCase().trim();
-                    const testRows = document.querySelectorAll('.test-row');
-                    let visibleCount = 0;
-
-                    testRows.forEach(row => {
-                        const title = row.dataset.testTitle || '';
-                        if (title.includes(query)) {
-                            row.style.display = '';
-                            visibleCount++;
-                        } else {
-                            row.style.display = 'none';
-                        }
-                    });
-
-                    // Обновляем счетчик
-                    if (visibleCount === totalTests) {
-                        testsCount.textContent = `Всего тестов: ${totalTests}`;
-                        if (noResultsMessage) noResultsMessage.style.display = 'none';
-                    } else if (visibleCount === 0) {
-                        testsCount.textContent = `Показано: 0 из ${totalTests}`;
-                        if (noResultsMessage) noResultsMessage.style.display = 'block';
-                    } else {
-                        testsCount.textContent = `Показано: ${visibleCount} из ${totalTests}`;
-                        if (noResultsMessage) noResultsMessage.style.display = 'none';
+        // Поиск и фильтрация
+        $(document).ready(function() {
+            // Поиск
+            $('#searchInput').on('keyup', function() {
+                var searchText = $(this).val().toLowerCase();
+                $('.assignment-item').each(function() {
+                    var assignmentText = $(this).text().toLowerCase();
+                    var hasMatch = assignmentText.indexOf(searchText) > -1;
+                    
+                    // Также проверяем тесты внутри
+                    if (!hasMatch) {
+                        $(this).find('.test-row').each(function() {
+                            var testTitle = $(this).data('test-title') || '';
+                            if (testTitle.indexOf(searchText) > -1) {
+                                hasMatch = true;
+                                return false; // break
+                            }
+                        });
                     }
+                    
+                    $(this).toggle(hasMatch);
                 });
-            }
+            });
+
+            // Фильтр по предмету
+            $('#subjectFilter').on('change', function() {
+                var subjectId = $(this).val();
+                if (subjectId === '') {
+                    $('.assignment-item').show();
+                } else {
+                    $('.assignment-item').hide();
+                    $('.assignment-item[data-subject-id="' + subjectId + '"]').show();
+                }
+            });
         });
     </script>
 }
-

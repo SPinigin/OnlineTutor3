@@ -102,6 +102,30 @@ namespace OnlineTutor3.Web.Controllers
                 // Получаем доступные тесты
                 var availableTests = await _studentTestService.GetAvailableTestsAsync(student.Id, category);
 
+                // Получаем все доступные задания
+                var allAssignments = new List<Assignment>();
+                if (viewModel.Class != null)
+                {
+                    allAssignments = await _assignmentRepository.GetByTeacherIdAsync(viewModel.Class.TeacherId);
+                    allAssignments = allAssignments.Where(a => a.IsActive).ToList();
+                }
+
+                // Создаем словарь для группировки тестов по заданиям
+                var assignmentsDict = new Dictionary<int, AssignmentTestsInfo>();
+                var subjectsDict = new Dictionary<int, string>();
+
+                // Загружаем предметы
+                var subjectRepository = HttpContext.RequestServices.GetRequiredService<ISubjectRepository>();
+                foreach (var assignmentEntity in allAssignments)
+                {
+                    if (!subjectsDict.ContainsKey(assignmentEntity.SubjectId))
+                    {
+                        var subject = await subjectRepository.GetByIdAsync(assignmentEntity.SubjectId);
+                        subjectsDict[assignmentEntity.SubjectId] = subject?.Name ?? $"Предмет #{assignmentEntity.SubjectId}";
+                    }
+                }
+                viewModel.SubjectsDict = subjectsDict;
+
                 // Обрабатываем тесты по орфографии
                 foreach (var test in availableTests.SpellingTests)
                 {
@@ -109,6 +133,20 @@ namespace OnlineTutor3.Web.Controllers
                     if (testInfo != null)
                     {
                         viewModel.SpellingTests.Add(testInfo);
+                        
+                        // Группируем по заданию
+                        if (!assignmentsDict.ContainsKey(testInfo.AssignmentId))
+                        {
+                            var assignmentEntity = await _assignmentRepository.GetByIdAsync(testInfo.AssignmentId);
+                            if (assignmentEntity != null)
+                            {
+                                assignmentsDict[testInfo.AssignmentId] = new AssignmentTestsInfo { Assignment = assignmentEntity };
+                            }
+                        }
+                        if (assignmentsDict.ContainsKey(testInfo.AssignmentId))
+                        {
+                            assignmentsDict[testInfo.AssignmentId].SpellingTests.Add(testInfo);
+                        }
                     }
                 }
 
@@ -119,6 +157,20 @@ namespace OnlineTutor3.Web.Controllers
                     if (testInfo != null)
                     {
                         viewModel.PunctuationTests.Add(testInfo);
+                        
+                        // Группируем по заданию
+                        if (!assignmentsDict.ContainsKey(testInfo.AssignmentId))
+                        {
+                            var assignmentEntity = await _assignmentRepository.GetByIdAsync(testInfo.AssignmentId);
+                            if (assignmentEntity != null)
+                            {
+                                assignmentsDict[testInfo.AssignmentId] = new AssignmentTestsInfo { Assignment = assignmentEntity };
+                            }
+                        }
+                        if (assignmentsDict.ContainsKey(testInfo.AssignmentId))
+                        {
+                            assignmentsDict[testInfo.AssignmentId].PunctuationTests.Add(testInfo);
+                        }
                     }
                 }
 
@@ -129,6 +181,20 @@ namespace OnlineTutor3.Web.Controllers
                     if (testInfo != null)
                     {
                         viewModel.OrthoeopyTests.Add(testInfo);
+                        
+                        // Группируем по заданию
+                        if (!assignmentsDict.ContainsKey(testInfo.AssignmentId))
+                        {
+                            var assignmentEntity = await _assignmentRepository.GetByIdAsync(testInfo.AssignmentId);
+                            if (assignmentEntity != null)
+                            {
+                                assignmentsDict[testInfo.AssignmentId] = new AssignmentTestsInfo { Assignment = assignmentEntity };
+                            }
+                        }
+                        if (assignmentsDict.ContainsKey(testInfo.AssignmentId))
+                        {
+                            assignmentsDict[testInfo.AssignmentId].OrthoeopyTests.Add(testInfo);
+                        }
                     }
                 }
 
@@ -139,34 +205,59 @@ namespace OnlineTutor3.Web.Controllers
                     if (testInfo != null)
                     {
                         viewModel.RegularTests.Add(testInfo);
+                        
+                        // Группируем по заданию
+                        if (!assignmentsDict.ContainsKey(testInfo.AssignmentId))
+                        {
+                            var assignmentEntity = await _assignmentRepository.GetByIdAsync(testInfo.AssignmentId);
+                            if (assignmentEntity != null)
+                            {
+                                assignmentsDict[testInfo.AssignmentId] = new AssignmentTestsInfo { Assignment = assignmentEntity };
+                            }
+                        }
+                        if (assignmentsDict.ContainsKey(testInfo.AssignmentId))
+                        {
+                            assignmentsDict[testInfo.AssignmentId].RegularTests.Add(testInfo);
+                        }
                     }
-                }
-
-                // Получаем доступные задания для фильтра
-                if (viewModel.Class != null)
-                {
-                    var assignments = await _assignmentRepository.GetByTeacherIdAsync(viewModel.Class.TeacherId);
-                    viewModel.AvailableAssignments = assignments.Where(a => a.IsActive).ToList();
                 }
 
                 // Применяем фильтр по заданию, если указан
                 if (assignment.HasValue)
                 {
-                    viewModel.SpellingTests = viewModel.SpellingTests.Where(t => t.AssignmentId == assignment.Value).ToList();
-                    viewModel.PunctuationTests = viewModel.PunctuationTests.Where(t => t.AssignmentId == assignment.Value).ToList();
-                    viewModel.OrthoeopyTests = viewModel.OrthoeopyTests.Where(t => t.AssignmentId == assignment.Value).ToList();
-                    viewModel.RegularTests = viewModel.RegularTests.Where(t => t.AssignmentId == assignment.Value).ToList();
+                    assignmentsDict = assignmentsDict.Where(kvp => kvp.Key == assignment.Value).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
                 }
 
                 // Применяем поиск, если указан
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     var searchLower = search.ToLower();
-                    viewModel.SpellingTests = viewModel.SpellingTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList();
-                    viewModel.PunctuationTests = viewModel.PunctuationTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList();
-                    viewModel.OrthoeopyTests = viewModel.OrthoeopyTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList();
-                    viewModel.RegularTests = viewModel.RegularTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList();
+                    var filteredAssignments = new Dictionary<int, AssignmentTestsInfo>();
+                    
+                    foreach (var kvp in assignmentsDict)
+                    {
+                        var assignmentInfo = kvp.Value;
+                        var filteredInfo = new AssignmentTestsInfo
+                        {
+                            Assignment = assignmentInfo.Assignment,
+                            SpellingTests = assignmentInfo.SpellingTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList(),
+                            PunctuationTests = assignmentInfo.PunctuationTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList(),
+                            OrthoeopyTests = assignmentInfo.OrthoeopyTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList(),
+                            RegularTests = assignmentInfo.RegularTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList()
+                        };
+                        
+                        // Добавляем только если есть тесты или название задания совпадает
+                        if (filteredInfo.TotalTestsCount > 0 || assignmentInfo.Assignment.Title.ToLower().Contains(searchLower))
+                        {
+                            filteredAssignments[kvp.Key] = filteredInfo;
+                        }
+                    }
+                    
+                    assignmentsDict = filteredAssignments;
                 }
+
+                viewModel.AssignmentsWithTests = assignmentsDict;
+                viewModel.AvailableAssignments = allAssignments;
 
                 return View(viewModel);
             }
@@ -231,11 +322,11 @@ namespace OnlineTutor3.Web.Controllers
                 };
 
                 // Получаем информацию о задании
-                var assignment = await _assignmentRepository.GetByIdAsync(testInfo.AssignmentId);
-                if (assignment != null)
+                var assignmentEntity = await _assignmentRepository.GetByIdAsync(testInfo.AssignmentId);
+                if (assignmentEntity != null)
                 {
-                    testInfo.AssignmentTitle = assignment.Title;
-                    var subject = await _subjectRepository.GetByIdAsync(assignment.SubjectId);
+                    testInfo.AssignmentTitle = assignmentEntity.Title;
+                    var subject = await _subjectRepository.GetByIdAsync(assignmentEntity.SubjectId);
                     testInfo.SubjectName = subject?.Name ?? "Неизвестно";
                 }
 

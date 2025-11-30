@@ -20,6 +20,24 @@ namespace OnlineTutor3.Web.ViewModels
         public List<AvailableTestInfo> RegularTests { get; set; } = new();
 
         public List<Assignment> AvailableAssignments { get; set; } = new();
+        
+        // Группировка тестов по заданиям
+        public Dictionary<int, AssignmentTestsInfo> AssignmentsWithTests { get; set; } = new();
+        public Dictionary<int, string> SubjectsDict { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Информация о тестах в задании
+    /// </summary>
+    public class AssignmentTestsInfo
+    {
+        public Assignment Assignment { get; set; } = null!;
+        public List<AvailableTestInfo> SpellingTests { get; set; } = new();
+        public List<AvailableTestInfo> PunctuationTests { get; set; } = new();
+        public List<AvailableTestInfo> OrthoeopyTests { get; set; } = new();
+        public List<AvailableTestInfo> RegularTests { get; set; } = new();
+
+        public int TotalTestsCount => SpellingTests.Count + PunctuationTests.Count + OrthoeopyTests.Count + RegularTests.Count;
     }
 
     /// <summary>
