@@ -129,7 +129,7 @@
                                     <tr>
                                         <th>Тест</th>
                                         <th>Тип</th>
-                                        <th class="text-center">Результат</th>
+                                        <th class="text-center">Оценка / Результат</th>
                                         <th class="text-center">Дата</th>
                                     </tr>
                                 </thead>
@@ -144,9 +144,36 @@
                                                 <span class="badge bg-secondary">@result.TestType</span>
                                             </td>
                                             <td class="text-center">
-                                                <span class="badge @(result.Percentage >= 80 ? "bg-success" : result.Percentage >= 60 ? "bg-warning" : "bg-danger")">
-                                                    @result.Score/@result.MaxScore (@result.Percentage.ToString("F1")%)
-                                                </span>
+                                                @if (result.Grade.HasValue)
+                                                {
+                                                    var gradeColor = result.Grade.Value switch
+                                                    {
+                                                        5 => "success",
+                                                        4 => "info",
+                                                        3 => "warning",
+                                                        2 => "danger",
+                                                        _ => "secondary"
+                                                    };
+                                                    <div>
+                                                        <span class="badge bg-@gradeColor rounded-pill" style="font-size: 0.9rem; min-width: 2rem;">
+                                                            @result.Grade.Value
+                                                        </span>
+                                                        <br>
+                                                        <small class="text-muted mt-1 d-block">
+                                                            @result.Percentage.ToString("F1")% (@result.Score/@result.MaxScore)
+                                                        </small>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge @(result.Percentage >= 80 ? "bg-success" : result.Percentage >= 60 ? "bg-warning" : "bg-danger")">
+                                                        @result.Percentage.ToString("F1")%
+                                                    </span>
+                                                    <br>
+                                                    <small class="text-muted mt-1 d-block">
+                                                        @result.Score/@result.MaxScore
+                                                    </small>
+                                                }
                                             </td>
                                             <td class="text-center">
                                                 <small class="text-muted">@result.CompletedAt.ToString("dd.MM.yyyy")</small>

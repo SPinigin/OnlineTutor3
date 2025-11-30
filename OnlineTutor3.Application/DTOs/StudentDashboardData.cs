@@ -34,6 +34,7 @@ namespace OnlineTutor3.Application.DTOs
         public int Score { get; set; }
         public int MaxScore { get; set; }
         public double Percentage { get; set; }
+        public int? Grade { get; set; }
         public DateTime CompletedAt { get; set; }
         public int AttemptNumber { get; set; }
     }

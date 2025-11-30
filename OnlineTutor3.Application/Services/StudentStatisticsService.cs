@@ -209,6 +209,7 @@ namespace OnlineTutor3.Application.Services
                             Score = result.Score,
                             MaxScore = result.MaxScore,
                             Percentage = result.Percentage,
+                            Grade = result.Grade,
                             CompletedAt = result.CompletedAt ?? result.StartedAt,
                             AttemptNumber = result.AttemptNumber
                         });
