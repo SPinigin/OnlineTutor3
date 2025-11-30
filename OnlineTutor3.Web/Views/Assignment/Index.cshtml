@@ -176,7 +176,7 @@ else
                                         <tr>
                                             <th style="width: 5%;">Тип</th>
                                             <th style="width: 35%;">Название</th>
-                                            <th style="width: 15%;">Вопросов</th>
+                                            <th style="width: 15%;" class="text-center">Вопросов</th>
                                             <th style="width: 10%;">Время</th>
                                             <th style="width: 10%;">Статус</th>
                                             <th style="width: 25%;" class="text-center">Действия</th>
@@ -202,7 +202,7 @@ else
                                                             <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                                         }
                                                     </td>
-                                                    <td>
+                                                    <td class="text-center">
                                                         <small>@(assignmentData?.SpellingTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.SpellingTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
                                                     <td>
@@ -249,7 +249,7 @@ else
                                                             <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                                         }
                                                     </td>
-                                                    <td>
+                                                    <td class="text-center">
                                                         <small>@(assignmentData?.PunctuationTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.PunctuationTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
                                                     <td>
@@ -296,7 +296,7 @@ else
                                                             <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                                         }
                                                     </td>
-                                                    <td>
+                                                    <td class="text-center">
                                                         <small>@(assignmentData?.OrthoeopyTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.OrthoeopyTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
                                                     <td>
@@ -343,7 +343,7 @@ else
                                                             <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                                         }
                                                     </td>
-                                                    <td>
+                                                    <td class="text-center">
                                                         <small>@(assignmentData?.RegularTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.RegularTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
                                                     <td>
