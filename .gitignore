@@ -186,5 +186,5 @@ FodyWeavers.xsd
 
 /README.md
 /STUDENT_PART_PLAN.md
-/OnlineTutor3.Infrastructure/Data/CreateDatabase.sql
 /OnlineTutor3.Infrastructure/Data/AddPercentageToTestResults.sql
+/OnlineTutor3.Infrastructure/Data/CreateDatabase.sql
