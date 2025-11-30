@@ -175,11 +175,9 @@
                                         <th>Ученик</th>
                                         <th>Класс</th>
                                         <th>Тест</th>
-                                        <th>Тип</th>
                                         <th>Предмет</th>
                                         <th class="text-center">Оценка</th>
-                                        <th class="text-center">Результат</th>
-                                        <th class="text-center">Дата завершения</th>
+                                        <th class="text-center">Дата</th>
                                         <th class="text-center">Действия</th>
                                     </tr>
                                 </thead>
@@ -194,13 +192,13 @@
                                             "regular" => "fa-clipboard-check",
                                             _ => "fa-question"
                                         };
-                                        var testTypeColor = completion.TestType switch
+                                        var testTypeName = completion.TestType switch
                                         {
-                                            "spelling" => "primary",
-                                            "punctuation" => "info",
-                                            "orthoeopy" => "success",
-                                            "regular" => "warning",
-                                            _ => "secondary"
+                                            "spelling" => "Правописание",
+                                            "punctuation" => "Пунктуация",
+                                            "orthoeopy" => "Орфоэпия",
+                                            "regular" => "Классический",
+                                            _ => "Неизвестно"
                                         };
                                         var gradeColor = completion.Grade.HasValue ? completion.Grade.Value switch
                                         {
@@ -218,12 +216,11 @@
                                                 <small class="text-muted">@(completion.ClassName ?? "—")</small>
                                             </td>
                                             <td>
-                                                <small class="fw-bold">@completion.TestTitle</small>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-@testTypeColor">
-                                                    <i class="fas @testTypeIcon"></i> @completion.TestType
-                                                </span>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="fas @testTypeIcon text-primary"></i>
+                                                    <small class="fw-bold">@completion.TestTitle</small>
+                                                </div>
+                                                <small class="text-muted d-block d-md-none">@testTypeName</small>
                                             </td>
                                             <td>
                                                 <span class="badge bg-secondary">@completion.SubjectName</span>
@@ -241,21 +238,17 @@
                                                 }
                                             </td>
                                             <td class="text-center">
-                                                <span class="badge @(completion.Percentage >= 80 ? "bg-success" : completion.Percentage >= 60 ? "bg-warning" : "bg-danger")">
-                                                    @completion.Percentage.ToString("F1")%
-                                                </span>
-                                                <br>
-                                                <small class="text-muted">@completion.Score/@completion.MaxScore</small>
-                                            </td>
-                                            <td class="text-center">
-                                                <small class="text-muted">@completion.CompletedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                                                <small class="text-muted d-none d-md-inline">@completion.CompletedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                                                <small class="text-muted d-md-none">@completion.CompletedAt.ToString("dd.MM.yyyy")</small>
                                             </td>
                                             <td class="text-center">
                                                 <a href="#" 
                                                    class="btn btn-sm btn-outline-primary view-test-result"
                                                    data-test-result-id="@completion.TestResultId"
-                                                   data-test-type="@completion.TestType">
-                                                    <i class="fas fa-eye"></i> Детали
+                                                   data-test-type="@completion.TestType"
+                                                   title="Детали">
+                                                    <i class="fas fa-eye"></i>
+                                                    <span class="d-none d-xl-inline ms-1">Детали</span>
                                                 </a>
                                             </td>
                                         </tr>
