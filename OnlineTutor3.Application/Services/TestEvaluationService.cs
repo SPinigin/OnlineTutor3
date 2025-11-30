@@ -143,14 +143,14 @@ namespace OnlineTutor3.Application.Services
                 var questions = await _spellingQuestionRepository.GetByTestIdOrderedAsync(testId);
 
                 int score = 0;
-                int maxScore = questions.Count; // Предполагаем 1 балл за вопрос
+                int maxScore = questions.Sum(q => q.Points); // Сумма баллов всех вопросов
 
                 foreach (var answer in answers)
                 {
                     var question = questions.FirstOrDefault(q => q.Id == answer.SpellingQuestionId);
                     if (question != null)
                     {
-                        var (isCorrect, points) = await EvaluateSpellingAnswerAsync(question, answer.StudentAnswer, 1);
+                        var (isCorrect, points) = await EvaluateSpellingAnswerAsync(question, answer.StudentAnswer, question.Points);
                         answer.IsCorrect = isCorrect;
                         answer.Points = points;
                         score += points;

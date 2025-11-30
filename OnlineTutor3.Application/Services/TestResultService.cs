@@ -13,6 +13,10 @@ namespace OnlineTutor3.Application.Services
         private readonly IPunctuationTestResultRepository _punctuationTestResultRepository;
         private readonly IOrthoeopyTestResultRepository _orthoeopyTestResultRepository;
         private readonly IRegularTestResultRepository _regularTestResultRepository;
+        private readonly ISpellingQuestionRepository _spellingQuestionRepository;
+        private readonly IPunctuationQuestionRepository _punctuationQuestionRepository;
+        private readonly IOrthoeopyQuestionRepository _orthoeopyQuestionRepository;
+        private readonly IRegularQuestionRepository _regularQuestionRepository;
         private readonly ILogger<TestResultService> _logger;
 
         public TestResultService(
@@ -20,12 +24,20 @@ namespace OnlineTutor3.Application.Services
             IPunctuationTestResultRepository punctuationTestResultRepository,
             IOrthoeopyTestResultRepository orthoeopyTestResultRepository,
             IRegularTestResultRepository regularTestResultRepository,
+            ISpellingQuestionRepository spellingQuestionRepository,
+            IPunctuationQuestionRepository punctuationQuestionRepository,
+            IOrthoeopyQuestionRepository orthoeopyQuestionRepository,
+            IRegularQuestionRepository regularQuestionRepository,
             ILogger<TestResultService> logger)
         {
             _spellingTestResultRepository = spellingTestResultRepository;
             _punctuationTestResultRepository = punctuationTestResultRepository;
             _orthoeopyTestResultRepository = orthoeopyTestResultRepository;
             _regularTestResultRepository = regularTestResultRepository;
+            _spellingQuestionRepository = spellingQuestionRepository;
+            _punctuationQuestionRepository = punctuationQuestionRepository;
+            _orthoeopyQuestionRepository = orthoeopyQuestionRepository;
+            _regularQuestionRepository = regularQuestionRepository;
             _logger = logger;
         }
 
@@ -36,6 +48,10 @@ namespace OnlineTutor3.Application.Services
                 var existingResults = await _spellingTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId);
                 var attemptNumber = existingResults.Count + 1;
 
+                // Вычисляем максимальный балл (сумма баллов всех вопросов)
+                var questions = await _spellingQuestionRepository.GetByTestIdOrderedAsync(testId);
+                var maxScore = questions.Sum(q => q.Points);
+
                 var testResult = new SpellingTestResult
                 {
                     StudentId = studentId,
@@ -43,7 +59,7 @@ namespace OnlineTutor3.Application.Services
                     AttemptNumber = attemptNumber,
                     StartedAt = DateTime.Now,
                     Score = 0,
-                    MaxScore = 0,
+                    MaxScore = maxScore,
                     Percentage = 0.0,
                     IsCompleted = false
                 };

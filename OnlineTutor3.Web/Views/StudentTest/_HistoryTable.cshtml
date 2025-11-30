@@ -1,43 +1,32 @@
+@model OnlineTutor3.Web.ViewModels.AssignmentHistoryInfo
 @using OnlineTutor3.Domain.Entities
+
 @{
-    var model = (dynamic)Model;
-    var testType = (string)model.TestType;
-    
-    List<TestResult> results = new();
-    if (testType == "Spelling")
-    {
-        results = ((List<SpellingTestResult>)model.Results).Cast<TestResult>().ToList();
-    }
-    else if (testType == "Punctuation")
-    {
-        results = ((List<PunctuationTestResult>)model.Results).Cast<TestResult>().ToList();
-    }
-    else if (testType == "Orthoeopy")
-    {
-        results = ((List<OrthoeopyTestResult>)model.Results).Cast<TestResult>().ToList();
-    }
-    else if (testType == "Regular")
-    {
-        results = ((List<RegularTestResult>)model.Results).Cast<TestResult>().ToList();
-    }
+    var allResults = new List<TestResult>();
+    allResults.AddRange(Model.SpellingResults.Cast<TestResult>());
+    allResults.AddRange(Model.PunctuationResults.Cast<TestResult>());
+    allResults.AddRange(Model.OrthoeopyResults.Cast<TestResult>());
+    allResults.AddRange(Model.RegularResults.Cast<TestResult>());
+    allResults = allResults.OrderByDescending(r => r.CompletedAt ?? r.StartedAt).ToList();
 }
 
-@if (results.Any())
+@if (allResults.Any())
 {
     <div class="table-responsive">
         <table class="table table-hover table-striped align-middle">
             <thead class="table-light">
-                <tr>
-                    <th style="width: 30%;">Тест</th>
-                    <th class="d-none d-md-table-cell" style="width: 15%;">Дата</th>
-                    <th class="text-center" style="width: 10%;">Попытка</th>
-                    <th class="text-center" style="width: 15%;">Результат</th>
-                    <th class="d-none d-md-table-cell text-center" style="width: 10%;">Время</th>
-                    <th class="text-center" style="width: 20%;">Действия</th>
-                </tr>
+                        <tr>
+                            <th style="width: 5%;">Тип</th>
+                            <th style="width: 30%;">Тест</th>
+                            <th class="d-none d-md-table-cell" style="width: 15%;">Дата</th>
+                            <th class="text-center" style="width: 10%;">Попытка</th>
+                            <th class="text-center" style="width: 15%;">Результат</th>
+                            <th class="d-none d-md-table-cell text-center" style="width: 10%;">Время</th>
+                            <th class="text-center" style="width: 15%;">Действия</th>
+                        </tr>
             </thead>
             <tbody>
-                @foreach (var result in results)
+                @foreach (var result in allResults)
                 {
                     var duration = result.CompletedAt.HasValue
                         ? (result.CompletedAt.Value - result.StartedAt).ToString(@"mm\:ss")
@@ -46,32 +35,46 @@
                     string testTitle = "Неизвестный тест";
                     int resultId = result.Id;
                     string resultAction = "";
+                    string testTypeIcon = "";
+                    string testTypeColor = "";
 
-                    if (testType == "Spelling" && result is SpellingTestResult spellingResult)
+                    if (result is SpellingTestResult spellingResult)
                     {
                         testTitle = spellingResult.SpellingTest?.Title ?? "Неизвестный тест";
                         resultAction = "SpellingResult";
+                        testTypeIcon = "spell-check";
+                        testTypeColor = "success";
                     }
-                    else if (testType == "Punctuation" && result is PunctuationTestResult punctuationResult)
+                    else if (result is PunctuationTestResult punctuationResult)
                     {
                         testTitle = punctuationResult.PunctuationTest?.Title ?? "Неизвестный тест";
                         resultAction = "PunctuationResult";
+                        testTypeIcon = "quote-right";
+                        testTypeColor = "info";
                     }
-                    else if (testType == "Orthoeopy" && result is OrthoeopyTestResult orthoeopyResult)
+                    else if (result is OrthoeopyTestResult orthoeopyResult)
                     {
                         testTitle = orthoeopyResult.OrthoeopyTest?.Title ?? "Неизвестный тест";
                         resultAction = "OrthoeopyResult";
+                        testTypeIcon = "volume-up";
+                        testTypeColor = "warning";
                     }
-                    else if (testType == "Regular" && result is RegularTestResult regularResult)
+                    else if (result is RegularTestResult regularResult)
                     {
                         testTitle = regularResult.RegularTest?.Title ?? "Неизвестный тест";
                         resultAction = "RegularResult";
+                        testTypeIcon = "clipboard-check";
+                        testTypeColor = "primary";
                     }
 
                     <tr>
                         <td>
+                            <span class="badge bg-@testTypeColor">
+                                <i class="fas fa-@testTypeIcon"></i>
+                            </span>
+                        </td>
+                        <td>
                             <div class="d-flex align-items-center">
-                                <i class="fas fa-@(testType == "Spelling" ? "spell-check text-primary" : testType == "Punctuation" ? "quote-right text-warning" : testType == "Orthoeopy" ? "volume-up text-success" : "list-ul text-info") me-2 d-none d-md-inline"></i>
                                 <div>
                                     <strong class="d-block">@testTitle</strong>
                                     <small class="text-muted d-md-none">

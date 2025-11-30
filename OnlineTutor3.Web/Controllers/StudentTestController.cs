@@ -14,6 +14,8 @@ namespace OnlineTutor3.Web.Controllers
         private readonly IStudentRepository _studentRepository;
         private readonly ITestResultService _testResultService;
         private readonly ITestAccessService _testAccessService;
+        private readonly ITestEvaluationService _testEvaluationService;
+        private readonly IAnswerService _answerService;
         private readonly IAssignmentRepository _assignmentRepository;
         private readonly IClassRepository _classRepository;
         private readonly ISubjectRepository _subjectRepository;
@@ -21,6 +23,7 @@ namespace OnlineTutor3.Web.Controllers
         private readonly IPunctuationTestRepository _punctuationTestRepository;
         private readonly IOrthoeopyTestRepository _orthoeopyTestRepository;
         private readonly IRegularTestRepository _regularTestRepository;
+        private readonly ISpellingTestResultRepository _spellingTestResultRepository;
         private readonly ISpellingQuestionRepository _spellingQuestionRepository;
         private readonly IPunctuationQuestionRepository _punctuationQuestionRepository;
         private readonly IOrthoeopyQuestionRepository _orthoeopyQuestionRepository;
@@ -33,6 +36,8 @@ namespace OnlineTutor3.Web.Controllers
             IStudentRepository studentRepository,
             ITestResultService testResultService,
             ITestAccessService testAccessService,
+            ITestEvaluationService testEvaluationService,
+            IAnswerService answerService,
             IAssignmentRepository assignmentRepository,
             IClassRepository classRepository,
             ISubjectRepository subjectRepository,
@@ -40,6 +45,7 @@ namespace OnlineTutor3.Web.Controllers
             IPunctuationTestRepository punctuationTestRepository,
             IOrthoeopyTestRepository orthoeopyTestRepository,
             IRegularTestRepository regularTestRepository,
+            ISpellingTestResultRepository spellingTestResultRepository,
             ISpellingQuestionRepository spellingQuestionRepository,
             IPunctuationQuestionRepository punctuationQuestionRepository,
             IOrthoeopyQuestionRepository orthoeopyQuestionRepository,
@@ -51,6 +57,8 @@ namespace OnlineTutor3.Web.Controllers
             _studentRepository = studentRepository;
             _testResultService = testResultService;
             _testAccessService = testAccessService;
+            _testEvaluationService = testEvaluationService;
+            _answerService = answerService;
             _assignmentRepository = assignmentRepository;
             _classRepository = classRepository;
             _subjectRepository = subjectRepository;
@@ -58,6 +66,7 @@ namespace OnlineTutor3.Web.Controllers
             _punctuationTestRepository = punctuationTestRepository;
             _orthoeopyTestRepository = orthoeopyTestRepository;
             _regularTestRepository = regularTestRepository;
+            _spellingTestResultRepository = spellingTestResultRepository;
             _spellingQuestionRepository = spellingQuestionRepository;
             _punctuationQuestionRepository = punctuationQuestionRepository;
             _orthoeopyQuestionRepository = orthoeopyQuestionRepository;
@@ -305,6 +314,9 @@ namespace OnlineTutor3.Web.Controllers
                 // Загружаем связанные данные (тесты) для каждого результата
                 await LoadTestDataForResultsAsync(viewModel);
 
+                // Группируем результаты по заданиям
+                await GroupResultsByAssignmentsAsync(viewModel);
+
                 return View(viewModel);
             }
             catch (Exception ex)
@@ -351,6 +363,406 @@ namespace OnlineTutor3.Web.Controllers
                 {
                     result.RegularTest = await _regularTestRepository.GetByIdAsync(result.RegularTestId);
                 }
+            }
+        }
+
+        private async Task GroupResultsByAssignmentsAsync(ViewModels.StudentTestHistoryViewModel viewModel)
+        {
+            var assignmentsDict = new Dictionary<int, ViewModels.AssignmentHistoryInfo>();
+            var subjectsDict = new Dictionary<int, string>();
+
+            // Группируем результаты по орфографии
+            foreach (var result in viewModel.SpellingResults)
+            {
+                if (result.SpellingTest != null)
+                {
+                    var assignmentId = result.SpellingTest.AssignmentId;
+                    if (!assignmentsDict.ContainsKey(assignmentId))
+                    {
+                        var assignment = await _assignmentRepository.GetByIdAsync(assignmentId);
+                        if (assignment != null)
+                        {
+                            assignmentsDict[assignmentId] = new ViewModels.AssignmentHistoryInfo { Assignment = assignment };
+                            
+                            // Загружаем предмет
+                            if (!subjectsDict.ContainsKey(assignment.SubjectId))
+                            {
+                                var subject = await _subjectRepository.GetByIdAsync(assignment.SubjectId);
+                                subjectsDict[assignment.SubjectId] = subject?.Name ?? $"Предмет #{assignment.SubjectId}";
+                            }
+                        }
+                    }
+                    if (assignmentsDict.ContainsKey(assignmentId))
+                    {
+                        assignmentsDict[assignmentId].SpellingResults.Add(result);
+                    }
+                }
+            }
+
+            // Группируем результаты по пунктуации
+            foreach (var result in viewModel.PunctuationResults)
+            {
+                if (result.PunctuationTest != null)
+                {
+                    var assignmentId = result.PunctuationTest.AssignmentId;
+                    if (!assignmentsDict.ContainsKey(assignmentId))
+                    {
+                        var assignment = await _assignmentRepository.GetByIdAsync(assignmentId);
+                        if (assignment != null)
+                        {
+                            assignmentsDict[assignmentId] = new ViewModels.AssignmentHistoryInfo { Assignment = assignment };
+                            
+                            if (!subjectsDict.ContainsKey(assignment.SubjectId))
+                            {
+                                var subject = await _subjectRepository.GetByIdAsync(assignment.SubjectId);
+                                subjectsDict[assignment.SubjectId] = subject?.Name ?? $"Предмет #{assignment.SubjectId}";
+                            }
+                        }
+                    }
+                    if (assignmentsDict.ContainsKey(assignmentId))
+                    {
+                        assignmentsDict[assignmentId].PunctuationResults.Add(result);
+                    }
+                }
+            }
+
+            // Группируем результаты по орфоэпии
+            foreach (var result in viewModel.OrthoeopyResults)
+            {
+                if (result.OrthoeopyTest != null)
+                {
+                    var assignmentId = result.OrthoeopyTest.AssignmentId;
+                    if (!assignmentsDict.ContainsKey(assignmentId))
+                    {
+                        var assignment = await _assignmentRepository.GetByIdAsync(assignmentId);
+                        if (assignment != null)
+                        {
+                            assignmentsDict[assignmentId] = new ViewModels.AssignmentHistoryInfo { Assignment = assignment };
+                            
+                            if (!subjectsDict.ContainsKey(assignment.SubjectId))
+                            {
+                                var subject = await _subjectRepository.GetByIdAsync(assignment.SubjectId);
+                                subjectsDict[assignment.SubjectId] = subject?.Name ?? $"Предмет #{assignment.SubjectId}";
+                            }
+                        }
+                    }
+                    if (assignmentsDict.ContainsKey(assignmentId))
+                    {
+                        assignmentsDict[assignmentId].OrthoeopyResults.Add(result);
+                    }
+                }
+            }
+
+            // Группируем классические результаты
+            foreach (var result in viewModel.RegularResults)
+            {
+                if (result.RegularTest != null)
+                {
+                    var assignmentId = result.RegularTest.AssignmentId;
+                    if (!assignmentsDict.ContainsKey(assignmentId))
+                    {
+                        var assignment = await _assignmentRepository.GetByIdAsync(assignmentId);
+                        if (assignment != null)
+                        {
+                            assignmentsDict[assignmentId] = new ViewModels.AssignmentHistoryInfo { Assignment = assignment };
+                            
+                            if (!subjectsDict.ContainsKey(assignment.SubjectId))
+                            {
+                                var subject = await _subjectRepository.GetByIdAsync(assignment.SubjectId);
+                                subjectsDict[assignment.SubjectId] = subject?.Name ?? $"Предмет #{assignment.SubjectId}";
+                            }
+                        }
+                    }
+                    if (assignmentsDict.ContainsKey(assignmentId))
+                    {
+                        assignmentsDict[assignmentId].RegularResults.Add(result);
+                    }
+                }
+            }
+
+            viewModel.AssignmentsWithResults = assignmentsDict;
+            viewModel.SubjectsDict = subjectsDict;
+        }
+
+        // GET: StudentTest/StartSpelling/{id}
+        public async Task<IActionResult> StartSpelling(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    _logger.LogWarning("Студент не найден для пользователя {UserId}", currentUser.Id);
+                    TempData["ErrorMessage"] = "Профиль студента не найден.";
+                    return RedirectToAction("Index");
+                }
+
+                // Используем сервис для начала теста
+                var testResult = await _studentTestService.StartSpellingTestAsync(student.Id, id);
+                
+                _logger.LogInformation("Студент {StudentId} начал тест по орфографии {TestId}", student.Id, id);
+                
+                return RedirectToAction(nameof(TakeSpelling), new { id = testResult.Id });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Попытка доступа к недоступному тесту. TestId: {TestId}", id);
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при начале теста по орфографии. TestId: {TestId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при начале теста. Попробуйте позже.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: StudentTest/TakeSpelling/{id}
+        public async Task<IActionResult> TakeSpelling(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                // Получаем результат теста через репозиторий
+                var testResult = await _spellingTestResultRepository.GetByIdAsync(id);
+                
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                // Проверяем, не завершен ли тест
+                if (testResult.IsCompleted)
+                {
+                    return RedirectToAction("SpellingResult", new { id = testResult.Id });
+                }
+
+                // Загружаем тест
+                var test = await _spellingTestRepository.GetByIdAsync(testResult.SpellingTestId);
+                if (test == null)
+                {
+                    return NotFound();
+                }
+
+                // Загружаем вопросы
+                var questions = await _spellingQuestionRepository.GetByTestIdOrderedAsync(test.Id);
+                if (!questions.Any())
+                {
+                    TempData["ErrorMessage"] = "В тесте нет вопросов.";
+                    return RedirectToAction("Index");
+                }
+
+                // Загружаем ответы
+                var answers = await _answerService.GetSpellingAnswersAsync(testResult.Id);
+
+                // Вычисляем оставшееся время
+                var timeElapsed = DateTime.Now - testResult.StartedAt;
+                var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                var timeRemaining = timeLimit - timeElapsed;
+
+                // Если время истекло, завершаем тест автоматически
+                if (timeRemaining <= TimeSpan.Zero)
+                {
+                    await _testResultService.CompleteTestResultAsync(testResult);
+                    await _testEvaluationService.CalculateSpellingTestResultAsync(testResult.Id, test.Id);
+                    return RedirectToAction("SpellingResult", new { id = testResult.Id });
+                }
+
+                // Создаем ViewModel
+                var viewModel = new ViewModels.TakeSpellingTestViewModel
+                {
+                    TestResult = testResult,
+                    Test = test,
+                    Questions = questions,
+                    Answers = answers,
+                    TimeRemaining = timeRemaining,
+                    CurrentQuestionIndex = 0
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке страницы прохождения теста. ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при загрузке теста.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // POST: StudentTest/SubmitSpellingAnswer
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> SubmitSpellingAnswer([FromBody] ViewModels.SubmitSpellingAnswerViewModel model)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Пользователь не авторизован" });
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return Json(new { success = false, message = "Студент не найден" });
+                }
+
+                // Проверяем результат теста через репозиторий
+                var testResult = await _spellingTestResultRepository.GetByIdAsync(model.TestResultId);
+                
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return Json(new { success = false, message = "Результат теста не найден" });
+                }
+
+                if (testResult.IsCompleted)
+                {
+                    return Json(new { success = false, message = "Тест уже завершен" });
+                }
+
+                // Проверяем вопрос
+                var question = await _spellingQuestionRepository.GetByIdAsync(model.QuestionId);
+                if (question == null || question.SpellingTestId != testResult.SpellingTestId)
+                {
+                    return Json(new { success = false, message = "Вопрос не найден" });
+                }
+
+                // Сохраняем ответ
+                var answer = await _answerService.SaveSpellingAnswerAsync(model.TestResultId, model.QuestionId, model.StudentAnswer ?? "");
+
+                // Оцениваем ответ
+                var (isCorrect, points) = await _testEvaluationService.EvaluateSpellingAnswerAsync(
+                    question, 
+                    model.StudentAnswer ?? "", 
+                    question.Points);
+
+                // Обновляем ответ с результатом оценки
+                answer.IsCorrect = isCorrect;
+                answer.Points = points;
+                await _answerService.UpdateAnswerAsync(answer);
+
+                return Json(new 
+                { 
+                    success = true, 
+                    isCorrect = isCorrect,
+                    points = points
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при сохранении ответа. QuestionId: {QuestionId}, TestResultId: {TestResultId}", 
+                    model.QuestionId, model.TestResultId);
+                return Json(new { success = false, message = "Произошла ошибка при сохранении ответа" });
+            }
+        }
+
+        // POST: StudentTest/CompleteSpellingTest/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompleteSpellingTest(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                // Получаем результат теста через репозиторий
+                var testResult = await _spellingTestResultRepository.GetByIdAsync(id);
+                
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                if (testResult.IsCompleted)
+                {
+                    return RedirectToAction("SpellingResult", new { id = testResult.Id });
+                }
+
+                // Вычисляем результат
+                var (score, maxScore, percentage) = await _testEvaluationService.CalculateSpellingTestResultAsync(testResult.Id, testResult.SpellingTestId);
+                
+                // Обновляем результат теста
+                testResult.Score = score;
+                testResult.MaxScore = maxScore;
+                testResult.Percentage = percentage;
+                
+                // Завершаем тест (устанавливает CompletedAt и IsCompleted)
+                await _testResultService.CompleteTestResultAsync(testResult);
+
+                _logger.LogInformation("Студент {StudentId} завершил тест по орфографии {ResultId}. Баллы: {Score}/{MaxScore}, Процент: {Percentage}",
+                    student.Id, testResult.Id, testResult.Score, testResult.MaxScore, testResult.Percentage);
+
+                return RedirectToAction("SpellingResult", new { id = testResult.Id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при завершении теста по орфографии. ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при завершении теста.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: StudentTest/SpellingResult/{id}
+        public async Task<IActionResult> SpellingResult(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                var testResult = await _spellingTestResultRepository.GetByIdAsync(id);
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                // TODO: Этап 9 - Реализовать детальный просмотр результатов
+                TempData["InfoMessage"] = $"Тест завершен! Ваш результат: {testResult.Score}/{testResult.MaxScore} ({testResult.Percentage:F1}%)";
+                return RedirectToAction("History");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке результатов теста. ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при загрузке результатов.";
+                return RedirectToAction("Index");
             }
         }
 
