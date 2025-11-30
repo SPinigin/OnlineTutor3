@@ -92,7 +92,7 @@
                 </div>
                 <div class="card-body d-flex flex-column">
                     <p class="card-text d-none d-md-block">Управляйте учебными материалами</p>
-                    <a href="#" class="btn btn-secondary mt-auto w-100">
+                    <a asp-controller="Material" asp-action="Index" class="btn btn-secondary mt-auto w-100">
                         <i class="fas fa-list"></i> Материалы
                     </a>
                 </div>
@@ -101,15 +101,15 @@
 
         <div class="col-6 col-md-4">
             <div class="card h-100 shadow-sm border-0">
-                <div class="card-header bg-dark text-white">
+                <div class="card-header bg-danger text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-user-circle"></i> Профиль
+                        <i class="fas fa-calendar-alt"></i> Календарь
                     </h5>
                 </div>
                 <div class="card-body d-flex flex-column">
-                    <p class="card-text d-none d-md-block">Управляйте своим профилем</p>
-                    <a asp-controller="Account" asp-action="Profile" class="btn btn-dark mt-auto w-100">
-                        <i class="fas fa-cog"></i> Настройки
+                    <p class="card-text d-none d-md-block">Управляйте расписанием занятий</p>
+                    <a asp-controller="Calendar" asp-action="Index" class="btn btn-danger mt-auto w-100">
+                        <i class="fas fa-calendar"></i> Календарь
                     </a>
                 </div>
             </div>
