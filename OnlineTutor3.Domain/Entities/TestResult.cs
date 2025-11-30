@@ -30,6 +30,11 @@ namespace OnlineTutor3.Domain.Entities
         public int? Grade { get; set; }
 
         public bool IsCompleted { get; set; } = false;
+
+        /// <summary>
+        /// Оставшееся время в секундах (для паузы теста при закрытии страницы)
+        /// </summary>
+        public int? TimeRemainingSeconds { get; set; }
     }
 
     /// <summary>

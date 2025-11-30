@@ -346,6 +346,54 @@ namespace OnlineTutor3.Application.Services
                 return null;
             }
         }
+
+        public async Task UpdateTimeRemainingAsync<T>(int testResultId, int timeRemainingSeconds) where T : TestResult
+        {
+            try
+            {
+                if (typeof(T) == typeof(SpellingTestResult))
+                {
+                    var result = await _spellingTestResultRepository.GetByIdAsync(testResultId);
+                    if (result != null && !result.IsCompleted)
+                    {
+                        result.TimeRemainingSeconds = timeRemainingSeconds;
+                        await _spellingTestResultRepository.UpdateAsync(result);
+                    }
+                }
+                else if (typeof(T) == typeof(PunctuationTestResult))
+                {
+                    var result = await _punctuationTestResultRepository.GetByIdAsync(testResultId);
+                    if (result != null && !result.IsCompleted)
+                    {
+                        result.TimeRemainingSeconds = timeRemainingSeconds;
+                        await _punctuationTestResultRepository.UpdateAsync(result);
+                    }
+                }
+                else if (typeof(T) == typeof(OrthoeopyTestResult))
+                {
+                    var result = await _orthoeopyTestResultRepository.GetByIdAsync(testResultId);
+                    if (result != null && !result.IsCompleted)
+                    {
+                        result.TimeRemainingSeconds = timeRemainingSeconds;
+                        await _orthoeopyTestResultRepository.UpdateAsync(result);
+                    }
+                }
+                else if (typeof(T) == typeof(RegularTestResult))
+                {
+                    var result = await _regularTestResultRepository.GetByIdAsync(testResultId);
+                    if (result != null && !result.IsCompleted)
+                    {
+                        result.TimeRemainingSeconds = timeRemainingSeconds;
+                        await _regularTestResultRepository.UpdateAsync(result);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при обновлении оставшегося времени. ResultId: {ResultId}", testResultId);
+                throw;
+            }
+        }
     }
 }
 

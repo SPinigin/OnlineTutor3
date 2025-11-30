@@ -66,6 +66,11 @@ namespace OnlineTutor3.Application.Interfaces
         /// Получает лучший результат студента по тесту
         /// </summary>
         Task<T?> GetBestResultAsync<T>(int studentId, int testId) where T : TestResult;
+
+        /// <summary>
+        /// Обновляет оставшееся время для результата теста
+        /// </summary>
+        Task UpdateTimeRemainingAsync<T>(int testResultId, int timeRemainingSeconds) where T : TestResult;
     }
 
     /// <summary>

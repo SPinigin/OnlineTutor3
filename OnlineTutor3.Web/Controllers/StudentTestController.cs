@@ -634,9 +634,27 @@ namespace OnlineTutor3.Web.Controllers
                 var answers = await _answerService.GetSpellingAnswersAsync(testResult.Id);
 
                 // Вычисляем оставшееся время
-                var timeElapsed = DateTime.Now - testResult.StartedAt;
-                var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
-                var timeRemaining = timeLimit - timeElapsed;
+                // Если есть сохраненное время (пауза), используем его, иначе вычисляем на основе StartedAt
+                TimeSpan timeRemaining;
+                if (testResult.TimeRemainingSeconds.HasValue && testResult.TimeRemainingSeconds.Value > 0)
+                {
+                    // Используем сохраненное время (тест был на паузе)
+                    timeRemaining = TimeSpan.FromSeconds(testResult.TimeRemainingSeconds.Value);
+                }
+                else
+                {
+                    // Вычисляем время на основе StartedAt
+                    var timeElapsed = DateTime.Now - testResult.StartedAt;
+                    var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                    timeRemaining = timeLimit - timeElapsed;
+                    
+                    // Сохраняем вычисленное время для будущих пауз
+                    if (timeRemaining > TimeSpan.Zero)
+                    {
+                        testResult.TimeRemainingSeconds = (int)timeRemaining.TotalSeconds;
+                        await _spellingTestResultRepository.UpdateAsync(testResult);
+                    }
+                }
 
                 // Если время истекло, завершаем тест автоматически
                 if (timeRemaining <= TimeSpan.Zero)
@@ -772,6 +790,53 @@ namespace OnlineTutor3.Web.Controllers
                 _logger.LogError(ex, "Ошибка при сохранении ответа. QuestionId: {QuestionId}, TestResultId: {TestResultId}", 
                     model.QuestionId, model.TestResultId);
                 return Json(new { success = false, message = "Произошла ошибка при сохранении ответа" });
+            }
+        }
+
+        // POST: StudentTest/UpdateTimeRemaining
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> UpdateTimeRemaining(int testResultId, int timeRemainingSeconds, string testType)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Unauthorized();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return Unauthorized();
+                }
+
+                // Обновляем время в зависимости от типа теста
+                switch (testType.ToLower())
+                {
+                    case "spelling":
+                        await _testResultService.UpdateTimeRemainingAsync<SpellingTestResult>(testResultId, timeRemainingSeconds);
+                        break;
+                    case "punctuation":
+                        await _testResultService.UpdateTimeRemainingAsync<PunctuationTestResult>(testResultId, timeRemainingSeconds);
+                        break;
+                    case "orthoeopy":
+                        await _testResultService.UpdateTimeRemainingAsync<OrthoeopyTestResult>(testResultId, timeRemainingSeconds);
+                        break;
+                    case "regular":
+                        await _testResultService.UpdateTimeRemainingAsync<RegularTestResult>(testResultId, timeRemainingSeconds);
+                        break;
+                    default:
+                        return BadRequest("Неизвестный тип теста");
+                }
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при обновлении оставшегося времени. ResultId: {ResultId}", testResultId);
+                return StatusCode(500, "Ошибка при обновлении времени");
             }
         }
 
@@ -949,9 +1014,27 @@ namespace OnlineTutor3.Web.Controllers
                 var answers = await _answerService.GetPunctuationAnswersAsync(testResult.Id);
 
                 // Вычисляем оставшееся время
-                var timeElapsed = DateTime.Now - testResult.StartedAt;
-                var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
-                var timeRemaining = timeLimit - timeElapsed;
+                // Если есть сохраненное время (пауза), используем его, иначе вычисляем на основе StartedAt
+                TimeSpan timeRemaining;
+                if (testResult.TimeRemainingSeconds.HasValue && testResult.TimeRemainingSeconds.Value > 0)
+                {
+                    // Используем сохраненное время (тест был на паузе)
+                    timeRemaining = TimeSpan.FromSeconds(testResult.TimeRemainingSeconds.Value);
+                }
+                else
+                {
+                    // Вычисляем время на основе StartedAt
+                    var timeElapsed = DateTime.Now - testResult.StartedAt;
+                    var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                    timeRemaining = timeLimit - timeElapsed;
+                    
+                    // Сохраняем вычисленное время для будущих пауз
+                    if (timeRemaining > TimeSpan.Zero)
+                    {
+                        testResult.TimeRemainingSeconds = (int)timeRemaining.TotalSeconds;
+                        await _punctuationTestResultRepository.UpdateAsync(testResult);
+                    }
+                }
 
                 // Если время истекло, завершаем тест автоматически
                 if (timeRemaining <= TimeSpan.Zero)
@@ -1215,9 +1298,27 @@ namespace OnlineTutor3.Web.Controllers
                 var answers = await _answerService.GetOrthoeopyAnswersAsync(testResult.Id);
 
                 // Вычисляем оставшееся время
-                var timeElapsed = DateTime.Now - testResult.StartedAt;
-                var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
-                var timeRemaining = timeLimit - timeElapsed;
+                // Если есть сохраненное время (пауза), используем его, иначе вычисляем на основе StartedAt
+                TimeSpan timeRemaining;
+                if (testResult.TimeRemainingSeconds.HasValue && testResult.TimeRemainingSeconds.Value > 0)
+                {
+                    // Используем сохраненное время (тест был на паузе)
+                    timeRemaining = TimeSpan.FromSeconds(testResult.TimeRemainingSeconds.Value);
+                }
+                else
+                {
+                    // Вычисляем время на основе StartedAt
+                    var timeElapsed = DateTime.Now - testResult.StartedAt;
+                    var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                    timeRemaining = timeLimit - timeElapsed;
+                    
+                    // Сохраняем вычисленное время для будущих пауз
+                    if (timeRemaining > TimeSpan.Zero)
+                    {
+                        testResult.TimeRemainingSeconds = (int)timeRemaining.TotalSeconds;
+                        await _orthoeopyTestResultRepository.UpdateAsync(testResult);
+                    }
+                }
 
                 // Если время истекло, завершаем тест автоматически
                 if (timeRemaining <= TimeSpan.Zero)
@@ -1489,9 +1590,27 @@ namespace OnlineTutor3.Web.Controllers
                 var answers = await _answerService.GetRegularAnswersAsync(testResult.Id);
 
                 // Вычисляем оставшееся время
-                var timeElapsed = DateTime.Now - testResult.StartedAt;
-                var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
-                var timeRemaining = timeLimit - timeElapsed;
+                // Если есть сохраненное время (пауза), используем его, иначе вычисляем на основе StartedAt
+                TimeSpan timeRemaining;
+                if (testResult.TimeRemainingSeconds.HasValue && testResult.TimeRemainingSeconds.Value > 0)
+                {
+                    // Используем сохраненное время (тест был на паузе)
+                    timeRemaining = TimeSpan.FromSeconds(testResult.TimeRemainingSeconds.Value);
+                }
+                else
+                {
+                    // Вычисляем время на основе StartedAt
+                    var timeElapsed = DateTime.Now - testResult.StartedAt;
+                    var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                    timeRemaining = timeLimit - timeElapsed;
+                    
+                    // Сохраняем вычисленное время для будущих пауз
+                    if (timeRemaining > TimeSpan.Zero)
+                    {
+                        testResult.TimeRemainingSeconds = (int)timeRemaining.TotalSeconds;
+                        await _regularTestResultRepository.UpdateAsync(testResult);
+                    }
+                }
 
                 // Если время истекло, завершаем тест автоматически
                 if (timeRemaining <= TimeSpan.Zero)

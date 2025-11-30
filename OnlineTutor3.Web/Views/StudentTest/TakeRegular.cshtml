@@ -323,9 +323,13 @@
     <script>
         let currentQuestionIndex = 0;
         let totalQuestions = @Model.Questions.Count;
+        // Используем сохраненное время или вычисляем на основе серверного времени
         let timeRemaining = @((int)Model.TimeRemaining.TotalSeconds);
+        let testResultId = @Model.TestResult.Id;
+        let testType = 'regular';
         let answers = {};
         let timerInterval;
+        let timeSaveInterval;
         let testCompleting = false;
 
         $(document).ready(function() {
@@ -357,8 +361,36 @@
             updateProgress();
         }
 
+        /**
+         * Сохраняет оставшееся время на сервере
+         */
+        function saveTimeRemaining() {
+            if (testCompleting) return;
+            
+            $.ajax({
+                url: '@Url.Action("UpdateTimeRemaining", "StudentTest")',
+                type: 'POST',
+                data: {
+                    testResultId: testResultId,
+                    timeRemainingSeconds: timeRemaining,
+                    testType: testType
+                },
+                success: function() {
+                    // Время успешно сохранено
+                },
+                error: function() {
+                    console.error('Ошибка при сохранении времени');
+                }
+            });
+        }
+
         function startTimer() {
             updateTimerDisplay();
+            
+            // Сохраняем время каждые 30 секунд
+            timeSaveInterval = setInterval(function() {
+                saveTimeRemaining();
+            }, 30000);
             
             timerInterval = setInterval(function() {
                 timeRemaining--;
@@ -366,6 +398,7 @@
 
                 if (timeRemaining <= 0) {
                     clearInterval(timerInterval);
+                    clearInterval(timeSaveInterval);
                     autoSubmitTest();
                 }
             }, 1000);
@@ -528,18 +561,46 @@
         }
 
         function autoSubmitTest() {
-            testCompleting = true;
+            if (testCompleting) return;
             
-            alert('Время вышло! Тест будет автоматически завершен.');
+            if (timeRemaining > 0) {
+                // Если время еще есть, не завершаем
+                return;
+            }
+            
+            alert('Время истекло! Тест будет автоматически завершен.');
+            testCompleting = true;
+            clearInterval(timerInterval);
+            clearInterval(timeSaveInterval);
             $('form[action*="CompleteRegularTest"]').submit();
         }
 
-        // Предотвращение случайного закрытия страницы
+        // Предотвращение случайного закрытия страницы и сохранение времени
         window.addEventListener('beforeunload', function(e) {
             if (testCompleting) {
                 return;
             }
-
+            
+            // Сохраняем время перед закрытием (синхронный запрос)
+            if (navigator.sendBeacon) {
+                const formData = new FormData();
+                formData.append('testResultId', testResultId);
+                formData.append('timeRemainingSeconds', timeRemaining);
+                formData.append('testType', testType);
+                navigator.sendBeacon('@Url.Action("UpdateTimeRemaining", "StudentTest")', formData);
+            } else {
+                $.ajax({
+                    url: '@Url.Action("UpdateTimeRemaining", "StudentTest")',
+                    type: 'POST',
+                    async: false,
+                    data: {
+                        testResultId: testResultId,
+                        timeRemainingSeconds: timeRemaining,
+                        testType: testType
+                    }
+                });
+            }
+            
             e.preventDefault();
             e.returnValue = '';
         });
