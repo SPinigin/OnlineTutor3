@@ -140,7 +140,9 @@ else
                                 <td>
                                     @if (item.ClassId.HasValue)
                                     {
-                                        <span class="badge bg-primary">Класс #@item.ClassId</span>
+                                        var classesDict = ViewBag.ClassesDict as Dictionary<int, string> ?? new Dictionary<int, string>();
+                                        var className = classesDict.ContainsKey(item.ClassId.Value) ? classesDict[item.ClassId.Value] : $"Класс #{item.ClassId}";
+                                        <span class="badge bg-primary">@className</span>
                                     }
                                     else
                                     {

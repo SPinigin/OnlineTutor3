@@ -93,6 +93,10 @@ namespace OnlineTutor3.Web.Controllers
                 ViewBag.Classes = new SelectList(classes, "Id", "Name");
                 ViewBag.CurrentFilter = searchString;
                 ViewBag.ClassFilter = classFilter;
+                
+                // Создаем словарь для быстрого доступа к названиям классов
+                var classesDict = classes.ToDictionary(c => c.Id, c => c.Name);
+                ViewBag.ClassesDict = classesDict;
 
                 return View(studentsWithUsers.Select(s => s.Student).ToList());
             }
