@@ -11,113 +11,113 @@
                     <i class="fas fa-plus"></i> Добавить занятие в календарь
                 </h4>
             </div>
-            <div class="card-body">
+            <div class="card-body py-3">
                 <form asp-action="Create" method="post">
-                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                    <div asp-validation-summary="All" class="text-danger mb-2"></div>
 
-                    <fieldset class="mb-4">
-                        <legend class="fs-6 text-primary border-bottom pb-1 mb-3">
+                    <fieldset class="mb-3">
+                        <legend class="fs-6 text-primary border-bottom pb-1 mb-2">
                             <i class="fas fa-info-circle"></i> Основная информация
                         </legend>
 
-                        <div class="mb-3">
-                            <label asp-for="Title" class="form-label">
+                        <div class="mb-2">
+                            <label asp-for="Title" class="form-label small">
                                 <i class="fas fa-heading"></i> Название занятия <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="Title" class="form-control" placeholder="Например: Урок русского языка" />
-                            <span asp-validation-for="Title" class="text-danger"></span>
+                            <input asp-for="Title" class="form-control form-control-sm" placeholder="Например: Урок русского языка" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Description" class="form-label">
+                        <div class="mb-2">
+                            <label asp-for="Description" class="form-label small">
                                 <i class="fas fa-align-left"></i> Описание
                             </label>
-                            <textarea asp-for="Description" class="form-control" rows="3"
+                            <textarea asp-for="Description" class="form-control form-control-sm" rows="2"
                                       placeholder="Краткое описание занятия, темы и т.д."></textarea>
-                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
                         </div>
                     </fieldset>
 
-                    <fieldset class="mb-4">
-                        <legend class="fs-6 text-primary border-bottom pb-1 mb-3">
+                    <fieldset class="mb-3">
+                        <legend class="fs-6 text-primary border-bottom pb-1 mb-2">
                             <i class="fas fa-clock"></i> Дата и время
                         </legend>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="StartDateTime" class="form-label">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="StartDateTime" class="form-label small">
                                     <i class="fas fa-play-circle"></i> Начало <span class="text-danger">*</span>
                                 </label>
-                                <input asp-for="StartDateTime" class="form-control" type="datetime-local"
+                                <input asp-for="StartDateTime" class="form-control form-control-sm" type="datetime-local"
                                        step="60" value="@Model.StartDateTime.ToString("yyyy-MM-ddTHH:mm")" />
-                                <span asp-validation-for="StartDateTime" class="text-danger"></span>
+                                <span asp-validation-for="StartDateTime" class="text-danger small"></span>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="EndDateTime" class="form-label">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="EndDateTime" class="form-label small">
                                     <i class="fas fa-stop-circle"></i> Окончание <span class="text-danger">*</span>
                                 </label>
-                                <input asp-for="EndDateTime" class="form-control" type="datetime-local"
+                                <input asp-for="EndDateTime" class="form-control form-control-sm" type="datetime-local"
                                        step="60" value="@Model.EndDateTime.ToString("yyyy-MM-ddTHH:mm")" />
-                                <span asp-validation-for="EndDateTime" class="text-danger"></span>
+                                <span asp-validation-for="EndDateTime" class="text-danger small"></span>
                             </div>
                         </div>
                     </fieldset>
 
-                    <fieldset class="mb-4">
-                        <legend class="fs-6 text-primary border-bottom pb-1 mb-3">
+                    <fieldset class="mb-3">
+                        <legend class="fs-6 text-primary border-bottom pb-1 mb-2">
                             <i class="fas fa-users"></i> Участники
                         </legend>
 
-                        <div class="alert alert-info">
+                        <div class="alert alert-info py-2 mb-2">
                             <i class="fas fa-info-circle"></i>
-                            <strong>Внимание:</strong> Выберите либо класс, либо отдельного ученика
+                            <strong class="small">Внимание:</strong> <span class="small">Выберите либо класс, либо отдельного ученика</span>
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="ClassId" class="form-label">
+                        <div class="mb-2">
+                            <label asp-for="ClassId" class="form-label small">
                                 <i class="fas fa-users"></i> Класс
                             </label>
-                            <select asp-for="ClassId" asp-items="@ViewBag.Classes" class="form-select" id="classSelect">
+                            <select asp-for="ClassId" asp-items="@ViewBag.Classes" class="form-select form-select-sm" id="classSelect">
                                 <option value="">Не выбран</option>
                             </select>
-                            <span asp-validation-for="ClassId" class="text-danger"></span>
+                            <span asp-validation-for="ClassId" class="text-danger small"></span>
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="StudentId" class="form-label">
+                        <div class="mb-2">
+                            <label asp-for="StudentId" class="form-label small">
                                 <i class="fas fa-user-graduate"></i> Ученик
                             </label>
-                            <select asp-for="StudentId" asp-items="@ViewBag.Students" class="form-select" id="studentSelect">
+                            <select asp-for="StudentId" asp-items="@ViewBag.Students" class="form-select form-select-sm" id="studentSelect">
                                 <option value="">Не выбран</option>
                             </select>
-                            <span asp-validation-for="StudentId" class="text-danger"></span>
+                            <span asp-validation-for="StudentId" class="text-danger small"></span>
                         </div>
                     </fieldset>
 
-                    <fieldset class="mb-4">
-                        <legend class="fs-6 text-primary border-bottom pb-1 mb-3">
+                    <fieldset class="mb-3">
+                        <legend class="fs-6 text-primary border-bottom pb-1 mb-2">
                             <i class="fas fa-cog"></i> Дополнительные настройки
                         </legend>
 
-                        <div class="mb-3">
-                            <label asp-for="Location" class="form-label">
+                        <div class="mb-2">
+                            <label asp-for="Location" class="form-label small">
                                 <i class="fas fa-map-marker-alt"></i> Место проведения
                             </label>
-                            <input asp-for="Location" class="form-control" placeholder="Например: Онлайн, Кабинет 201" />
-                            <span asp-validation-for="Location" class="text-danger"></span>
+                            <input asp-for="Location" class="form-control form-control-sm" placeholder="Например: Онлайн, Кабинет 201" />
+                            <span asp-validation-for="Location" class="text-danger small"></span>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">
+                        <div class="mb-2">
+                            <label class="form-label small">
                                 <i class="fas fa-palette"></i> Цвет в календаре
                             </label>
                             <div class="row">
                                 @foreach (var color in ViewBag.Colors)
                                 {
-                                    <div class="col-3 mb-2">
+                                    <div class="col-3 mb-1">
                                         <input type="radio" class="btn-check" name="Color" id="color-@color.Value"
                                                value="@color.Value" @(color.Value == "#007bff" ? "checked" : "") />
-                                        <label class="btn btn-outline-@color.Class w-100" for="color-@color.Value">
+                                        <label class="btn btn-outline-@color.Class btn-sm w-100" for="color-@color.Value">
                                             @color.Text
                                         </label>
                                     </div>
@@ -125,31 +125,31 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
+                        <div class="mb-2">
                             <div class="form-check form-switch">
                                 <input asp-for="IsRecurring" class="form-check-input" id="isRecurring" />
-                                <label asp-for="IsRecurring" class="form-check-label">
+                                <label asp-for="IsRecurring" class="form-check-label small">
                                     <i class="fas fa-repeat"></i> Повторяющееся занятие
                                 </label>
                             </div>
                         </div>
 
-                        <div class="mb-3" id="recurrenceGroup" style="display: none;">
-                            <label asp-for="RecurrencePattern" class="form-label">
+                        <div class="mb-2" id="recurrenceGroup" style="display: none;">
+                            <label asp-for="RecurrencePattern" class="form-label small">
                                 <i class="fas fa-calendar-week"></i> Повторять
                             </label>
-                            <select asp-for="RecurrencePattern" asp-items="@ViewBag.RecurrencePatterns" class="form-select">
+                            <select asp-for="RecurrencePattern" asp-items="@ViewBag.RecurrencePatterns" class="form-select form-select-sm">
                                 <option value="">Выберите...</option>
                             </select>
-                            <span asp-validation-for="RecurrencePattern" class="text-danger"></span>
+                            <span asp-validation-for="RecurrencePattern" class="text-danger small"></span>
                         </div>
                     </fieldset>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a asp-action="Index" class="btn btn-outline-secondary">
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
                             <i class="fas fa-times"></i> Отмена
                         </a>
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-success btn-sm">
                             <i class="fas fa-save"></i> Добавить занятие
                         </button>
                     </div>
