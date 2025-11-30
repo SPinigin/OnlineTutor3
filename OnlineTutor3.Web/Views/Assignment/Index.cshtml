@@ -177,8 +177,8 @@ else
                                             <th style="width: 5%;">Тип</th>
                                             <th style="width: 35%;">Название</th>
                                             <th style="width: 15%;" class="text-center">Вопросов</th>
-                                            <th style="width: 10%;">Время</th>
-                                            <th style="width: 10%;">Статус</th>
+                                            <th style="width: 10%;" class="text-center">Время</th>
+                                            <th style="width: 10%;" class="text-center">Статус</th>
                                             <th style="width: 25%;" class="text-center">Действия</th>
                                         </tr>
                                     </thead>
@@ -205,10 +205,10 @@ else
                                                     <td class="text-center">
                                                         <small>@(assignmentData?.SpellingTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.SpellingTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-center">
                                                         <small>@test.TimeLimit мин</small>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-center">
                                                         <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
@@ -252,10 +252,10 @@ else
                                                     <td class="text-center">
                                                         <small>@(assignmentData?.PunctuationTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.PunctuationTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-center">
                                                         <small>@test.TimeLimit мин</small>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-center">
                                                         <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
@@ -299,10 +299,10 @@ else
                                                     <td class="text-center">
                                                         <small>@(assignmentData?.OrthoeopyTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.OrthoeopyTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-center">
                                                         <small>@test.TimeLimit мин</small>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-center">
                                                         <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
@@ -346,10 +346,10 @@ else
                                                     <td class="text-center">
                                                         <small>@(assignmentData?.RegularTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.RegularTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-center">
                                                         <small>@test.TimeLimit мин</small>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-center">
                                                         <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
