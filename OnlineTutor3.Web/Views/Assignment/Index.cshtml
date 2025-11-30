@@ -188,7 +188,7 @@ else
                                         {
                                             @foreach (var test in assignmentData.SpellingTests)
                                             {
-                                                <tr>
+                                                <tr class="test-row" data-details-url="@Url.Action("Details", "SpellingTest", new { id = test.Id })" style="cursor: pointer;">
                                                     <td>
                                                         <span class="badge bg-success">
                                                             <i class="fas fa-spell-check"></i>
@@ -213,7 +213,7 @@ else
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center" onclick="event.stopPropagation();">
                                                         <div class="d-flex gap-1 justify-content-center">
                                                             <a asp-controller="SpellingTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
                                                                 <i class="fas fa-eye"></i>
@@ -235,7 +235,7 @@ else
                                         {
                                             @foreach (var test in assignmentData.PunctuationTests)
                                             {
-                                                <tr>
+                                                <tr class="test-row" data-details-url="@Url.Action("Details", "PunctuationTest", new { id = test.Id })" style="cursor: pointer;">
                                                     <td>
                                                         <span class="badge bg-info">
                                                             <i class="fas fa-quote-right"></i>
@@ -260,7 +260,7 @@ else
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center" onclick="event.stopPropagation();">
                                                         <div class="d-flex gap-1 justify-content-center">
                                                             <a asp-controller="PunctuationTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
                                                                 <i class="fas fa-eye"></i>
@@ -282,7 +282,7 @@ else
                                         {
                                             @foreach (var test in assignmentData.OrthoeopyTests)
                                             {
-                                                <tr>
+                                                <tr class="test-row" data-details-url="@Url.Action("Details", "OrthoeopyTest", new { id = test.Id })" style="cursor: pointer;">
                                                     <td>
                                                         <span class="badge bg-warning text-dark">
                                                             <i class="fas fa-volume-up"></i>
@@ -307,7 +307,7 @@ else
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center" onclick="event.stopPropagation();">
                                                         <div class="d-flex gap-1 justify-content-center">
                                                             <a asp-controller="OrthoeopyTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
                                                                 <i class="fas fa-eye"></i>
@@ -329,7 +329,7 @@ else
                                         {
                                             @foreach (var test in assignmentData.RegularTests)
                                             {
-                                                <tr>
+                                                <tr class="test-row" data-details-url="@Url.Action("Details", "RegularTest", new { id = test.Id })" style="cursor: pointer;">
                                                     <td>
                                                         <span class="badge bg-primary">
                                                             <i class="fas fa-clipboard-check"></i>
@@ -354,7 +354,7 @@ else
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center" onclick="event.stopPropagation();">
                                                         <div class="d-flex gap-1 justify-content-center">
                                                             <a asp-controller="RegularTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
                                                                 <i class="fas fa-eye"></i>
@@ -401,6 +401,19 @@ else
                 } else {
                     $('.assignment-item').hide();
                     $('.assignment-item[data-subject-id="' + subjectId + '"]').show();
+                }
+            });
+
+            // Обработка клика на строку теста
+            $('.test-row').on('click', function(e) {
+                // Не обрабатываем клик, если кликнули на кнопку или ссылку
+                if ($(e.target).closest('a, button').length > 0) {
+                    return;
+                }
+                
+                var detailsUrl = $(this).data('details-url');
+                if (detailsUrl) {
+                    window.location.href = detailsUrl;
                 }
             });
         });

@@ -199,6 +199,15 @@ body {
     padding: 0.2rem 0.4rem;
 }
 
+/* Кликабельные строки тестов */
+.test-row {
+    transition: background-color 0.2s ease;
+}
+
+.test-row:hover {
+    background-color: #f0f0f0 !important;
+}
+
 .accordion-button {
     font-size: 0.9rem;
     padding: 0.5rem 1rem;
