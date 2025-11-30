@@ -20,6 +20,12 @@ namespace OnlineTutor3.Web.Controllers
         private readonly IPunctuationTestResultRepository _punctuationTestResultRepository;
         private readonly IOrthoeopyTestResultRepository _orthoeopyTestResultRepository;
         private readonly IRegularTestResultRepository _regularTestResultRepository;
+        private readonly ISpellingQuestionRepository _spellingQuestionRepository;
+        private readonly IPunctuationQuestionRepository _punctuationQuestionRepository;
+        private readonly IOrthoeopyQuestionRepository _orthoeopyQuestionRepository;
+        private readonly IRegularQuestionRepository _regularQuestionRepository;
+        private readonly IRegularQuestionOptionRepository _regularQuestionOptionRepository;
+        private readonly IAnswerService _answerService;
         private readonly IStudentService _studentService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<TeacherDashboardController> _logger;
@@ -33,6 +39,12 @@ namespace OnlineTutor3.Web.Controllers
             IPunctuationTestResultRepository punctuationTestResultRepository,
             IOrthoeopyTestResultRepository orthoeopyTestResultRepository,
             IRegularTestResultRepository regularTestResultRepository,
+            ISpellingQuestionRepository spellingQuestionRepository,
+            IPunctuationQuestionRepository punctuationQuestionRepository,
+            IOrthoeopyQuestionRepository orthoeopyQuestionRepository,
+            IRegularQuestionRepository regularQuestionRepository,
+            IRegularQuestionOptionRepository regularQuestionOptionRepository,
+            IAnswerService answerService,
             IStudentService studentService,
             UserManager<ApplicationUser> userManager,
             ILogger<TeacherDashboardController> logger)
@@ -45,6 +57,12 @@ namespace OnlineTutor3.Web.Controllers
             _punctuationTestResultRepository = punctuationTestResultRepository;
             _orthoeopyTestResultRepository = orthoeopyTestResultRepository;
             _regularTestResultRepository = regularTestResultRepository;
+            _spellingQuestionRepository = spellingQuestionRepository;
+            _punctuationQuestionRepository = punctuationQuestionRepository;
+            _orthoeopyQuestionRepository = orthoeopyQuestionRepository;
+            _regularQuestionRepository = regularQuestionRepository;
+            _regularQuestionOptionRepository = regularQuestionOptionRepository;
+            _answerService = answerService;
             _studentService = studentService;
             _userManager = userManager;
             _logger = logger;
@@ -288,12 +306,197 @@ namespace OnlineTutor3.Web.Controllers
                     return BadRequest("Тип теста не указан");
                 }
 
-                // Перенаправляем на соответствующий action в StudentTestController
-                return RedirectToAction(
-                    $"{testType}Result",
-                    "StudentTest",
-                    new { id = testResultId }
-                );
+                // Загружаем результат теста и проверяем права доступа
+                object? result = null;
+                string? studentName = null;
+
+                switch (testType.ToLower())
+                {
+                    case "spelling":
+                        var spellingResult = await _spellingTestResultRepository.GetByIdAsync(testResultId);
+                        if (spellingResult != null)
+                        {
+                            // Проверяем, что тест принадлежит учителю
+                            var spellingTest = await _spellingTestService.GetByIdAsync(spellingResult.SpellingTestId);
+                            if (spellingTest == null || spellingTest.TeacherId != currentUser.Id)
+                            {
+                                return Forbid();
+                            }
+
+                            // Загружаем данные
+                            var spellingQuestions = await _spellingQuestionRepository.GetByTestIdOrderedAsync(spellingResult.SpellingTestId);
+                            var spellingAnswers = await _answerService.GetSpellingAnswersAsync(testResultId);
+                            var student = await _studentService.GetByIdAsync(spellingResult.StudentId);
+                            var studentUser = student != null ? await _userManager.FindByIdAsync(student.UserId) : null;
+                            studentName = studentUser?.FullName ?? studentUser?.Email ?? "Неизвестный студент";
+
+                            result = new SpellingTestResultViewModel
+                            {
+                                TestResult = spellingResult,
+                                Test = spellingTest,
+                                Questions = spellingQuestions,
+                                Answers = spellingAnswers,
+                                TestTitle = spellingTest.Title,
+                                Score = spellingResult.Score,
+                                MaxScore = spellingResult.MaxScore,
+                                Percentage = spellingResult.Percentage,
+                                Grade = spellingResult.Grade ?? 0,
+                                CompletedAt = spellingResult.CompletedAt,
+                                StartedAt = spellingResult.StartedAt,
+                                Duration = spellingResult.CompletedAt.HasValue ? spellingResult.CompletedAt.Value - spellingResult.StartedAt : TimeSpan.Zero,
+                                StudentName = studentName,
+                                ShowCorrectAnswers = spellingTest.ShowCorrectAnswers,
+                                TestIcon = "fa-spell-check",
+                                TestColor = "primary",
+                                AttemptNumber = spellingResult.AttemptNumber
+                            };
+                        }
+                        break;
+
+                    case "punctuation":
+                        var punctuationResult = await _punctuationTestResultRepository.GetByIdAsync(testResultId);
+                        if (punctuationResult != null)
+                        {
+                            var punctuationTest = await _punctuationTestService.GetByIdAsync(punctuationResult.PunctuationTestId);
+                            if (punctuationTest == null || punctuationTest.TeacherId != currentUser.Id)
+                            {
+                                return Forbid();
+                            }
+
+                            var punctuationQuestions = await _punctuationQuestionRepository.GetByTestIdOrderedAsync(punctuationResult.PunctuationTestId);
+                            var punctuationAnswers = await _answerService.GetPunctuationAnswersAsync(testResultId);
+                            var student2 = await _studentService.GetByIdAsync(punctuationResult.StudentId);
+                            var studentUser2 = student2 != null ? await _userManager.FindByIdAsync(student2.UserId) : null;
+                            studentName = studentUser2?.FullName ?? studentUser2?.Email ?? "Неизвестный студент";
+
+                            result = new PunctuationTestResultViewModel
+                            {
+                                TestResult = punctuationResult,
+                                Test = punctuationTest,
+                                Questions = punctuationQuestions,
+                                Answers = punctuationAnswers,
+                                TestTitle = punctuationTest.Title,
+                                Score = punctuationResult.Score,
+                                MaxScore = punctuationResult.MaxScore,
+                                Percentage = punctuationResult.Percentage,
+                                Grade = punctuationResult.Grade ?? 0,
+                                CompletedAt = punctuationResult.CompletedAt,
+                                StartedAt = punctuationResult.StartedAt,
+                                Duration = punctuationResult.CompletedAt.HasValue ? punctuationResult.CompletedAt.Value - punctuationResult.StartedAt : TimeSpan.Zero,
+                                StudentName = studentName,
+                                ShowCorrectAnswers = punctuationTest.ShowCorrectAnswers,
+                                TestIcon = "fa-exclamation",
+                                TestColor = "info",
+                                AttemptNumber = punctuationResult.AttemptNumber
+                            };
+                        }
+                        break;
+
+                    case "orthoeopy":
+                        var orthoeopyResult = await _orthoeopyTestResultRepository.GetByIdAsync(testResultId);
+                        if (orthoeopyResult != null)
+                        {
+                            var orthoeopyTest = await _orthoeopyTestService.GetByIdAsync(orthoeopyResult.OrthoeopyTestId);
+                            if (orthoeopyTest == null || orthoeopyTest.TeacherId != currentUser.Id)
+                            {
+                                return Forbid();
+                            }
+
+                            var orthoeopyQuestions = await _orthoeopyQuestionRepository.GetByTestIdOrderedAsync(orthoeopyResult.OrthoeopyTestId);
+                            var orthoeopyAnswers = await _answerService.GetOrthoeopyAnswersAsync(testResultId);
+                            var student3 = await _studentService.GetByIdAsync(orthoeopyResult.StudentId);
+                            var studentUser3 = student3 != null ? await _userManager.FindByIdAsync(student3.UserId) : null;
+                            studentName = studentUser3?.FullName ?? studentUser3?.Email ?? "Неизвестный студент";
+
+                            result = new OrthoeopyTestResultViewModel
+                            {
+                                TestResult = orthoeopyResult,
+                                Test = orthoeopyTest,
+                                Questions = orthoeopyQuestions,
+                                Answers = orthoeopyAnswers,
+                                TestTitle = orthoeopyTest.Title,
+                                Score = orthoeopyResult.Score,
+                                MaxScore = orthoeopyResult.MaxScore,
+                                Percentage = orthoeopyResult.Percentage,
+                                Grade = orthoeopyResult.Grade ?? 0,
+                                CompletedAt = orthoeopyResult.CompletedAt,
+                                StartedAt = orthoeopyResult.StartedAt,
+                                Duration = orthoeopyResult.CompletedAt.HasValue ? orthoeopyResult.CompletedAt.Value - orthoeopyResult.StartedAt : TimeSpan.Zero,
+                                StudentName = studentName,
+                                ShowCorrectAnswers = orthoeopyTest.ShowCorrectAnswers,
+                                TestIcon = "fa-volume-up",
+                                TestColor = "success",
+                                AttemptNumber = orthoeopyResult.AttemptNumber
+                            };
+                        }
+                        break;
+
+                    case "regular":
+                        var regularResult = await _regularTestResultRepository.GetByIdAsync(testResultId);
+                        if (regularResult != null)
+                        {
+                            var regularTest = await _regularTestService.GetByIdAsync(regularResult.RegularTestId);
+                            if (regularTest == null || regularTest.TeacherId != currentUser.Id)
+                            {
+                                return Forbid();
+                            }
+
+                            var regularQuestions = await _regularQuestionRepository.GetByTestIdOrderedAsync(regularResult.RegularTestId);
+                            var regularAnswers = await _answerService.GetRegularAnswersAsync(testResultId);
+                            
+                            // Загружаем опции для каждого вопроса
+                            var allOptions = new List<RegularQuestionOption>();
+                            foreach (var question in regularQuestions)
+                            {
+                                var options = await _regularQuestionOptionRepository.GetByQuestionIdOrderedAsync(question.Id);
+                                allOptions.AddRange(options);
+                            }
+
+                            var student4 = await _studentService.GetByIdAsync(regularResult.StudentId);
+                            var studentUser4 = student4 != null ? await _userManager.FindByIdAsync(student4.UserId) : null;
+                            studentName = studentUser4?.FullName ?? studentUser4?.Email ?? "Неизвестный студент";
+
+                            result = new RegularTestResultViewModel
+                            {
+                                TestResult = regularResult,
+                                Test = regularTest,
+                                Questions = regularQuestions,
+                                Options = allOptions,
+                                Answers = regularAnswers,
+                                TestTitle = regularTest.Title,
+                                Score = regularResult.Score,
+                                MaxScore = regularResult.MaxScore,
+                                Percentage = regularResult.Percentage,
+                                Grade = regularResult.Grade ?? 0,
+                                CompletedAt = regularResult.CompletedAt,
+                                StartedAt = regularResult.StartedAt,
+                                Duration = regularResult.CompletedAt.HasValue ? regularResult.CompletedAt.Value - regularResult.StartedAt : TimeSpan.Zero,
+                                StudentName = studentName,
+                                ShowCorrectAnswers = regularTest.ShowCorrectAnswers,
+                                TestIcon = "fa-list-ul",
+                                TestColor = "info",
+                                AttemptNumber = regularResult.AttemptNumber
+                            };
+                        }
+                        break;
+
+                    default:
+                        _logger.LogWarning("Неизвестный тип теста: {TestType}", testType);
+                        return BadRequest($"Неизвестный тип теста: {testType}");
+                }
+
+                if (result == null)
+                {
+                    _logger.LogWarning("Результат теста не найден: TestType={TestType}, ResultId={ResultId}, TeacherId={TeacherId}", 
+                        testType, testResultId, currentUser.Id);
+                    return NotFound();
+                }
+
+                // Возвращаем частичное представление для модального окна
+                ViewBag.IsModal = true;
+                
+                // Возвращаем соответствующее представление в зависимости от типа теста
+                return PartialView($"~/Views/StudentTest/{testType}Result.cshtml", result);
             }
             catch (Exception ex)
             {

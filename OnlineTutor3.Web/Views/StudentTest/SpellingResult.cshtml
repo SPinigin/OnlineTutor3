@@ -7,16 +7,19 @@
                      Model.Percentage >= 40 ? "info" : "danger";
 }
 
-<div class="mb-3">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb breadcrumb-compact">
-            <li class="breadcrumb-item">
-                <a asp-controller="StudentTest" asp-action="History">История прохождения</a>
-            </li>
-            <li class="breadcrumb-item active text-truncate">@Model.TestTitle</li>
-        </ol>
-    </nav>
-</div>
+@if (!(ViewBag.IsModal as bool? ?? false))
+{
+    <div class="mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-compact">
+                <li class="breadcrumb-item">
+                    <a asp-controller="StudentTest" asp-action="History">История прохождения</a>
+                </li>
+                <li class="breadcrumb-item active text-truncate">@Model.TestTitle</li>
+            </ol>
+        </nav>
+    </div>
+}
 
 <div class="test-container">
     <div class="card shadow-sm mb-3">

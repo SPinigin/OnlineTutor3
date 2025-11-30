@@ -477,17 +477,100 @@ window.showTestResultModal = function(testType, testResultId, studentName) {
 function loadTestResult(testType, testResultId) {
     console.log('📡 Загрузка результата теста:', testType, testResultId);
 
-    // Перенаправляем на страницу результата в новой вкладке
-    var url = '/StudentTest/' + testType + 'Result?id=' + testResultId;
-    window.open(url, '_blank');
-    
-    // Закрываем модальное окно
-    var modal = document.getElementById('testResultModal');
-    if (modal) {
-        var bsModal = bootstrap.Modal.getInstance(modal);
-        if (bsModal) {
-            bsModal.hide();
+    fetch('/TeacherDashboard/GetTestResult?testType=' + encodeURIComponent(testType) + '&testResultId=' + testResultId)
+        .then(async response => {
+            if (!response.ok) {
+                // Пытаемся получить текст ошибки от сервера
+                let errorMessage = 'HTTP ' + response.status;
+                try {
+                    const errorText = await response.text();
+                    if (errorText) {
+                        errorMessage = errorText;
+                    }
+                } catch (e) {
+                    // Игнорируем ошибку парсинга
+                }
+                
+                // Определяем более понятное сообщение об ошибке
+                if (response.status === 404) {
+                    errorMessage = 'Результат теста не найден';
+                } else if (response.status === 401 || response.status === 403) {
+                    errorMessage = 'Недостаточно прав для просмотра результата';
+                } else if (response.status === 500) {
+                    errorMessage = 'Внутренняя ошибка сервера. Попробуйте позже';
+                }
+                
+                throw new Error(errorMessage);
+            }
+            return response.text();
+        })
+        .then(html => {
+            console.log('✅ Результат загружен');
+            var modalBody = document.getElementById('testResultModalBody');
+            if (modalBody) {
+                modalBody.innerHTML = html;
+                
+                // Инициализируем скрипты внутри загруженного HTML
+                initializeResultScripts();
+            }
+        })
+        .catch(error => {
+            console.error('❌ Ошибка загрузки результата:', error);
+            var modalBody = document.getElementById('testResultModalBody');
+            if (modalBody) {
+                modalBody.innerHTML = 
+                    '<div class="text-center py-5">' +
+                    '<i class="fas fa-exclamation-triangle text-danger fs-1 mb-3"></i>' +
+                    '<h5 class="text-danger mb-3">Ошибка загрузки результата</h5>' +
+                    '<p class="text-muted mb-4">' + error.message + '</p>' +
+                    '<button class="btn btn-primary" onclick="loadTestResult(\'' + testType + '\', ' + testResultId + ')">' +
+                    '<i class="fas fa-redo"></i> Попробовать снова' +
+                    '</button>' +
+                    '</div>';
+            }
+        });
+}
+
+/**
+ * Инициализация скриптов внутри результата
+ */
+function initializeResultScripts() {
+    console.log('🔧 Инициализация скриптов результата');
+
+    // Анимация круговой диаграммы
+    var circle = document.querySelector('#testResultModal .result-circle circle:nth-child(2)');
+    if (circle) {
+        circle.style.transition = 'stroke-dasharray 1s ease';
+    }
+
+    // Фильтр "Только ошибки"
+    var filterCheckbox = document.querySelector('#testResultModal #showErrorsOnly');
+    if (filterCheckbox) {
+        function applyFilter() {
+            var questions = document.querySelectorAll('#testResultModal .question-result');
+            
+            questions.forEach(function(question) {
+                var isCorrect = question.getAttribute('data-correct') === 'true';
+                
+                if (filterCheckbox.checked) {
+                    question.style.display = isCorrect ? 'none' : 'block';
+                } else {
+                    question.style.display = 'block';
+                }
+            });
         }
+
+        filterCheckbox.addEventListener('change', applyFilter);
+        // Применяем фильтр сразу, если он включен
+        if (filterCheckbox.checked) {
+            applyFilter();
+        }
+    }
+
+    // Инициализация аккордеонов (для классических тестов)
+    var accordions = document.querySelectorAll('#testResultModal .accordion-button');
+    if (accordions.length > 0) {
+        console.log('✅ Найдено аккордеонов:', accordions.length);
     }
 }
 
