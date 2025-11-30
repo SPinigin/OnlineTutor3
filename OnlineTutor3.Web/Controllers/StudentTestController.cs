@@ -562,6 +562,9 @@ namespace OnlineTutor3.Web.Controllers
                 
                 _logger.LogInformation("Студент {StudentId} начал тест по орфографии {TestId}", student.Id, id);
                 
+                // Отправляем уведомление через SignalR
+                await SendTestStartedNotificationAsync(testResult, "spelling", currentUser.FullName ?? currentUser.Email ?? "Студент");
+                
                 return RedirectToAction(nameof(TakeSpelling), new { id = testResult.Id });
             }
             catch (UnauthorizedAccessException ex)
@@ -828,6 +831,9 @@ namespace OnlineTutor3.Web.Controllers
                 
                 _logger.LogInformation("Студент {StudentId} начал тест по пунктуации {TestId}", student.Id, id);
                 
+                // Отправляем уведомление через SignalR
+                await SendTestStartedNotificationAsync(testResult, "punctuation", currentUser.FullName ?? currentUser.Email ?? "Студент");
+                
                 return RedirectToAction(nameof(TakePunctuation), new { id = testResult.Id });
             }
             catch (UnauthorizedAccessException ex)
@@ -1091,6 +1097,9 @@ namespace OnlineTutor3.Web.Controllers
                 
                 _logger.LogInformation("Студент {StudentId} начал тест по орфоэпии {TestId}", student.Id, id);
                 
+                // Отправляем уведомление через SignalR
+                await SendTestStartedNotificationAsync(testResult, "orthoeopy", currentUser.FullName ?? currentUser.Email ?? "Студент");
+                
                 return RedirectToAction(nameof(TakeOrthoeopy), new { id = testResult.Id });
             }
             catch (UnauthorizedAccessException ex)
@@ -1353,6 +1362,9 @@ namespace OnlineTutor3.Web.Controllers
                 var testResult = await _studentTestService.StartRegularTestAsync(student.Id, id);
                 
                 _logger.LogInformation("Студент {StudentId} начал классический тест {TestId}", student.Id, id);
+                
+                // Отправляем уведомление через SignalR
+                await SendTestStartedNotificationAsync(testResult, "regular", currentUser.FullName ?? currentUser.Email ?? "Студент");
                 
                 return RedirectToAction(nameof(TakeRegular), new { id = testResult.Id });
             }
@@ -2136,6 +2148,105 @@ namespace OnlineTutor3.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка отправки SignalR уведомления о завершении теста");
+            }
+        }
+
+        /// <summary>
+        /// Отправка уведомления о начале теста через SignalR
+        /// </summary>
+        private async Task SendTestStartedNotificationAsync(TestResult testResult, string testType, string studentName)
+        {
+            try
+            {
+                // Получаем тест для определения TeacherId
+                string? teacherId = null;
+                string? testTitle = null;
+                int testId = 0;
+
+                switch (testType)
+                {
+                    case "spelling":
+                        if (testResult is SpellingTestResult spellingResult)
+                        {
+                            testId = spellingResult.SpellingTestId;
+                            var spellingTest = await _spellingTestRepository.GetByIdAsync(testId);
+                            if (spellingTest != null)
+                            {
+                                teacherId = spellingTest.TeacherId;
+                                testTitle = spellingTest.Title;
+                            }
+                        }
+                        break;
+                    case "punctuation":
+                        if (testResult is PunctuationTestResult punctuationResult)
+                        {
+                            testId = punctuationResult.PunctuationTestId;
+                            var punctuationTest = await _punctuationTestRepository.GetByIdAsync(testId);
+                            if (punctuationTest != null)
+                            {
+                                teacherId = punctuationTest.TeacherId;
+                                testTitle = punctuationTest.Title;
+                            }
+                        }
+                        break;
+                    case "orthoeopy":
+                        if (testResult is OrthoeopyTestResult orthoeopyResult)
+                        {
+                            testId = orthoeopyResult.OrthoeopyTestId;
+                            var orthoeopyTest = await _orthoeopyTestRepository.GetByIdAsync(testId);
+                            if (orthoeopyTest != null)
+                            {
+                                teacherId = orthoeopyTest.TeacherId;
+                                testTitle = orthoeopyTest.Title;
+                            }
+                        }
+                        break;
+                    case "regular":
+                        if (testResult is RegularTestResult regularResult)
+                        {
+                            testId = regularResult.RegularTestId;
+                            var regularTest = await _regularTestRepository.GetByIdAsync(testId);
+                            if (regularTest != null)
+                            {
+                                teacherId = regularTest.TeacherId;
+                                testTitle = regularTest.Title;
+                            }
+                        }
+                        break;
+                }
+
+                if (string.IsNullOrEmpty(teacherId) || string.IsNullOrEmpty(testTitle) || testId == 0)
+                {
+                    _logger.LogWarning("Не удалось определить TeacherId или TestTitle для отправки уведомления о начале теста. TestType: {TestType}, TestResultId: {TestResultId}", 
+                        testType, testResult.Id);
+                    return;
+                }
+
+                var notificationData = new
+                {
+                    testId = testId,
+                    testTitle = testTitle,
+                    testType = testType,
+                    studentId = testResult.StudentId,
+                    studentName = studentName,
+                    score = 0,
+                    maxScore = 0,
+                    percentage = 0.0,
+                    timestamp = DateTime.Now,
+                    action = "started",
+                    isAutoCompleted = false,
+                    testResultId = testResult.Id
+                };
+
+                await _hubContext.Clients.Group($"teacher_{teacherId}")
+                    .SendAsync("StudentTestActivity", notificationData);
+
+                _logger.LogInformation("SignalR: Отправлено уведомление о начале теста {TestType} {TestId} студентом {StudentName}",
+                    testType, testId, studentName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка отправки SignalR уведомления о начале теста");
             }
         }
     }

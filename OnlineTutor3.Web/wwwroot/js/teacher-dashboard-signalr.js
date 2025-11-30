@@ -146,8 +146,12 @@ class TeacherDashboardSignalR {
                 break;
         }
 
-        // Показываем уведомление
-        this.showNotification(message, notificationType, data, isTimeout);
+        // Показываем уведомление только если сообщение не пустое
+        if (message) {
+            this.showNotification(message, notificationType, data, isTimeout);
+        } else {
+            console.warn('⚠️ Пустое сообщение для уведомления, action:', data.action);
+        }
 
         // Воспроизводим звук (опционально)
         this.playNotificationSound(data.action, isTimeout);
@@ -168,7 +172,13 @@ class TeacherDashboardSignalR {
      * Показать уведомление
      */
     showNotification(message, type, data, isTimeout = false) {
-        console.log('📣 Уведомление:', type, message);
+        console.log('📣 Уведомление:', type, message, 'Data:', data);
+        
+        // Проверяем, что message не пустой
+        if (!message || message.trim() === '') {
+            console.warn('⚠️ Попытка показать уведомление с пустым сообщением');
+            return;
+        }
         
         var alertClass = type === 'success' ? 'alert-success' : 
             type === 'info' ? 'alert-info' : 
@@ -230,7 +240,7 @@ class TeacherDashboardSignalR {
             testType: data.testType,
             studentId: data.studentId,
             studentName: data.studentName,
-            status: data.action === 'completed' ? 'completed' : 'in_progress',
+            status: data.action === 'completed' ? 'completed' : (data.action === 'started' ? 'started' : 'in_progress'),
             percentage: data.percentage || 0,
             score: data.score || 0,
             maxScore: data.maxScore || 0,

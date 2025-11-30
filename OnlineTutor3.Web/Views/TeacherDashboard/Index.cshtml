@@ -493,6 +493,8 @@
             tbody.innerHTML = activities.map(function(activity) {
                 var statusBadge = activity.status === 'completed' 
                     ? '<span class="badge bg-success">Завершен</span>'
+                    : activity.status === 'started'
+                    ? '<span class="badge bg-info">Начат</span>'
                     : '<span class="badge bg-warning">В процессе</span>';
                 
                 var percentageBadge = activity.percentage >= 80 
