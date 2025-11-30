@@ -68,7 +68,7 @@
                         testTypeColor = "primary";
                     }
 
-                    <tr>
+                    <tr class="clickable-row" style="cursor: pointer;" data-href="@Url.Action(resultAction, new { id = resultId })">
                         <td>
                             <span class="badge bg-@testTypeColor">
                                 <i class="fas fa-@testTypeIcon"></i>
@@ -82,20 +82,6 @@
                                         <small class="text-muted">
                                             @result.CompletedAt?.ToString("dd.MM.yy HH:mm")
                                         </small>
-                                        @if (result.Grade.HasValue)
-                                        {
-                                            var gradeColor = result.Grade.Value switch
-                                            {
-                                                5 => "success",
-                                                4 => "info",
-                                                3 => "warning",
-                                                2 => "danger",
-                                                _ => "secondary"
-                                            };
-                                            <span class="badge bg-@gradeColor rounded-pill ms-2" style="font-size: 0.875rem;">
-                                                Оценка: @result.Grade.Value
-                                            </span>
-                                        }
                                     </div>
                                 </div>
                             </div>
@@ -158,9 +144,10 @@
                             @if (!string.IsNullOrEmpty(resultAction))
                             {
                                 <a asp-action="@resultAction" asp-route-id="@resultId"
-                                   class="btn btn-outline-info btn-sm">
+                                   class="btn btn-outline-info btn-sm"
+                                   onclick="event.stopPropagation();">
                                     <i class="fas fa-eye"></i>
-                                    <span class="d-none d-md-inline">Подробно</span>
+                                    <span class="d-none d-lg-inline">Подробно</span>
                                 </a>
                             }
                         </td>
