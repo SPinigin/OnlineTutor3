@@ -25,6 +25,7 @@ namespace OnlineTutor3.Web.Controllers
         private readonly IOrthoeopyTestRepository _orthoeopyTestRepository;
         private readonly IRegularTestRepository _regularTestRepository;
         private readonly ISpellingTestResultRepository _spellingTestResultRepository;
+        private readonly IPunctuationTestResultRepository _punctuationTestResultRepository;
         private readonly ISpellingQuestionRepository _spellingQuestionRepository;
         private readonly IPunctuationQuestionRepository _punctuationQuestionRepository;
         private readonly IOrthoeopyQuestionRepository _orthoeopyQuestionRepository;
@@ -47,6 +48,7 @@ namespace OnlineTutor3.Web.Controllers
             IOrthoeopyTestRepository orthoeopyTestRepository,
             IRegularTestRepository regularTestRepository,
             ISpellingTestResultRepository spellingTestResultRepository,
+            IPunctuationTestResultRepository punctuationTestResultRepository,
             ISpellingQuestionRepository spellingQuestionRepository,
             IPunctuationQuestionRepository punctuationQuestionRepository,
             IOrthoeopyQuestionRepository orthoeopyQuestionRepository,
@@ -68,6 +70,7 @@ namespace OnlineTutor3.Web.Controllers
             _orthoeopyTestRepository = orthoeopyTestRepository;
             _regularTestRepository = regularTestRepository;
             _spellingTestResultRepository = spellingTestResultRepository;
+            _punctuationTestResultRepository = punctuationTestResultRepository;
             _spellingQuestionRepository = spellingQuestionRepository;
             _punctuationQuestionRepository = punctuationQuestionRepository;
             _orthoeopyQuestionRepository = orthoeopyQuestionRepository;
@@ -779,6 +782,266 @@ namespace OnlineTutor3.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при завершении теста по орфографии. ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при завершении теста.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: StudentTest/StartPunctuation/{id}
+        public async Task<IActionResult> StartPunctuation(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    _logger.LogWarning("Студент не найден для пользователя {UserId}", currentUser.Id);
+                    TempData["ErrorMessage"] = "Профиль студента не найден.";
+                    return RedirectToAction("Index");
+                }
+
+                // Используем сервис для начала теста
+                var testResult = await _studentTestService.StartPunctuationTestAsync(student.Id, id);
+                
+                _logger.LogInformation("Студент {StudentId} начал тест по пунктуации {TestId}", student.Id, id);
+                
+                return RedirectToAction(nameof(TakePunctuation), new { id = testResult.Id });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Попытка доступа к недоступному тесту. TestId: {TestId}", id);
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при начале теста по пунктуации. TestId: {TestId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при начале теста. Попробуйте позже.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: StudentTest/TakePunctuation/{id}
+        public async Task<IActionResult> TakePunctuation(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                // Получаем результат теста через репозиторий
+                var testResult = await _punctuationTestResultRepository.GetByIdAsync(id);
+                
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                // Проверяем, не завершен ли тест
+                if (testResult.IsCompleted)
+                {
+                    return RedirectToAction("PunctuationResult", new { id = testResult.Id });
+                }
+
+                // Загружаем тест
+                var test = await _punctuationTestRepository.GetByIdAsync(testResult.PunctuationTestId);
+                if (test == null)
+                {
+                    return NotFound();
+                }
+
+                // Загружаем вопросы
+                var questions = await _punctuationQuestionRepository.GetByTestIdOrderedAsync(test.Id);
+                if (!questions.Any())
+                {
+                    TempData["ErrorMessage"] = "В тесте нет вопросов.";
+                    return RedirectToAction("Index");
+                }
+
+                // Загружаем ответы
+                var answers = await _answerService.GetPunctuationAnswersAsync(testResult.Id);
+
+                // Вычисляем оставшееся время
+                var timeElapsed = DateTime.Now - testResult.StartedAt;
+                var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                var timeRemaining = timeLimit - timeElapsed;
+
+                // Если время истекло, завершаем тест автоматически
+                if (timeRemaining <= TimeSpan.Zero)
+                {
+                    // Вычисляем результат
+                    var (score, maxScore, percentage) = await _testEvaluationService.CalculatePunctuationTestResultAsync(testResult.Id, test.Id);
+                    
+                    // Вычисляем оценку
+                    var grade = TestEvaluationService.CalculateGrade(percentage);
+                    
+                    // Обновляем результат теста
+                    testResult.Score = score;
+                    testResult.MaxScore = maxScore;
+                    testResult.Percentage = percentage;
+                    testResult.Grade = grade;
+                    
+                    // Завершаем тест
+                    await _testResultService.CompleteTestResultAsync(testResult);
+                    
+                    return RedirectToAction("PunctuationResult", new { id = testResult.Id });
+                }
+
+                var viewModel = new TakePunctuationTestViewModel
+                {
+                    TestResult = testResult,
+                    Test = test,
+                    Questions = questions,
+                    Answers = answers,
+                    TimeRemaining = timeRemaining,
+                    CurrentQuestionIndex = 0
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке теста по пунктуации. ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при загрузке теста.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // POST: StudentTest/SubmitPunctuationAnswer
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> SubmitPunctuationAnswer([FromBody] SubmitPunctuationAnswerViewModel model)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Пользователь не авторизован" });
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return Json(new { success = false, message = "Студент не найден" });
+                }
+
+                // Получаем результат теста
+                var testResult = await _punctuationTestResultRepository.GetByIdAsync(model.TestResultId);
+                if (testResult == null || testResult.StudentId != student.Id || testResult.IsCompleted)
+                {
+                    return Json(new { success = false, message = "Тест не найден или уже завершен" });
+                }
+
+                // Получаем вопрос
+                var question = await _punctuationQuestionRepository.GetByIdAsync(model.QuestionId);
+                if (question == null || question.PunctuationTestId != testResult.PunctuationTestId)
+                {
+                    return Json(new { success = false, message = "Вопрос не найден" });
+                }
+
+                // Сохраняем ответ
+                var answer = await _answerService.SavePunctuationAnswerAsync(
+                    testResult.Id, 
+                    question.Id, 
+                    model.StudentAnswer ?? "");
+
+                // Оцениваем ответ
+                var (isCorrect, points) = await _testEvaluationService.EvaluatePunctuationAnswerAsync(
+                    question, 
+                    model.StudentAnswer ?? "", 
+                    question.Points);
+
+                // Обновляем ответ с результатом оценки
+                answer.IsCorrect = isCorrect;
+                answer.Points = points;
+                await _answerService.UpdateAnswerAsync(answer);
+
+                return Json(new 
+                { 
+                    success = true, 
+                    isCorrect = isCorrect,
+                    points = points
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при сохранении ответа. QuestionId: {QuestionId}, TestResultId: {TestResultId}", 
+                    model.QuestionId, model.TestResultId);
+                return Json(new { success = false, message = "Произошла ошибка при сохранении ответа" });
+            }
+        }
+
+        // POST: StudentTest/CompletePunctuationTest/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompletePunctuationTest(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                // Получаем результат теста через репозиторий
+                var testResult = await _punctuationTestResultRepository.GetByIdAsync(id);
+                
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                if (testResult.IsCompleted)
+                {
+                    return RedirectToAction("PunctuationResult", new { id = testResult.Id });
+                }
+
+                // Вычисляем результат
+                var (score, maxScore, percentage) = await _testEvaluationService.CalculatePunctuationTestResultAsync(testResult.Id, testResult.PunctuationTestId);
+                
+                // Вычисляем оценку
+                var grade = TestEvaluationService.CalculateGrade(percentage);
+                
+                // Обновляем результат теста
+                testResult.Score = score;
+                testResult.MaxScore = maxScore;
+                testResult.Percentage = percentage;
+                testResult.Grade = grade;
+                
+                // Завершаем тест (устанавливает CompletedAt и IsCompleted)
+                await _testResultService.CompleteTestResultAsync(testResult);
+
+                _logger.LogInformation("Студент {StudentId} завершил тест по пунктуации {ResultId}. Баллы: {Score}/{MaxScore}, Процент: {Percentage}",
+                    student.Id, testResult.Id, testResult.Score, testResult.MaxScore, testResult.Percentage);
+
+                return RedirectToAction("PunctuationResult", new { id = testResult.Id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при завершении теста по пунктуации. ResultId: {ResultId}", id);
                 TempData["ErrorMessage"] = "Произошла ошибка при завершении теста.";
                 return RedirectToAction("Index");
             }

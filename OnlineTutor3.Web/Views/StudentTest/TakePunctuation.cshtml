@@ -1,0 +1,491 @@
+@model OnlineTutor3.Web.ViewModels.TakePunctuationTestViewModel
+@{
+    ViewData["Title"] = $"Прохождение теста: {Model.Test.Title}";
+}
+
+<div class="mb-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-compact">
+            <li class="breadcrumb-item">
+                <a asp-controller="StudentTest" asp-action="Index">Доступные тесты</a>
+            </li>
+            <li class="breadcrumb-item active">@Model.Test.Title</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="test-container">
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-warning text-dark py-2">
+            <div class="d-flex justify-content-between align-items-center gap-2">
+                <div class="flex-grow-1 min-w-0">
+                    <h6 class="mb-0 d-flex align-items-center">
+                        <i class="fas fa-exclamation me-2 flex-shrink-0"></i>
+                        <span class="text-truncate">@Model.Test.Title</span>
+                    </h6>
+                </div>
+                <div class="flex-shrink-0">
+                    <div id="timer" class="d-flex align-items-center">
+                        <i class="fas fa-clock me-2"></i>
+                        <span id="timeRemaining" class="h6 mb-0 font-monospace">
+                            @($"{Model.TimeRemaining.Minutes:D2}:{Model.TimeRemaining.Seconds:D2}")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body p-2 p-md-3">
+            <div class="progress mb-2" style="height: 8px;">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" id="progressBar"></div>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <small class="text-muted mb-0">
+                    <i class="fas fa-redo-alt"></i>
+                    Попытка @Model.TestResult.AttemptNumber из @Model.Test.MaxAttempts
+                </small>
+                <small class="text-muted mb-0">
+                    <i class="fas fa-question-circle"></i>
+                    Вопрос <span id="currentQuestion" class="fw-bold">1</span> из @Model.Questions.Count
+                </small>
+                <small class="text-muted mb-0" id="answeredInfo">
+                    <i class="fas fa-check-circle text-success"></i>
+                    Отвечено: <span id="answeredCount">0</span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div id="questionsContainer">
+        @for (int i = 0; i < Model.Questions.Count; i++)
+        {
+            var question = Model.Questions[i];
+            var existingAnswer = Model.Answers.FirstOrDefault(a => a.PunctuationQuestionId == question.Id);
+
+            <div class="question-card @(i == 0 ? "active" : "d-none")" data-question-index="@i" data-question-id="@question.Id">
+                <div class="card shadow-sm">
+                    <div class="card-body p-3 p-md-4">
+                        <div class="question-header mb-3">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <h6 class="text-warning mb-0">
+                                    <i class="fas fa-question-circle"></i>
+                                    Вопрос @(i + 1)
+                                </h6>
+                                <span class="badge bg-warning text-dark badge-sm">
+                                    <i class="fas fa-star"></i> Балл: @question.Points
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="question-content mb-3">
+                            <p class="mb-3 text-muted">
+                                <i class="fas fa-comma"></i>
+                                Укажите номера позиций, где нужно поставить запятые:
+                            </p>
+                            
+                            <div class="sentence-container text-center mb-3 p-3 bg-light rounded border-2 border-warning">
+                                <span class="sentence-with-numbers">@question.SentenceWithNumbers</span>
+                            </div>
+                        </div>
+
+                        <div class="answer-input-section mb-4">
+                            <label class="form-label small fw-semibold">
+                                <i class="fas fa-keyboard"></i> Ваш ответ (номера без запятых):
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control answer-input"
+                                       maxlength="9"
+                                       placeholder="Например: 135 или оставьте пустым"
+                                       value="@(existingAnswer?.StudentAnswer ?? "")"
+                                       data-question-id="@question.Id" />
+                                <button class="btn btn-outline-secondary" type="button" onclick="clearAnswer(@question.Id)"
+                                        title="Очистить ответ">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted d-block mt-1">
+                                <i class="fas fa-info-circle"></i>
+                                Введите номера позиций без пробелов и знаков препинания. Если запятые не нужны, оставьте поле пустым.
+                            </small>
+                        </div>
+
+                        @if (Model.Test.ShowHints && !string.IsNullOrEmpty(question.Hint))
+                        {
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-outline-info btn-sm" onclick="toggleHint(@i)">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span class="hint-button-text">Показать подсказку</span>
+                                </button>
+                            </div>
+                            
+                            <div class="hint-container" style="display: none;">
+                                <div class="alert alert-info alert-sm py-2 mb-0">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-lightbulb mt-1 me-2"></i>
+                                        <div>
+                                            <strong class="small">Подсказка:</strong>
+                                            <p class="mb-0 small">@question.Hint</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="card shadow-sm mt-3 navigation-card">
+        <div class="card-body p-2 p-md-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <button type="button" 
+                        class="btn btn-outline-secondary btn-sm" 
+                        id="prevButton" 
+                        onclick="previousQuestion()" 
+                        disabled>
+                    <i class="fas fa-arrow-left"></i>
+                    <span class="d-none d-sm-inline ms-1">Предыдущий</span>
+                </button>
+                
+                <div class="d-flex gap-2">
+                    <button type="button" 
+                            class="btn btn-warning btn-sm" 
+                            id="nextButton" 
+                            onclick="nextQuestion()">
+                        <span class="d-none d-sm-inline me-1">Следующий</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="button" 
+                            class="btn btn-success btn-sm" 
+                            id="finishButton" 
+                            onclick="showFinishModal()">
+                        <i class="fas fa-check"></i>
+                        <span class="d-none d-sm-inline ms-1">Завершить тест</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="finishTestModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header py-2 bg-light">
+                <h6 class="modal-title mb-0">
+                    <i class="fas fa-check-circle text-success"></i> Завершить тест
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="alert alert-warning alert-sm py-2 mb-3">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-triangle mt-1 me-2"></i>
+                        <div>
+                            <strong class="small">Внимание!</strong>
+                            <p class="mb-0 small">После завершения теста вы не сможете изменить ответы.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <p class="mb-2 small">
+                        <i class="fas fa-clipboard-check text-primary"></i>
+                        Вы ответили на <strong><span id="answeredCountModal">0</span></strong> 
+                        из <strong>@Model.Questions.Count</strong> вопросов.
+                    </p>
+                    @if (Model.Questions.Count > 1)
+                    {
+                        <p class="mb-2 small text-warning">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Вы находитесь на вопросе <strong><span id="currentQuestionModal">1</span></strong> из <strong>@Model.Questions.Count</strong>.
+                            <span>Неотвеченные вопросы будут засчитаны как неправильные.</span>
+                        </p>
+                    }
+                    <p class="mb-0 small text-muted">Вы уверены, что хотите завершить тест?</p>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Продолжить
+                </button>
+                <form asp-action="CompletePunctuationTest" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.TestResult.Id" />
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="fas fa-check"></i> Завершить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .timer-warning {
+            color: #ffc107 !important;
+        }
+        .timer-danger {
+            color: #dc3545 !important;
+            animation: pulse 1s infinite;
+        }
+        @@keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .sentence-with-numbers {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #856404;
+            line-height: 1.6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .answer-input {
+            font-size: 1.2rem;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+    
+    <script>
+        let currentQuestionIndex = 0;
+        let totalQuestions = @Model.Questions.Count;
+        let timeRemaining = @((int)Model.TimeRemaining.TotalSeconds);
+        let answers = {};
+        let timerInterval;
+        let testCompleting = false;
+
+        $(document).ready(function() {
+            initializeTest();
+            startTimer();
+            loadExistingAnswers();
+
+            // Обработчик завершения теста
+            $('form[action*="CompletePunctuationTest"]').on('submit', function() {
+                testCompleting = true;
+            });
+        });
+
+        function initializeTest() {
+            updateProgress();
+            updateNavigation();
+
+            // Автосохранение ответов с валидацией
+            $('.answer-input').on('input', function() {
+                const input = $(this);
+                let value = input.val();
+
+                // Убираем все символы кроме цифр 1-9
+                value = value.replace(/[^1-9]/g, '');
+
+                // Убираем дублирующиеся цифры
+                value = [...new Set(value)].join('');
+
+                // Ограничиваем длину до 9 символов
+                if (value.length > 9) {
+                    value = value.substring(0, 9);
+                }
+
+                input.val(value);
+
+                const questionId = input.data('question-id');
+                if (value) {
+                    saveAnswer(questionId, value);
+                } else {
+                    // Если поле пустое, тоже сохраняем (для очистки)
+                    saveAnswer(questionId, '');
+                }
+            });
+
+            // Enter для перехода к следующему вопросу
+            $('.answer-input').on('keypress', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    nextQuestion();
+                }
+            });
+        }
+
+        function loadExistingAnswers() {
+            @foreach (var answer in Model.Answers)
+            {
+                <text>
+                answers[@answer.PunctuationQuestionId] = '@(answer.StudentAnswer ?? "")';
+                </text>
+            }
+            updateProgress();
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(function() {
+                timeRemaining--;
+                updateTimerDisplay();
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    autoSubmitTest();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            $('#timeRemaining').text(display);
+
+            // Изменение цвета таймера
+            const timerElement = $('#timer');
+            timerElement.removeClass('timer-warning timer-danger');
+            
+            if (timeRemaining <= 60) {
+                timerElement.addClass('timer-danger');
+            } else if (timeRemaining <= 300) {
+                timerElement.addClass('timer-warning');
+            }
+        }
+
+        function saveAnswer(questionId, answer) {
+            $.ajax({
+                url: '@Url.Action("SubmitPunctuationAnswer")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    TestResultId: @Model.TestResult.Id,
+                    QuestionId: questionId,
+                    StudentAnswer: answer
+                }),
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        if (answer) {
+                            answers[questionId] = answer;
+                        } else {
+                            delete answers[questionId];
+                        }
+                        updateProgress();
+                    } else {
+                        console.error('Ошибка сохранения:', response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Ошибка AJAX:', error);
+                }
+            });
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < totalQuestions - 1) {
+                showQuestion(currentQuestionIndex + 1);
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                showQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        function showQuestion(index) {
+            $('.question-card').addClass('d-none').removeClass('active');
+            $(`.question-card[data-question-index="${index}"]`).removeClass('d-none').addClass('active');
+
+            currentQuestionIndex = index;
+            updateProgress();
+            updateNavigation();
+
+            // Фокус на поле ввода
+            setTimeout(function() {
+                $(`.question-card[data-question-index="${index}"] .answer-input`).focus();
+            }, 100);
+
+            // Прокрутка вверх на мобильных
+            if ($(window).width() < 768) {
+                $('html, body').animate({
+                    scrollTop: $('.question-card.active').offset().top - 100
+                }, 300);
+            }
+        }
+
+        function updateProgress() {
+            const answeredCount = Object.keys(answers).filter(key => answers[key] && answers[key].trim() !== '').length;
+            const percentage = (answeredCount / totalQuestions) * 100;
+
+            $('#progressBar').css('width', percentage + '%');
+            $('#currentQuestion').text(currentQuestionIndex + 1);
+            $('#answeredCount, #answeredCountModal').text(answeredCount);
+        }
+
+        function updateNavigation() {
+            $('#prevButton').prop('disabled', currentQuestionIndex === 0);
+
+            // Кнопка "Следующий" скрывается только на последнем вопросе
+            if (currentQuestionIndex === totalQuestions - 1) {
+                $('#nextButton').addClass('d-none');
+            } else {
+                $('#nextButton').removeClass('d-none');
+            }
+            
+            // Кнопка "Завершить тест" всегда видна
+            $('#finishButton').removeClass('d-none');
+        }
+
+        function toggleHint(questionIndex) {
+            const hintContainer = $(`.question-card[data-question-index="${questionIndex}"] .hint-container`);
+            const buttonText = $(`.question-card[data-question-index="${questionIndex}"] .hint-button-text`);
+
+            if (hintContainer.is(':visible')) {
+                hintContainer.slideUp(300);
+                buttonText.text('Показать подсказку');
+            } else {
+                hintContainer.slideDown(300);
+                buttonText.text('Скрыть подсказку');
+            }
+        }
+
+        function clearAnswer(questionId) {
+            $(`.answer-input[data-question-id="${questionId}"]`).val('').focus();
+            delete answers[questionId];
+            updateProgress();
+            
+            // Удаляем ответ с сервера
+            saveAnswer(questionId, '');
+        }
+
+        function showFinishModal() {
+            // Обновляем информацию в модальном окне
+            $('#currentQuestionModal').text(currentQuestionIndex + 1);
+            $('#answeredCountModal').text(Object.keys(answers).filter(key => answers[key] && answers[key].trim() !== '').length);
+            
+            const modal = new bootstrap.Modal(document.getElementById('finishTestModal'));
+            modal.show();
+        }
+
+        function autoSubmitTest() {
+            testCompleting = true;
+            
+            alert('Время вышло! Тест будет автоматически завершен.');
+            $('form[action*="CompletePunctuationTest"]').submit();
+        }
+
+        // Предотвращение случайного закрытия страницы
+        window.addEventListener('beforeunload', function(e) {
+            if (testCompleting) {
+                return;
+            }
+
+            e.preventDefault();
+            e.returnValue = '';
+        });
+    </script>
+    @Html.AntiForgeryToken()
+}
+
