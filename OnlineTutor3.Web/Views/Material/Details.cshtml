@@ -1,0 +1,183 @@
+@model OnlineTutor3.Domain.Entities.Material
+@{
+    ViewData["Title"] = "Детали материала";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    @switch (Model.Type)
+                    {
+                        case MaterialType.Document:
+                            <i class="fas fa-file-alt me-2"></i>
+                            break;
+                        case MaterialType.Presentation:
+                            <i class="fas fa-file-powerpoint me-2"></i>
+                            break;
+                        case MaterialType.Image:
+                            <i class="fas fa-file-image me-2"></i>
+                            break;
+                        case MaterialType.Audio:
+                            <i class="fas fa-file-audio me-2"></i>
+                            break;
+                        case MaterialType.Video:
+                            <i class="fas fa-file-video me-2"></i>
+                            break;
+                        default:
+                            <i class="fas fa-file me-2"></i>
+                            break;
+                    }
+                    @Model.Title
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body py-2">
+                                <small class="text-muted d-block">Название</small>
+                                <strong>@Model.Title</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body py-2">
+                                <small class="text-muted d-block">Тип</small>
+                                <span class="badge bg-secondary">@GetMaterialTypeDisplayName(Model.Type)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="mb-3">
+                        <h6><i class="fas fa-align-left"></i> Описание</h6>
+                        <p>@Model.Description</p>
+                    </div>
+                }
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body py-2">
+                                <small class="text-muted d-block">Файл</small>
+                                <strong>@Model.FileName</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body py-2">
+                                <small class="text-muted d-block">Размер</small>
+                                <strong>@FormatFileSize(Model.FileSize)</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body py-2">
+                                <small class="text-muted d-block">Дата загрузки</small>
+                                <strong>@Model.UploadedAt.ToString("dd.MM.yyyy HH:mm")</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body py-2">
+                                <small class="text-muted d-block">Класс</small>
+                                @if (Model.ClassId.HasValue)
+                                {
+                                    <span class="badge bg-info">Класс #@Model.ClassId</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Не назначен</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body py-2">
+                                <small class="text-muted d-block">Задание</small>
+                                @if (Model.AssignmentId.HasValue)
+                                {
+                                    <span class="badge bg-primary">Задание #@Model.AssignmentId</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Не назначено</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="card bg-light">
+                        <div class="card-body py-2">
+                            <small class="text-muted d-block">Статус</small>
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">Активен</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Неактивен</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a asp-action="Download" asp-route-id="@Model.Id" class="btn btn-success">
+                        <i class="fas fa-download"></i> Скачать
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Редактировать
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Назад к списку
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetMaterialTypeDisplayName(MaterialType type)
+    {
+        return type switch
+        {
+            MaterialType.Document => "Документ",
+            MaterialType.Presentation => "Презентация",
+            MaterialType.Image => "Изображение",
+            MaterialType.Audio => "Аудио",
+            MaterialType.Video => "Видео",
+            MaterialType.Other => "Другое",
+            _ => type.ToString()
+        };
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "Б", "КБ", "МБ", "ГБ" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+}
+
