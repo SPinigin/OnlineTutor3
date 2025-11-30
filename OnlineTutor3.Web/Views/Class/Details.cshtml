@@ -4,42 +4,42 @@
     var students = ViewBag.Students as List<OnlineTutor3.Domain.Entities.Student> ?? new List<OnlineTutor3.Domain.Entities.Student>();
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <h2>
+        <h4 class="mb-1">
             <i class="fas fa-graduation-cap text-primary"></i> @Model.Name
-            <span class="badge bg-@(Model.IsActive ? "success" : "secondary") ms-2">
+            <span class="badge bg-@(Model.IsActive ? "success" : "secondary") ms-2 badge-sm">
                 @(Model.IsActive ? "Активный" : "Неактивный")
             </span>
-        </h2>
+        </h4>
         @if (!string.IsNullOrEmpty(Model.Description))
         {
-            <p class="text-muted">@Model.Description</p>
+            <p class="text-muted mb-0 small">@Model.Description</p>
         }
     </div>
     <div>
-        <a asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
             <i class="fas fa-arrow-left"></i> Назад к списку
         </a>
     </div>
 </div>
 
-<div class="row mb-4 g-2 g-md-3">
+<div class="row mb-3 g-1 g-md-2">
     <div class="col-6 col-md-3">
         <div class="card text-center border-primary">
-            <div class="card-body">
-                <i class="fas fa-users text-primary" style="font-size: 2rem;"></i>
-                <h6 class="mt-2 mb-0">@students.Count</h6>
-                <p class="text-muted mb-0 small">Учеников</p>
+            <div class="card-body py-2 px-2">
+                <i class="fas fa-users text-primary" style="font-size: 1.25rem;"></i>
+                <div class="mt-1 mb-0 small fw-bold">@students.Count</div>
+                <p class="text-muted mb-0" style="font-size: 0.75rem;">Учеников</p>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="card text-center border-success">
-            <div class="card-body">
-                <i class="fas fa-calendar-plus text-success" style="font-size: 2rem;"></i>
-                <h6 class="mt-2 mb-0">@Model.CreatedAt.ToString("dd.MM.yyyy")</h6>
-                <p class="text-muted mb-0 small">Создан</p>
+            <div class="card-body py-2 px-2">
+                <i class="fas fa-calendar-plus text-success" style="font-size: 1.25rem;"></i>
+                <div class="mt-1 mb-0 small fw-bold">@Model.CreatedAt.ToString("dd.MM.yyyy")</div>
+                <p class="text-muted mb-0" style="font-size: 0.75rem;">Создан</p>
             </div>
         </div>
     </div>

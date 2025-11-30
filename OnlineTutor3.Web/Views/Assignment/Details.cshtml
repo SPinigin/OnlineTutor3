@@ -15,51 +15,51 @@
     var isRussianLanguage = subject?.Name?.Equals("Русский язык", StringComparison.OrdinalIgnoreCase) == true;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <h2>
+        <h4 class="mb-1">
             <i class="fas fa-tasks text-primary"></i> @Model.Title
-            <span class="badge bg-@(Model.IsActive ? "success" : "secondary") ms-2">
+            <span class="badge bg-@(Model.IsActive ? "success" : "secondary") ms-2 badge-sm">
                 @(Model.IsActive ? "Активно" : "Неактивно")
             </span>
-        </h2>
+        </h4>
         @if (!string.IsNullOrEmpty(Model.Description))
         {
-            <p class="text-muted">@Model.Description</p>
+            <p class="text-muted mb-0 small">@Model.Description</p>
         }
     </div>
     <div>
-        <a asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
             <i class="fas fa-arrow-left"></i> Назад к списку
         </a>
     </div>
 </div>
 
-<div class="row mb-4 g-2 g-md-3">
+<div class="row mb-3 g-1 g-md-2">
     <div class="col-6 col-md-3">
         <div class="card text-center border-primary">
-            <div class="card-body">
-                <i class="fas fa-book text-primary" style="font-size: 2rem;"></i>
-                <h6 class="mt-2 mb-0">@(subject?.Name ?? "Неизвестно")</h6>
-                <p class="text-muted mb-0 small">Предмет</p>
+            <div class="card-body py-2 px-2">
+                <i class="fas fa-book text-primary" style="font-size: 1.25rem;"></i>
+                <div class="mt-1 mb-0 small fw-bold">@(subject?.Name ?? "Неизвестно")</div>
+                <p class="text-muted mb-0" style="font-size: 0.75rem;">Предмет</p>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="card text-center border-info">
-            <div class="card-body">
-                <i class="fas fa-graduation-cap text-info" style="font-size: 2rem;"></i>
-                <h6 class="mt-2 mb-0">@classes.Count</h6>
-                <p class="text-muted mb-0 small">Классов</p>
+            <div class="card-body py-2 px-2">
+                <i class="fas fa-graduation-cap text-info" style="font-size: 1.25rem;"></i>
+                <div class="mt-1 mb-0 small fw-bold">@classes.Count</div>
+                <p class="text-muted mb-0" style="font-size: 0.75rem;">Классов</p>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="card text-center border-success">
-            <div class="card-body">
-                <i class="fas fa-calendar-plus text-success" style="font-size: 2rem;"></i>
-                <h6 class="mt-2 mb-0">@Model.CreatedAt.ToString("dd.MM.yyyy")</h6>
-                <p class="text-muted mb-0 small">Создано</p>
+            <div class="card-body py-2 px-2">
+                <i class="fas fa-calendar-plus text-success" style="font-size: 1.25rem;"></i>
+                <div class="mt-1 mb-0 small fw-bold">@Model.CreatedAt.ToString("dd.MM.yyyy")</div>
+                <p class="text-muted mb-0" style="font-size: 0.75rem;">Создано</p>
             </div>
         </div>
     </div>
@@ -67,10 +67,10 @@
     {
         <div class="col-6 col-md-3">
             <div class="card text-center border-@(Model.DueDate.Value < DateTime.Now ? "danger" : "warning")">
-                <div class="card-body">
-                    <i class="fas fa-calendar-alt text-@(Model.DueDate.Value < DateTime.Now ? "danger" : "warning")" style="font-size: 2rem;"></i>
-                    <h6 class="mt-2 mb-0">@Model.DueDate.Value.ToString("dd.MM.yyyy")</h6>
-                    <p class="text-muted mb-0 small">Срок выполнения</p>
+                <div class="card-body py-2 px-2">
+                    <i class="fas fa-calendar-alt text-@(Model.DueDate.Value < DateTime.Now ? "danger" : "warning")" style="font-size: 1.25rem;"></i>
+                    <div class="mt-1 mb-0 small fw-bold">@Model.DueDate.Value.ToString("dd.MM.yyyy")</div>
+                    <p class="text-muted mb-0" style="font-size: 0.75rem;">Срок выполнения</p>
                 </div>
             </div>
         </div>

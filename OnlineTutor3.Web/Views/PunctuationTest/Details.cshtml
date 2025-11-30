@@ -5,67 +5,67 @@
     var questions = ViewBag.Questions as List<OnlineTutor3.Domain.Entities.PunctuationQuestion> ?? new List<OnlineTutor3.Domain.Entities.PunctuationQuestion>();
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <h2>
+        <h4 class="mb-1">
             <i class="fas fa-comma text-info"></i> @Model.Title
-            <span class="badge bg-@(Model.IsActive ? "success" : "secondary") ms-2">
+            <span class="badge bg-@(Model.IsActive ? "success" : "secondary") ms-2 badge-sm">
                 @(Model.IsActive ? "Активен" : "Неактивен")
             </span>
-        </h2>
+        </h4>
         @if (!string.IsNullOrEmpty(Model.Description))
         {
-            <p class="text-muted">@Model.Description</p>
+            <p class="text-muted mb-0 small">@Model.Description</p>
         }
         @if (assignment != null)
         {
-            <p class="text-muted">
+            <p class="text-muted mb-0 small">
                 <i class="fas fa-tasks"></i> 
                 <a asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id">@assignment.Title</a>
             </p>
         }
     </div>
     <div>
-        <a asp-controller="Assignment" asp-action="Details" asp-route-id="@Model.AssignmentId" class="btn btn-outline-secondary">
+        <a asp-controller="Assignment" asp-action="Details" asp-route-id="@Model.AssignmentId" class="btn btn-sm btn-outline-secondary">
             <i class="fas fa-arrow-left"></i> Назад к заданию
         </a>
     </div>
 </div>
 
-<div class="row mb-4 g-2 g-md-3">
+<div class="row mb-3 g-1 g-md-2">
     <div class="col-6 col-md-3">
         <div class="card text-center border-primary">
-            <div class="card-body">
-                <i class="fas fa-question-circle text-primary" style="font-size: 2rem;"></i>
-                <h6 class="mt-2 mb-0">@questions.Count</h6>
-                <p class="text-muted mb-0 small">Вопросов</p>
+            <div class="card-body py-2 px-2">
+                <i class="fas fa-question-circle text-primary" style="font-size: 1.25rem;"></i>
+                <div class="mt-1 mb-0 small fw-bold">@questions.Count</div>
+                <p class="text-muted mb-0" style="font-size: 0.75rem;">Вопросов</p>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="card text-center border-info">
-            <div class="card-body">
-                <i class="fas fa-clock text-info" style="font-size: 2rem;"></i>
-                <h6 class="mt-2 mb-0">@Model.TimeLimit</h6>
-                <p class="text-muted mb-0 small">Минут</p>
+            <div class="card-body py-2 px-2">
+                <i class="fas fa-clock text-info" style="font-size: 1.25rem;"></i>
+                <div class="mt-1 mb-0 small fw-bold">@Model.TimeLimit</div>
+                <p class="text-muted mb-0" style="font-size: 0.75rem;">Минут</p>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="card text-center border-success">
-            <div class="card-body">
-                <i class="fas fa-redo text-success" style="font-size: 2rem;"></i>
-                <h6 class="mt-2 mb-0">@Model.MaxAttempts</h6>
-                <p class="text-muted mb-0 small">Попыток</p>
+            <div class="card-body py-2 px-2">
+                <i class="fas fa-redo text-success" style="font-size: 1.25rem;"></i>
+                <div class="mt-1 mb-0 small fw-bold">@Model.MaxAttempts</div>
+                <p class="text-muted mb-0" style="font-size: 0.75rem;">Попыток</p>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="card text-center border-warning">
-            <div class="card-body">
-                <i class="fas fa-calendar-plus text-warning" style="font-size: 2rem;"></i>
-                <h6 class="mt-2 mb-0">@Model.CreatedAt.ToString("dd.MM.yyyy")</h6>
-                <p class="text-muted mb-0 small">Создан</p>
+            <div class="card-body py-2 px-2">
+                <i class="fas fa-calendar-plus text-warning" style="font-size: 1.25rem;"></i>
+                <div class="mt-1 mb-0 small fw-bold">@Model.CreatedAt.ToString("dd.MM.yyyy")</div>
+                <p class="text-muted mb-0" style="font-size: 0.75rem;">Создан</p>
             </div>
         </div>
     </div>
