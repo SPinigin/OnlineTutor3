@@ -31,6 +31,7 @@ namespace OnlineTutor3.Infrastructure
             services.AddScoped<IAssignmentRepository, AssignmentRepository>();
             services.AddScoped<IAssignmentClassRepository, AssignmentClassRepository>();
             services.AddScoped<IMaterialRepository, MaterialRepository>();
+            services.AddScoped<ICalendarEventRepository, CalendarEventRepository>();
             services.AddScoped<ISpellingTestRepository, SpellingTestRepository>();
             services.AddScoped<IPunctuationTestRepository, PunctuationTestRepository>();
             services.AddScoped<IOrthoeopyTestRepository, OrthoeopyTestRepository>();

@@ -1,0 +1,241 @@
+@{
+    ViewData["Title"] = "Календарь";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-calendar-alt text-primary"></i> Календарь</h2>
+    </div>
+    <div>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="fas fa-plus"></i> Добавить занятие
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-4 col-md-4">
+        <div class="card text-center border-primary">
+            <div class="card-body p-2 p-md-3">
+                <i class="fas fa-clock text-primary" style="font-size: 1.5rem;"></i>
+                <h4 class="mt-2 text-primary fs-6 fs-md-4">@ViewBag.UpcomingEvents</h4>
+                <p class="text-muted mb-0 small">Предстоящих занятий</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-4 col-md-4">
+        <div class="card text-center border-success">
+            <div class="card-body p-2 p-md-3">
+                <i class="fas fa-calendar-day text-success" style="font-size: 1.5rem;"></i>
+                <h4 class="mt-2 text-success fs-6 fs-md-4">@ViewBag.TodayEvents</h4>
+                <p class="text-muted mb-0 small">Занятий сегодня</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-4 col-md-4">
+        <div class="card text-center border-info">
+            <div class="card-body p-2 p-md-3">
+                <i class="fas fa-check-circle text-info" style="font-size: 1.5rem;"></i>
+                <h4 class="mt-2 text-info fs-6 fs-md-4">@ViewBag.CompletedThisMonth</h4>
+                <p class="text-muted mb-0 small">Проведено за месяц</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        <div id="calendar"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="eventModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="eventModalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <a href="#" id="eventEditBtn" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Редактировать
+                </a>
+                <a href="#" id="eventDetailsBtn" class="btn btn-info">
+                    <i class="fas fa-info-circle"></i> Подробнее
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+    <style>
+        #calendar {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .fc-event {
+            cursor: pointer;
+        }
+
+        .fc-daygrid-event {
+            white-space: normal !important;
+            align-items: normal !important;
+        }
+
+        .fc-event-title {
+            font-weight: 500;
+        }
+
+        .event-info-item {
+            margin-bottom: 10px;
+        }
+
+            .event-info-item i {
+                width: 20px;
+                text-align: center;
+            }
+
+        /* Стиль для повторяющихся событий */
+        .fc-event.recurring-event {
+            border-left: 4px solid #ffc107 !important;
+        }
+
+            .fc-event.recurring-event:before {
+                content: "↻ ";
+                font-weight: bold;
+            }
+    </style>
+}
+
+@section Scripts {
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/ru.global.min.js'></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                locale: 'ru',
+                firstDay: 1, // Неделя начинается с понедельника
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+                },
+                buttonText: {
+                    today: 'Сегодня',
+                    month: 'Месяц',
+                    week: 'Неделя',
+                    day: 'День',
+                    list: 'Список'
+                },
+                slotMinTime: '08:00:00', // Начало списка времени с 8:00
+                slotMaxTime: '20:00:00', // Конец списка времени до 20:00
+                navLinks: true,
+                editable: false,
+                dayMaxEvents: true,
+                events: {
+                    url: '@Url.Action("GetEvents", "Calendar")',
+                    method: 'GET',
+                    failure: function() {
+                        alert('Ошибка загрузки событий!');
+                    }
+                },
+                eventClick: function(info) {
+                    var event = info.event;
+
+                    var originalTitle = event.extendedProps.originalTitle || event.title;
+                    document.getElementById('eventModalTitle').textContent = originalTitle;
+
+                    var modalBody = '';
+
+                    if (event.extendedProps.isRecurringInstance) {
+                        modalBody += '<div class="alert alert-info"><i class="fas fa-repeat"></i> Это повторяющееся занятие</div>';
+                    }
+
+                    if (event.extendedProps.description) {
+                        modalBody += '<div class="event-info-item"><i class="fas fa-align-left text-muted"></i> <strong>Описание:</strong><br><span class="ms-4">' + event.extendedProps.description + '</span></div>';
+                    }
+
+                    modalBody += '<div class="event-info-item"><i class="fas fa-clock text-primary"></i> <strong>Начало:</strong> ' + formatDateTime(event.start) + '</div>';
+                    modalBody += '<div class="event-info-item"><i class="fas fa-clock text-danger"></i> <strong>Окончание:</strong> ' + formatDateTime(event.end) + '</div>';
+
+                    if (event.extendedProps.className) {
+                        modalBody += '<div class="event-info-item"><i class="fas fa-users text-success"></i> <strong>Класс:</strong> <span class="badge bg-success">' + event.extendedProps.className + '</span></div>';
+                    }
+
+                    if (event.extendedProps.studentName) {
+                        modalBody += '<div class="event-info-item"><i class="fas fa-user-graduate text-info"></i> <strong>Ученик:</strong> <span class="badge bg-info">' + event.extendedProps.studentName + '</span></div>';
+                    }
+
+                    if (event.extendedProps.location) {
+                        modalBody += '<div class="event-info-item"><i class="fas fa-map-marker-alt text-warning"></i> <strong>Место:</strong> ' + event.extendedProps.location + '</div>';
+                    }
+
+                    if (event.extendedProps.isCompleted) {
+                        modalBody += '<div class="alert alert-success mt-2"><i class="fas fa-check-circle"></i> Занятие завершено</div>';
+
+                        if (event.extendedProps.notes) {
+                            modalBody += '<div class="event-info-item"><i class="fas fa-sticky-note text-warning"></i> <strong>Заметки:</strong><br><span class="ms-4">' + event.extendedProps.notes + '</span></div>';
+                        }
+                    }
+
+                    document.getElementById('eventModalBody').innerHTML = modalBody;
+
+                    document.getElementById('eventEditBtn').href = '@Url.Action("Edit", "Calendar")/' + event.id;
+                    document.getElementById('eventDetailsBtn').href = '@Url.Action("Details", "Calendar")/' + event.id;
+
+                    eventModal.show();
+                },
+                eventDidMount: function(info) {
+                    var tooltipText = info.event.extendedProps.originalTitle || info.event.title;
+                    if (info.event.extendedProps.isRecurringInstance) {
+                        tooltipText = '↻ ' + tooltipText + ' (повторяется)';
+                        info.el.classList.add('recurring-event');
+                    }
+                    if (info.event.extendedProps.className) {
+                        tooltipText += '\nКласс: ' + info.event.extendedProps.className;
+                    }
+                    if (info.event.extendedProps.studentName) {
+                        tooltipText += '\nУченик: ' + info.event.extendedProps.studentName;
+                    }
+                    if (info.event.extendedProps.location) {
+                        tooltipText += '\nМесто: ' + info.event.extendedProps.location;
+                    }
+
+                    info.el.setAttribute('title', tooltipText);
+                },
+                dateClick: function(info) {
+                    var dateStr = info.dateStr;
+                    window.location.href = '@Url.Action("Create", "Calendar")?date=' + dateStr;
+                }
+            });
+
+            calendar.render();
+
+            function formatDateTime(date) {
+                if (!date) return '';
+
+                var options = {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+
+                return date.toLocaleString('ru-RU', options);
+            }
+        });
+    </script>
+}
+
