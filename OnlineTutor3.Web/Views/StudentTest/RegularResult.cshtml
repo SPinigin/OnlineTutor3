@@ -1,0 +1,313 @@
+@model OnlineTutor3.Web.ViewModels.RegularTestResultViewModel
+@using OnlineTutor3.Domain.Entities
+@{
+    ViewData["Title"] = $"Результат теста: {Model.TestTitle}";
+    
+    var gradeColor = Model.Percentage >= 80 ? "success" :
+                     Model.Percentage >= 60 ? "warning" :
+                     Model.Percentage >= 40 ? "info" : "danger";
+}
+
+<div class="mb-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-compact">
+            <li class="breadcrumb-item">
+                <a asp-controller="StudentTest" asp-action="History">История прохождения</a>
+            </li>
+            <li class="breadcrumb-item active text-truncate">@Model.TestTitle</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="test-container">
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-@Model.TestColor text-white py-2">
+            <div class="d-flex justify-content-between align-items-center gap-2">
+                <div class="flex-grow-1 min-w-0">
+                    <h6 class="mb-0 d-flex align-items-center">
+                        <i class="fas @Model.TestIcon me-2 flex-shrink-0"></i>
+                        <span class="text-truncate">@Model.TestTitle</span>
+                    </h6>
+                </div>
+                <div class="flex-shrink-0">
+                    <span class="badge bg-@gradeColor fs-6">
+                        Оценка: @Model.Grade
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body p-3">
+            <div class="text-center mb-3">
+                <div class="result-circle mx-auto" style="width: 120px; height: 120px;">
+                    <svg viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#e9ecef" stroke-width="8" />
+                        <circle cx="50" cy="50" r="45" fill="none"
+                                stroke="@(Model.Percentage >= 80 ? "#28a745" : Model.Percentage >= 60 ? "#ffc107" : Model.Percentage >= 40 ? "#17a2b8" : "#dc3545")"
+                                stroke-width="8"
+                                stroke-dasharray="@(Model.Percentage * 2.827), 282.7"
+                                transform="rotate(-90 50 50)" />
+                        <text x="50" y="50" text-anchor="middle" dy="7"
+                              font-size="20" font-weight="bold"
+                              fill="@(Model.Percentage >= 80 ? "#28a745" : Model.Percentage >= 60 ? "#ffc107" : Model.Percentage >= 40 ? "#17a2b8" : "#dc3545")">
+                            @Model.Percentage.ToString("F1")%
+                        </text>
+                    </svg>
+                </div>
+                <div class="mt-2">
+                    <h5 class="mb-0 text-@gradeColor">@Model.Score / @Model.MaxScore баллов</h5>
+                </div>
+            </div>
+
+            <div class="row text-center g-2">
+                <div class="col-4">
+                    <div class="p-2 bg-light rounded">
+                        <i class="fas fa-user-graduate text-muted"></i>
+                        <div class="mt-1">
+                            <small class="fw-bold d-block text-truncate" style="font-size: 0.75rem;">@Model.StudentName</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 bg-light rounded">
+                        <i class="fas fa-calendar text-muted"></i>
+                        <div class="mt-1">
+                            <small class="fw-bold d-block" style="font-size: 0.75rem;">@Model.CompletedAt?.ToString("dd.MM.yyyy HH:mm")</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 bg-light rounded">
+                        <i class="fas fa-stopwatch text-muted"></i>
+                        <div class="mt-1">
+                            <small class="fw-bold d-block" style="font-size: 0.75rem;">@($"{Model.Duration.Minutes:D2}:{Model.Duration.Seconds:D2}")</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.ShowCorrectAnswers)
+    {
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-light py-2">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h6 class="mb-0">
+                        <i class="fas fa-list-alt"></i> Детальные результаты
+                    </h6>
+                    
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="showErrorsOnly" checked>
+                        <label class="form-check-label small" for="showErrorsOnly">
+                            Только ошибки
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-2 p-md-3">
+                @for (int i = 0; i < Model.Questions.Count; i++)
+                {
+                    var question = Model.Questions[i];
+                    var answer = Model.Answers.FirstOrDefault(a => a.RegularQuestionId == question.Id);
+                    var isAnswered = answer != null;
+                    var isCorrect = answer?.IsCorrect ?? false;
+                    var questionOptions = Model.Options.Where(o => o.RegularQuestionId == question.Id).OrderBy(o => o.OrderIndex).ToList();
+
+                    var selectedIds = new List<int>();
+                    if (answer != null)
+                    {
+                        if (!string.IsNullOrEmpty(answer.StudentAnswer))
+                        {
+                            // Для MultipleChoice
+                            selectedIds = answer.StudentAnswer.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(id => int.TryParse(id.Trim(), out var parsed) ? parsed : 0)
+                                .Where(id => id > 0)
+                                .ToList();
+                        }
+                        else if (answer.SelectedOptionId.HasValue)
+                        {
+                            // Для SingleChoice и TrueFalse
+                            selectedIds.Add(answer.SelectedOptionId.Value);
+                        }
+                    }
+
+                    <div class="question-result mb-2 border rounded @(isAnswered ? (isCorrect ? "border-success" : "border-danger") : "border-secondary")"
+                         data-correct="@isCorrect.ToString().ToLower()">
+                        <div class="accordion" id="accordion@i">
+                            <div class="accordion-item border-0">
+                                <h2 class="accordion-header" id="heading@i">
+                                    <button class="accordion-button @(i > 0 ? "collapsed" : "") p-2" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapse@i">
+                                        <div class="w-100 d-flex justify-content-between align-items-center gap-2">
+                                            <div class="d-flex align-items-center gap-2 flex-grow-1 min-w-0">
+                                                <span class="badge bg-@(isAnswered ? (isCorrect ? "success" : "danger") : "secondary")">@(i + 1)</span>
+                                                <span class="badge bg-@(question.Type == QuestionType.SingleChoice ? "primary" : question.Type == QuestionType.MultipleChoice ? "success" : "warning") badge-sm">
+                                                    @if (question.Type == QuestionType.SingleChoice)
+                                                    {
+                                                        <i class="fas fa-dot-circle"></i> <text>Одиночный</text>
+                                                    }
+                                                    else if (question.Type == QuestionType.MultipleChoice)
+                                                    {
+                                                        <i class="fas fa-check-square"></i> <text>Множественный</text>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="fas fa-toggle-on"></i> <text>Верно/Неверно</text>
+                                                    }
+                                                </span>
+                                                <span class="small text-truncate">@question.Text</span>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                @if (isAnswered)
+                                                {
+                                                    @if (isCorrect)
+                                                    {
+                                                        <span class="badge bg-success badge-sm">
+                                                            <i class="fas fa-check"></i> +@(answer?.Points ?? 0)
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-danger badge-sm">
+                                                            <i class="fas fa-times"></i> 0
+                                                        </span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary badge-sm">—</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="collapse@i" class="accordion-collapse collapse @(i == 0 ? "show" : "")"
+                                     data-bs-parent="#accordion@i">
+                                    <div class="accordion-body p-2">
+                                        @if (!string.IsNullOrEmpty(question.Hint))
+                                        {
+                                            <div class="alert alert-info alert-sm py-2 mb-2">
+                                                <small>
+                                                    <i class="fas fa-lightbulb"></i>
+                                                    <strong>Подсказка:</strong> @question.Hint
+                                                </small>
+                                            </div>
+                                        }
+
+                                        <div class="mb-2">
+                                            @foreach (var option in questionOptions)
+                                            {
+                                                var isSelected = selectedIds.Contains(option.Id);
+                                                var cardClass = "";
+                                                var borderClass = "";
+
+                                                if (option.IsCorrect)
+                                                {
+                                                    cardClass = "bg-success bg-opacity-10";
+                                                    borderClass = "border-success";
+                                                }
+                                                else if (isSelected)
+                                                {
+                                                    cardClass = "bg-danger bg-opacity-10";
+                                                    borderClass = "border-danger";
+                                                }
+
+                                                <div class="card mb-1 @cardClass @borderClass border">
+                                                    <div class="card-body p-2">
+                                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                                            <div class="flex-grow-1">
+                                                                <small>
+                                                                    @if (question.Type == QuestionType.MultipleChoice)
+                                                                    {
+                                                                        @if (isSelected)
+                                                                        {
+                                                                            <i class="fas fa-check-square text-primary me-1"></i>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <i class="far fa-square text-muted me-1"></i>
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @if (isSelected)
+                                                                        {
+                                                                            <i class="fas fa-dot-circle text-primary me-1"></i>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <i class="far fa-circle text-muted me-1"></i>
+                                                                        }
+                                                                    }
+                                                                    @option.Text
+                                                                </small>
+                                                            </div>
+                                                            <div class="flex-shrink-0">
+                                                                @if (option.IsCorrect)
+                                                                {
+                                                                    <span class="badge bg-success badge-sm">
+                                                                        <i class="fas fa-check"></i>
+                                                                    </span>
+                                                                }
+                                                                @if (isSelected && !option.IsCorrect)
+                                                                {
+                                                                    <span class="badge bg-danger badge-sm">
+                                                                        <i class="fas fa-times"></i>
+                                                                    </span>
+                                                                }
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+
+                                        @if (!string.IsNullOrEmpty(question.Explanation))
+                                        {
+                                            <div class="alert alert-success alert-sm py-2 mb-0">
+                                                <small>
+                                                    <i class="fas fa-graduation-cap"></i>
+                                                    <strong>Объяснение:</strong> @question.Explanation
+                                                </small>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm mb-3">
+            <div class="card-body p-3 text-center">
+                <p class="text-muted mb-0">
+                    <i class="fas fa-info-circle"></i>
+                    Детальные результаты недоступны. Учитель отключил показ правильных ответов.
+                </p>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#showErrorsOnly').on('change', function() {
+                if ($(this).is(':checked')) {
+                    $('.question-result[data-correct="true"]').hide();
+                } else {
+                    $('.question-result').show();
+                }
+            });
+        });
+    </script>
+}
+

@@ -1632,14 +1632,51 @@ namespace OnlineTutor3.Web.Controllers
                     return NotFound();
                 }
 
-                // TODO: Этап 9 - Реализовать детальный просмотр результатов
-                TempData["InfoMessage"] = $"Тест завершен! Ваш результат: {testResult.Score}/{testResult.MaxScore} ({testResult.Percentage:F1}%)";
-                return RedirectToAction("History");
+                if (!testResult.IsCompleted)
+                {
+                    return RedirectToAction(nameof(TakeSpelling), new { id = testResult.Id });
+                }
+
+                // Загружаем тест
+                var test = await _spellingTestRepository.GetByIdAsync(testResult.SpellingTestId);
+                if (test == null)
+                {
+                    return NotFound();
+                }
+
+                // Загружаем вопросы
+                var questions = await _spellingQuestionRepository.GetByTestIdOrderedAsync(test.Id);
+                
+                // Загружаем ответы
+                var answers = await _answerService.GetSpellingAnswersAsync(testResult.Id);
+
+                var viewModel = new SpellingTestResultViewModel
+                {
+                    TestResult = testResult,
+                    Test = test,
+                    Questions = questions,
+                    Answers = answers,
+                    TestTitle = test.Title,
+                    Score = testResult.Score,
+                    MaxScore = testResult.MaxScore,
+                    Percentage = testResult.Percentage,
+                    Grade = testResult.Grade ?? 0,
+                    CompletedAt = testResult.CompletedAt,
+                    StartedAt = testResult.StartedAt,
+                    Duration = testResult.CompletedAt.HasValue ? testResult.CompletedAt.Value - testResult.StartedAt : TimeSpan.Zero,
+                    StudentName = currentUser.FullName ?? currentUser.Email ?? "",
+                    ShowCorrectAnswers = test.ShowCorrectAnswers,
+                    TestIcon = "fa-spell-check",
+                    TestColor = "primary",
+                    AttemptNumber = testResult.AttemptNumber
+                };
+
+                return View("SpellingResult", viewModel);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при загрузке результатов теста. ResultId: {ResultId}", id);
-                TempData["ErrorMessage"] = "Произошла ошибка при загрузке результатов.";
+                _logger.LogError(ex, "Ошибка при загрузке результата теста по орфографии. ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при загрузке результата.";
                 return RedirectToAction("Index");
             }
         }
@@ -1759,6 +1796,231 @@ namespace OnlineTutor3.Web.Controllers
                     .Where(r => r.RegularTestId == testId).Cast<TestResult>().ToList(),
                 _ => new List<TestResult>()
             };
+        }
+
+        // GET: StudentTest/PunctuationResult/{id}
+        public async Task<IActionResult> PunctuationResult(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                var testResult = await _punctuationTestResultRepository.GetByIdAsync(id);
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                if (!testResult.IsCompleted)
+                {
+                    return RedirectToAction(nameof(TakePunctuation), new { id = testResult.Id });
+                }
+
+                // Загружаем тест
+                var test = await _punctuationTestRepository.GetByIdAsync(testResult.PunctuationTestId);
+                if (test == null)
+                {
+                    return NotFound();
+                }
+
+                // Загружаем вопросы
+                var questions = await _punctuationQuestionRepository.GetByTestIdOrderedAsync(test.Id);
+                
+                // Загружаем ответы
+                var answers = await _answerService.GetPunctuationAnswersAsync(testResult.Id);
+
+                var viewModel = new PunctuationTestResultViewModel
+                {
+                    TestResult = testResult,
+                    Test = test,
+                    Questions = questions,
+                    Answers = answers,
+                    TestTitle = test.Title,
+                    Score = testResult.Score,
+                    MaxScore = testResult.MaxScore,
+                    Percentage = testResult.Percentage,
+                    Grade = testResult.Grade ?? 0,
+                    CompletedAt = testResult.CompletedAt,
+                    StartedAt = testResult.StartedAt,
+                    Duration = testResult.CompletedAt.HasValue ? testResult.CompletedAt.Value - testResult.StartedAt : TimeSpan.Zero,
+                    StudentName = currentUser.FullName ?? currentUser.Email ?? "",
+                    ShowCorrectAnswers = test.ShowCorrectAnswers,
+                    TestIcon = "fa-exclamation",
+                    TestColor = "warning",
+                    AttemptNumber = testResult.AttemptNumber
+                };
+
+                return View("PunctuationResult", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке результата теста по пунктуации. ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при загрузке результата.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: StudentTest/OrthoeopyResult/{id}
+        public async Task<IActionResult> OrthoeopyResult(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                var testResult = await _orthoeopyTestResultRepository.GetByIdAsync(id);
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                if (!testResult.IsCompleted)
+                {
+                    return RedirectToAction(nameof(TakeOrthoeopy), new { id = testResult.Id });
+                }
+
+                // Загружаем тест
+                var test = await _orthoeopyTestRepository.GetByIdAsync(testResult.OrthoeopyTestId);
+                if (test == null)
+                {
+                    return NotFound();
+                }
+
+                // Загружаем вопросы
+                var questions = await _orthoeopyQuestionRepository.GetByTestIdOrderedAsync(test.Id);
+                
+                // Загружаем ответы
+                var answers = await _answerService.GetOrthoeopyAnswersAsync(testResult.Id);
+
+                var viewModel = new OrthoeopyTestResultViewModel
+                {
+                    TestResult = testResult,
+                    Test = test,
+                    Questions = questions,
+                    Answers = answers,
+                    TestTitle = test.Title,
+                    Score = testResult.Score,
+                    MaxScore = testResult.MaxScore,
+                    Percentage = testResult.Percentage,
+                    Grade = testResult.Grade ?? 0,
+                    CompletedAt = testResult.CompletedAt,
+                    StartedAt = testResult.StartedAt,
+                    Duration = testResult.CompletedAt.HasValue ? testResult.CompletedAt.Value - testResult.StartedAt : TimeSpan.Zero,
+                    StudentName = currentUser.FullName ?? currentUser.Email ?? "",
+                    ShowCorrectAnswers = test.ShowCorrectAnswers,
+                    TestIcon = "fa-volume-up",
+                    TestColor = "success",
+                    AttemptNumber = testResult.AttemptNumber
+                };
+
+                return View("OrthoeopyResult", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке результата теста по орфоэпии. ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при загрузке результата.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: StudentTest/RegularResult/{id}
+        public async Task<IActionResult> RegularResult(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                var testResult = await _regularTestResultRepository.GetByIdAsync(id);
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                if (!testResult.IsCompleted)
+                {
+                    return RedirectToAction(nameof(TakeRegular), new { id = testResult.Id });
+                }
+
+                // Загружаем тест
+                var test = await _regularTestRepository.GetByIdAsync(testResult.RegularTestId);
+                if (test == null)
+                {
+                    return NotFound();
+                }
+
+                // Загружаем вопросы
+                var questions = await _regularQuestionRepository.GetByTestIdOrderedAsync(test.Id);
+                
+                // Загружаем опции для всех вопросов
+                var options = new List<RegularQuestionOption>();
+                foreach (var question in questions)
+                {
+                    var questionOptions = await _regularQuestionOptionRepository.GetByQuestionIdOrderedAsync(question.Id);
+                    options.AddRange(questionOptions);
+                }
+                
+                // Загружаем ответы
+                var answers = await _answerService.GetRegularAnswersAsync(testResult.Id);
+
+                var viewModel = new RegularTestResultViewModel
+                {
+                    TestResult = testResult,
+                    Test = test,
+                    Questions = questions,
+                    Options = options,
+                    Answers = answers,
+                    TestTitle = test.Title,
+                    Score = testResult.Score,
+                    MaxScore = testResult.MaxScore,
+                    Percentage = testResult.Percentage,
+                    Grade = testResult.Grade ?? 0,
+                    CompletedAt = testResult.CompletedAt,
+                    StartedAt = testResult.StartedAt,
+                    Duration = testResult.CompletedAt.HasValue ? testResult.CompletedAt.Value - testResult.StartedAt : TimeSpan.Zero,
+                    StudentName = currentUser.FullName ?? currentUser.Email ?? "",
+                    ShowCorrectAnswers = test.ShowCorrectAnswers,
+                    TestIcon = "fa-list-ul",
+                    TestColor = "info",
+                    AttemptNumber = testResult.AttemptNumber
+                };
+
+                return View("RegularResult", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке результата классического теста. ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при загрузке результата.";
+                return RedirectToAction("Index");
+            }
         }
     }
 }
