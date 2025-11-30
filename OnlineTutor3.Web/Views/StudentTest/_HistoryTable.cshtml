@@ -18,10 +18,11 @@
                         <tr>
                             <th style="width: 5%;">Тип</th>
                             <th style="width: 30%;">Тест</th>
-                            <th class="d-none d-md-table-cell" style="width: 15%;">Дата</th>
-                            <th class="text-center" style="width: 10%;">Попытка</th>
-                            <th class="text-center" style="width: 15%;">Результат</th>
-                            <th class="d-none d-md-table-cell text-center" style="width: 10%;">Время</th>
+                            <th class="d-none d-md-table-cell" style="width: 12%;">Дата</th>
+                            <th class="text-center" style="width: 8%;">Попытка</th>
+                            <th class="text-center d-none d-md-table-cell" style="width: 12%;">Результат</th>
+                            <th class="text-center" style="width: 10%;">Оценка</th>
+                            <th class="d-none d-md-table-cell text-center" style="width: 8%;">Время</th>
                             <th class="text-center" style="width: 15%;">Действия</th>
                         </tr>
             </thead>
@@ -77,9 +78,25 @@
                             <div class="d-flex align-items-center">
                                 <div>
                                     <strong class="d-block">@testTitle</strong>
-                                    <small class="text-muted d-md-none">
-                                        @result.CompletedAt?.ToString("dd.MM.yy HH:mm")
-                                    </small>
+                                    <div class="d-md-none">
+                                        <small class="text-muted">
+                                            @result.CompletedAt?.ToString("dd.MM.yy HH:mm")
+                                        </small>
+                                        @if (result.Grade.HasValue)
+                                        {
+                                            var gradeColor = result.Grade.Value switch
+                                            {
+                                                5 => "success",
+                                                4 => "info",
+                                                3 => "warning",
+                                                2 => "danger",
+                                                _ => "secondary"
+                                            };
+                                            <span class="badge bg-@gradeColor rounded-pill ms-2" style="font-size: 0.875rem;">
+                                                Оценка: @result.Grade.Value
+                                            </span>
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </td>
@@ -100,13 +117,37 @@
                             </span>
                         </td>
 
-                        <td class="text-center">
+                        <td class="text-center d-none d-md-table-cell">
                             <span class="badge bg-@(result.Percentage >= 80 ? "success" : result.Percentage >= 60 ? "warning" : "danger") rounded-pill">
                                 @result.Percentage.ToString("F1")%
                             </span>
-                            <small class="text-muted d-none d-md-block mt-1">
+                            <small class="text-muted d-block mt-1">
                                 @result.Score/@result.MaxScore
                             </small>
+                        </td>
+
+                        <td class="text-center">
+                            @if (result.Grade.HasValue)
+                            {
+                                var gradeColor = result.Grade.Value switch
+                                {
+                                    5 => "success",
+                                    4 => "info",
+                                    3 => "warning",
+                                    2 => "danger",
+                                    _ => "secondary"
+                                };
+                                <span class="badge bg-@gradeColor rounded-pill" style="font-size: 1rem; min-width: 2.5rem;">
+                                    @result.Grade.Value
+                                </span>
+                                <small class="text-muted d-none d-md-block mt-1">
+                                    @result.Percentage.ToString("F1")%
+                                </small>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary rounded-pill">-</span>
+                            }
                         </td>
 
                         <td class="text-center d-none d-md-table-cell">
