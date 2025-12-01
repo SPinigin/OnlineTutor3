@@ -83,7 +83,28 @@ namespace OnlineTutor3.Web.Controllers
 
                 // Загружаем студентов класса
                 var students = await _studentService.GetByClassIdAsync(id.Value);
+                
+                // Загружаем данные пользователей для студентов
+                var studentsWithUsers = new List<(Student Student, ApplicationUser? User)>();
+                if (students != null)
+                {
+                    foreach (var student in students)
+                    {
+                        try
+                        {
+                            var user = await _userManager.FindByIdAsync(student.UserId);
+                            studentsWithUsers.Add((student, user));
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Ошибка при загрузке пользователя для студента {StudentId}, UserId: {UserId}", student.Id, student.UserId);
+                            studentsWithUsers.Add((student, null));
+                        }
+                    }
+                }
+                
                 ViewBag.Students = students;
+                ViewBag.StudentsWithUsers = studentsWithUsers;
 
                 return View(@class);
             }
