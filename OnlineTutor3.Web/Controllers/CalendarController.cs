@@ -8,7 +8,7 @@ using OnlineTutor3.Web.ViewModels;
 
 namespace OnlineTutor3.Web.Controllers
 {
-    [Authorize(Roles = ApplicationRoles.Teacher)]
+    [Authorize]
     public class CalendarController : Controller
     {
         private readonly ICalendarService _calendarService;
@@ -43,13 +43,65 @@ namespace OnlineTutor3.Web.Controllers
                 }
 
                 var now = DateTime.Now;
-                var upcomingEvents = await _calendarService.GetUpcomingCountAsync(currentUser.Id, now);
-                var todayEvents = await _calendarService.GetTodayCountAsync(currentUser.Id, now);
-                var completedThisMonth = await _calendarService.GetCompletedThisMonthCountAsync(currentUser.Id, now);
+                
+                // Проверяем роль пользователя
+                var isTeacher = await _userManager.IsInRoleAsync(currentUser, ApplicationRoles.Teacher);
+                
+                if (isTeacher)
+                {
+                    // Для учителя - события учителя
+                    var upcomingEvents = await _calendarService.GetUpcomingCountAsync(currentUser.Id, now);
+                    var todayEvents = await _calendarService.GetTodayCountAsync(currentUser.Id, now);
+                    var completedThisMonth = await _calendarService.GetCompletedThisMonthCountAsync(currentUser.Id, now);
 
-                ViewBag.UpcomingEvents = upcomingEvents;
-                ViewBag.TodayEvents = todayEvents;
-                ViewBag.CompletedThisMonth = completedThisMonth;
+                    ViewBag.UpcomingEvents = upcomingEvents;
+                    ViewBag.TodayEvents = todayEvents;
+                    ViewBag.CompletedThisMonth = completedThisMonth;
+                }
+                else if (await _userManager.IsInRoleAsync(currentUser, ApplicationRoles.Student))
+                {
+                    // Для студента - получаем события его класса и напрямую связанные с ним
+                    var student = await _studentService.GetByUserIdAsync(currentUser.Id);
+                    if (student != null)
+                    {
+                        var studentEvents = new List<CalendarEvent>();
+                        
+                        // События класса студента
+                        if (student.ClassId.HasValue)
+                        {
+                            var classEvents = await _calendarService.GetByClassIdAsync(student.ClassId.Value);
+                            studentEvents.AddRange(classEvents);
+                        }
+                        
+                        // События, напрямую связанные со студентом
+                        var directStudentEvents = await _calendarService.GetByStudentIdAsync(student.Id);
+                        studentEvents.AddRange(directStudentEvents);
+                        
+                        // Убираем дубликаты
+                        studentEvents = studentEvents.GroupBy(e => e.Id).Select(g => g.First()).ToList();
+                        
+                        // Подсчитываем статистику
+                        var upcomingCount = studentEvents.Count(e => e.StartDateTime > now && !e.IsCompleted);
+                        var todayCount = studentEvents.Count(e => e.StartDateTime.Date == now.Date && !e.IsCompleted);
+                        var completedCount = studentEvents.Count(e => e.IsCompleted && e.StartDateTime.Month == now.Month && e.StartDateTime.Year == now.Year);
+
+                        ViewBag.UpcomingEvents = upcomingCount;
+                        ViewBag.TodayEvents = todayCount;
+                        ViewBag.CompletedThisMonth = completedCount;
+                    }
+                    else
+                    {
+                        ViewBag.UpcomingEvents = 0;
+                        ViewBag.TodayEvents = 0;
+                        ViewBag.CompletedThisMonth = 0;
+                    }
+                }
+                else
+                {
+                    ViewBag.UpcomingEvents = 0;
+                    ViewBag.TodayEvents = 0;
+                    ViewBag.CompletedThisMonth = 0;
+                }
 
                 return View();
             }
@@ -62,6 +114,7 @@ namespace OnlineTutor3.Web.Controllers
         }
 
         // GET: Calendar/Create
+        [Authorize(Roles = ApplicationRoles.Teacher)]
         public async Task<IActionResult> Create(DateTime? date, int? classId, int? studentId)
         {
             try
@@ -94,6 +147,7 @@ namespace OnlineTutor3.Web.Controllers
 
         // POST: Calendar/Create
         [HttpPost]
+        [Authorize(Roles = ApplicationRoles.Teacher)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateCalendarEventViewModel model)
         {
@@ -221,6 +275,7 @@ namespace OnlineTutor3.Web.Controllers
         }
 
         // GET: Calendar/Edit/5
+        [Authorize(Roles = ApplicationRoles.Teacher)]
         public async Task<IActionResult> Edit(int? id)
         {
             try
@@ -266,6 +321,7 @@ namespace OnlineTutor3.Web.Controllers
 
         // POST: Calendar/Edit/5
         [HttpPost]
+        [Authorize(Roles = ApplicationRoles.Teacher)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, EditCalendarEventViewModel model)
         {
@@ -376,12 +432,54 @@ namespace OnlineTutor3.Web.Controllers
                     return Challenge();
                 }
 
-                var calendarEvent = await _calendarService.GetByIdWithRelationsAsync(id.Value, currentUser.Id);
+                // Проверяем роль пользователя
+                var isTeacher = await _userManager.IsInRoleAsync(currentUser, ApplicationRoles.Teacher);
+                CalendarEvent? calendarEvent;
+                
+                if (isTeacher)
+                {
+                    // Для учителя - используем существующий метод
+                    calendarEvent = await _calendarService.GetByIdWithRelationsAsync(id.Value, currentUser.Id);
+                }
+                else if (await _userManager.IsInRoleAsync(currentUser, ApplicationRoles.Student))
+                {
+                    // Для студента - проверяем доступ к событию
+                    calendarEvent = await _calendarService.GetByIdAsync(id.Value);
+                    if (calendarEvent == null) return NotFound();
+                    
+                    // Проверяем, что событие связано с классом или студентом
+                    var student = await _studentService.GetByUserIdAsync(currentUser.Id);
+                    if (student == null) return NotFound();
+                    
+                    bool hasAccess = false;
+                    
+                    // Проверяем, связано ли событие с классом студента
+                    if (calendarEvent.ClassId.HasValue && student.ClassId.HasValue)
+                    {
+                        hasAccess = calendarEvent.ClassId.Value == student.ClassId.Value;
+                    }
+                    
+                    // Проверяем, связано ли событие напрямую со студентом
+                    if (!hasAccess && calendarEvent.StudentId.HasValue)
+                    {
+                        hasAccess = calendarEvent.StudentId.Value == student.Id;
+                    }
+                    
+                    if (!hasAccess)
+                    {
+                        return NotFound();
+                    }
+                }
+                else
+                {
+                    return NotFound();
+                }
+                
                 if (calendarEvent == null) return NotFound();
 
                 var @class = calendarEvent.ClassId.HasValue ? await _classService.GetByIdAsync(calendarEvent.ClassId.Value) : null;
-                var student = calendarEvent.StudentId.HasValue ? await _studentService.GetByIdAsync(calendarEvent.StudentId.Value) : null;
-                var studentUser = student != null ? await _userManager.FindByIdAsync(student.UserId) : null;
+                var eventStudent = calendarEvent.StudentId.HasValue ? await _studentService.GetByIdAsync(calendarEvent.StudentId.Value) : null;
+                var studentUser = eventStudent != null ? await _userManager.FindByIdAsync(eventStudent.UserId) : null;
 
                 var model = new CalendarEventDetailsViewModel
                 {
@@ -412,6 +510,7 @@ namespace OnlineTutor3.Web.Controllers
         }
 
         // GET: Calendar/Delete/5
+        [Authorize(Roles = ApplicationRoles.Teacher)]
         public async Task<IActionResult> Delete(int? id)
         {
             try
@@ -446,6 +545,7 @@ namespace OnlineTutor3.Web.Controllers
 
         // POST: Calendar/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = ApplicationRoles.Teacher)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -490,7 +590,49 @@ namespace OnlineTutor3.Web.Controllers
                 var searchStart = start ?? DateTime.Now.AddMonths(-3);
                 var searchEnd = end ?? DateTime.Now.AddMonths(6);
 
-                var events = await _calendarService.GetByTeacherIdInDateRangeAsync(currentUser.Id, searchStart, searchEnd);
+                List<CalendarEvent> events;
+                
+                // Проверяем роль пользователя
+                var isTeacher = await _userManager.IsInRoleAsync(currentUser, ApplicationRoles.Teacher);
+                
+                if (isTeacher)
+                {
+                    // Для учителя - события учителя
+                    events = await _calendarService.GetByTeacherIdInDateRangeAsync(currentUser.Id, searchStart, searchEnd);
+                }
+                else if (await _userManager.IsInRoleAsync(currentUser, ApplicationRoles.Student))
+                {
+                    // Для студента - события его класса и напрямую связанные с ним
+                    var student = await _studentService.GetByUserIdAsync(currentUser.Id);
+                    if (student == null)
+                    {
+                        return Json(new List<object>());
+                    }
+                    
+                    var studentEvents = new List<CalendarEvent>();
+                    
+                    // События класса студента
+                    if (student.ClassId.HasValue)
+                    {
+                        var classEvents = await _calendarService.GetByClassIdAsync(student.ClassId.Value);
+                        // Фильтруем по дате
+                        studentEvents.AddRange(classEvents.Where(e => 
+                            e.StartDateTime >= searchStart && e.StartDateTime <= searchEnd));
+                    }
+                    
+                    // События, напрямую связанные со студентом
+                    var directStudentEvents = await _calendarService.GetByStudentIdAsync(student.Id);
+                    // Фильтруем по дате
+                    studentEvents.AddRange(directStudentEvents.Where(e => 
+                        e.StartDateTime >= searchStart && e.StartDateTime <= searchEnd));
+                    
+                    // Убираем дубликаты
+                    events = studentEvents.GroupBy(e => e.Id).Select(g => g.First()).ToList();
+                }
+                else
+                {
+                    return Json(new List<object>());
+                }
 
                 var result = new List<object>();
 
@@ -518,6 +660,7 @@ namespace OnlineTutor3.Web.Controllers
 
         // POST: Calendar/ToggleComplete/5
         [HttpPost]
+        [Authorize(Roles = ApplicationRoles.Teacher)]
         public async Task<IActionResult> ToggleComplete(int id)
         {
             try
