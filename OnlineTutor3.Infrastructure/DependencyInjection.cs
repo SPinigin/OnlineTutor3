@@ -64,7 +64,8 @@ namespace OnlineTutor3.Infrastructure
                 options.User.RequireUniqueEmail = true;
 
                 // Настройки подтверждения email
-                options.SignIn.RequireConfirmedEmail = true;
+                // Временно отключено для продакшн, так как БД создана через SQL-скрипт
+                options.SignIn.RequireConfirmedEmail = false;
 
                 // Настройки блокировки
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
@@ -75,7 +76,17 @@ namespace OnlineTutor3.Infrastructure
 
             // ApplicationDbContext для Identity
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            {
+                var connectionString = configuration.GetConnectionString("DefaultConnection");
+                options.UseSqlServer(connectionString, sqlOptions =>
+                {
+                    sqlOptions.CommandTimeout(30); // Таймаут 30 секунд
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(5),
+                        errorNumbersToAdd: null);
+                });
+            });
 
             // Настройка cookie
             services.ConfigureApplicationCookie(options =>

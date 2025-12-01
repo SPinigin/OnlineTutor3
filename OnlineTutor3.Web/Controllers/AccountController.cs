@@ -54,65 +54,116 @@ namespace OnlineTutor3.Web.Controllers
                 return View(model);
             }
 
-            _logger.LogInformation("Попытка входа пользователя: {Email}", model.Email);
-
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user != null)
+            try
             {
-                // Проверка активности аккаунта
-                if (!user.IsActive)
+                _logger.LogInformation("Попытка входа пользователя: {Email}", model.Email);
+
+                ApplicationUser? user = null;
+                try
                 {
-                    _logger.LogWarning("Попытка входа заблокированного пользователя. UserId: {UserId}", user.Id);
-                    ModelState.AddModelError(string.Empty, "Ваш аккаунт заблокирован. Обратитесь к администратору.");
+                    var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                    user = await _userManager.FindByEmailAsync(model.Email);
+                    stopwatch.Stop();
+                    _logger.LogInformation("FindByEmailAsync выполнен за {ElapsedMs}ms для {Email}", stopwatch.ElapsedMilliseconds, model.Email);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Ошибка при поиске пользователя по email: {Email}", model.Email);
+                    ModelState.AddModelError(string.Empty, "Произошла ошибка при входе. Попробуйте позже.");
                     return View(model);
                 }
 
-                // Проверка подтверждения email (если требуется)
-                if (!await _userManager.IsEmailConfirmedAsync(user))
-                {
-                    TempData["WarningMessage"] = "Пожалуйста, подтвердите ваш email перед входом.";
-                    return View(model);
-                }
-            }
-
-            var result = await _signInManager.PasswordSignInAsync(
-                model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
-
-            if (result.Succeeded)
-            {
                 if (user != null)
                 {
-                    user.LastLoginAt = DateTime.Now;
-                    await _userManager.UpdateAsync(user);
-
-                    // Проверяем, если это учитель, одобрен ли он
-                    if (await _userManager.IsInRoleAsync(user, ApplicationRoles.Teacher))
+                    try
                     {
-                        var teacher = await _teacherService.GetByUserIdAsync(user.Id);
-                        if (teacher != null && !teacher.IsApproved)
+                        // Проверка активности аккаунта
+                        if (!user.IsActive)
                         {
-                            await _signInManager.SignOutAsync();
-                            _logger.LogWarning("Попытка входа неодобренного учителя. UserId: {UserId}", user.Id);
-                            TempData["ErrorMessage"] = "Ваш аккаунт учителя еще не одобрен администратором.";
+                            _logger.LogWarning("Попытка входа заблокированного пользователя. UserId: {UserId}", user.Id);
+                            ModelState.AddModelError(string.Empty, "Ваш аккаунт заблокирован. Обратитесь к администратору.");
                             return View(model);
                         }
+
+                        // Проверка подтверждения email отключена в продакшн
+                        // if (!await _userManager.IsEmailConfirmedAsync(user))
+                        // {
+                        //     TempData["WarningMessage"] = "Пожалуйста, подтвердите ваш email перед входом.";
+                        //     return View(model);
+                        // }
                     }
-
-                    _logger.LogInformation("Успешный вход пользователя. UserId: {UserId}, Email: {Email}", user.Id, model.Email);
-                    return await RedirectToLocalAsync(returnUrl, user);
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Ошибка при проверке пользователя. UserId: {UserId}", user?.Id);
+                        ModelState.AddModelError(string.Empty, "Произошла ошибка при проверке аккаунта. Попробуйте позже.");
+                        return View(model);
+                    }
                 }
-            }
 
-            if (result.IsLockedOut)
-            {
-                _logger.LogWarning("Аккаунт {Email} заблокирован", model.Email);
-                TempData["ErrorMessage"] = "Ваш аккаунт временно заблокирован. Попробуйте позже.";
+                Microsoft.AspNetCore.Identity.SignInResult result;
+                try
+                {
+                    result = await _signInManager.PasswordSignInAsync(
+                        model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Ошибка при попытке входа. Email: {Email}", model.Email);
+                    ModelState.AddModelError(string.Empty, "Произошла ошибка при входе. Попробуйте позже.");
+                    return View(model);
+                }
+
+                if (result.Succeeded)
+                {
+                    if (user != null)
+                    {
+                        try
+                        {
+                            user.LastLoginAt = DateTime.Now;
+                            await _userManager.UpdateAsync(user);
+
+                            // Проверяем, если это учитель, одобрен ли он
+                            if (await _userManager.IsInRoleAsync(user, ApplicationRoles.Teacher))
+                            {
+                                var teacher = await _teacherService.GetByUserIdAsync(user.Id);
+                                if (teacher != null && !teacher.IsApproved)
+                                {
+                                    await _signInManager.SignOutAsync();
+                                    _logger.LogWarning("Попытка входа неодобренного учителя. UserId: {UserId}", user.Id);
+                                    TempData["ErrorMessage"] = "Ваш аккаунт учителя еще не одобрен администратором.";
+                                    return View(model);
+                                }
+                            }
+
+                            _logger.LogInformation("Успешный вход пользователя. UserId: {UserId}, Email: {Email}", user.Id, model.Email);
+                            return await RedirectToLocalAsync(returnUrl, user);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Ошибка после успешного входа. UserId: {UserId}", user.Id);
+                            // Даже если обновление не удалось, продолжаем редирект
+                            return await RedirectToLocalAsync(returnUrl, user);
+                        }
+                    }
+                }
+
+                if (result.IsLockedOut)
+                {
+                    _logger.LogWarning("Аккаунт {Email} заблокирован", model.Email);
+                    TempData["ErrorMessage"] = "Ваш аккаунт временно заблокирован. Попробуйте позже.";
+                    return View(model);
+                }
+
+                _logger.LogWarning("Неудачная попытка входа. Email: {Email}", model.Email);
+                ModelState.AddModelError(string.Empty, "Неверный логин или пароль.");
                 return View(model);
             }
-
-            _logger.LogWarning("Неудачная попытка входа. Email: {Email}", model.Email);
-            ModelState.AddModelError(string.Empty, "Неверный логин или пароль.");
-            return View(model);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Критическая ошибка при входе. Email: {Email}", model.Email);
+                ModelState.AddModelError(string.Empty, "Произошла критическая ошибка при входе. Попробуйте позже или обратитесь к администратору.");
+                return View(model);
+            }
         }
 
         [HttpPost]
