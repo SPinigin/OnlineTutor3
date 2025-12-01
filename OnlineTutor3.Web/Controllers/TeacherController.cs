@@ -97,8 +97,17 @@ namespace OnlineTutor3.Web.Controllers
                 var totalActiveTests = spellingTests.Count() + punctuationTests.Count() + 
                                       orthoeopyTests.Count() + regularTests.Count();
 
-                // Получаем последние 10 завершенных прохождений тестов
-                var recentCompletions = await GetRecentTestCompletionsAsync(currentUser.Id, subjectsDict);
+                // Получаем последние 10 завершенных прохождений тестов (с обработкой ошибок)
+                List<RecentTestCompletionViewModel> recentCompletions = new List<RecentTestCompletionViewModel>();
+                try
+                {
+                    recentCompletions = await GetRecentTestCompletionsAsync(currentUser.Id, subjectsDict);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Ошибка при загрузке последних завершенных тестов. Продолжаем работу без них.");
+                    // Продолжаем работу без recentCompletions
+                }
 
                 var viewModel = new TeacherIndexViewModel
                 {
@@ -123,6 +132,7 @@ namespace OnlineTutor3.Web.Controllers
 
         /// <summary>
         /// Получает последние 10 завершенных прохождений тестов учениками учителя
+        /// Оптимизированная версия с ограничением количества запросов
         /// </summary>
         private async Task<List<RecentTestCompletionViewModel>> GetRecentTestCompletionsAsync(
             string teacherId, 
@@ -130,191 +140,270 @@ namespace OnlineTutor3.Web.Controllers
         {
             var completions = new List<RecentTestCompletionViewModel>();
 
-            // Получаем тесты учителя
-            var spellingTests = await _spellingTestService.GetByTeacherIdAsync(teacherId);
-            var punctuationTests = await _punctuationTestService.GetByTeacherIdAsync(teacherId);
-            var orthoeopyTests = await _orthoeopyTestService.GetByTeacherIdAsync(teacherId);
-            var regularTests = await _regularTestService.GetByTeacherIdAsync(teacherId);
-
-            var spellingTestsDict = spellingTests.ToDictionary(t => t.Id);
-            var punctuationTestsDict = punctuationTests.ToDictionary(t => t.Id);
-            var orthoeopyTestsDict = orthoeopyTests.ToDictionary(t => t.Id);
-            var regularTestsDict = regularTests.ToDictionary(t => t.Id);
-
-            // Получаем все задания для получения предметов
-            var allAssignments = await _assignmentService.GetByTeacherSubjectsAsync(teacherId);
-            var assignmentsDict = allAssignments.ToDictionary(a => a.Id);
-
-            // Получаем результаты тестов по орфографии
-            foreach (var test in spellingTests)
+            try
             {
-                var testResults = await _spellingTestResultRepository.GetByTestIdAsync(test.Id);
-                var completedResults = testResults.Where(r => r.IsCompleted && r.CompletedAt.HasValue).ToList();
+                // Получаем тесты учителя
+                var spellingTests = await _spellingTestService.GetByTeacherIdAsync(teacherId);
+                var punctuationTests = await _punctuationTestService.GetByTeacherIdAsync(teacherId);
+                var orthoeopyTests = await _orthoeopyTestService.GetByTeacherIdAsync(teacherId);
+                var regularTests = await _regularTestService.GetByTeacherIdAsync(teacherId);
 
-                var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
-                    ? assignmentsDict[test.AssignmentId] 
-                    : null;
-                var subjectName = assignment != null && subjectsDict.ContainsKey(assignment.SubjectId)
-                    ? subjectsDict[assignment.SubjectId]
-                    : "Не указан";
+                // Получаем все задания для получения предметов
+                var allAssignments = await _assignmentService.GetByTeacherSubjectsAsync(teacherId);
+                var assignmentsDict = allAssignments.ToDictionary(a => a.Id);
 
-                foreach (var result in completedResults)
+                // Получаем все студенты учителя заранее (оптимизация)
+                var allStudents = await _studentService.GetByTeacherIdAsync(teacherId);
+                var studentsDict = allStudents.ToDictionary(s => s.Id);
+
+                // Получаем все классы заранее (оптимизация)
+                var allClasses = await _classService.GetActiveByTeacherIdAsync(teacherId);
+                var classesDict = allClasses.ToDictionary(c => c.Id);
+
+                // Получаем результаты тестов по орфографии (только завершенные, ограничиваем количество)
+                foreach (var test in spellingTests.Take(20)) // Ограничиваем до 20 тестов
                 {
-                    var student = await _studentService.GetByIdAsync(result.StudentId);
-                    if (student != null)
+                    try
                     {
-                        var user = await _userManager.FindByIdAsync(student.UserId);
-                        var className = student.ClassId.HasValue 
-                            ? (await _classService.GetByIdAsync(student.ClassId.Value))?.Name 
-                            : null;
+                        var testResults = await _spellingTestResultRepository.GetByTestIdAsync(test.Id);
+                        var completedResults = testResults
+                            .Where(r => r.IsCompleted && r.CompletedAt.HasValue)
+                            .OrderByDescending(r => r.CompletedAt)
+                            .Take(5) // Берем только последние 5 завершенных
+                            .ToList();
 
-                        completions.Add(new RecentTestCompletionViewModel
+                        var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
+                            ? assignmentsDict[test.AssignmentId] 
+                            : null;
+                        var subjectName = assignment != null && subjectsDict.ContainsKey(assignment.SubjectId)
+                            ? subjectsDict[assignment.SubjectId]
+                            : "Не указан";
+
+                        foreach (var result in completedResults)
                         {
-                            TestResultId = result.Id,
-                            TestId = result.SpellingTestId,
-                            TestTitle = test.Title,
-                            TestType = "spelling",
-                            StudentId = result.StudentId,
-                            StudentName = user?.FullName ?? "Неизвестный студент",
-                            ClassName = className,
-                            Score = result.Score,
-                            MaxScore = result.MaxScore,
-                            Percentage = result.Percentage,
-                            Grade = result.Grade,
-                            CompletedAt = result.CompletedAt!.Value,
-                            SubjectName = subjectName
-                        });
+                            if (studentsDict.TryGetValue(result.StudentId, out var student) && student != null)
+                            {
+                                try
+                                {
+                                    var user = await _userManager.FindByIdAsync(student.UserId);
+                                    var className = student.ClassId.HasValue && classesDict.ContainsKey(student.ClassId.Value)
+                                        ? classesDict[student.ClassId.Value]?.Name 
+                                        : null;
+
+                                    completions.Add(new RecentTestCompletionViewModel
+                                    {
+                                        TestResultId = result.Id,
+                                        TestId = result.SpellingTestId,
+                                        TestTitle = test.Title,
+                                        TestType = "spelling",
+                                        StudentId = result.StudentId,
+                                        StudentName = user?.FullName ?? "Неизвестный студент",
+                                        ClassName = className,
+                                        Score = result.Score,
+                                        MaxScore = result.MaxScore,
+                                        Percentage = result.Percentage,
+                                        Grade = result.Grade,
+                                        CompletedAt = result.CompletedAt!.Value,
+                                        SubjectName = subjectName
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogWarning(ex, "Ошибка при получении данных пользователя для студента {StudentId}", result.StudentId);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Ошибка при получении результатов теста по орфографии {TestId}", test.Id);
+                    }
+                }
+
+                // Получаем результаты тестов по пунктуации (только завершенные, ограничиваем количество)
+                foreach (var test in punctuationTests.Take(20)) // Ограничиваем до 20 тестов
+                {
+                    try
+                    {
+                        var testResults = await _punctuationTestResultRepository.GetByTestIdAsync(test.Id);
+                        var completedResults = testResults
+                            .Where(r => r.IsCompleted && r.CompletedAt.HasValue)
+                            .OrderByDescending(r => r.CompletedAt)
+                            .Take(5) // Берем только последние 5 завершенных
+                            .ToList();
+
+                        var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
+                            ? assignmentsDict[test.AssignmentId] 
+                            : null;
+                        var subjectName = assignment != null && subjectsDict.ContainsKey(assignment.SubjectId)
+                            ? subjectsDict[assignment.SubjectId]
+                            : "Не указан";
+
+                        foreach (var result in completedResults)
+                        {
+                            if (studentsDict.TryGetValue(result.StudentId, out var student) && student != null)
+                            {
+                                try
+                                {
+                                    var user = await _userManager.FindByIdAsync(student.UserId);
+                                    var className = student.ClassId.HasValue && classesDict.ContainsKey(student.ClassId.Value)
+                                        ? classesDict[student.ClassId.Value]?.Name 
+                                        : null;
+
+                                    completions.Add(new RecentTestCompletionViewModel
+                                    {
+                                        TestResultId = result.Id,
+                                        TestId = result.PunctuationTestId,
+                                        TestTitle = test.Title,
+                                        TestType = "punctuation",
+                                        StudentId = result.StudentId,
+                                        StudentName = user?.FullName ?? "Неизвестный студент",
+                                        ClassName = className,
+                                        Score = result.Score,
+                                        MaxScore = result.MaxScore,
+                                        Percentage = result.Percentage,
+                                        Grade = result.Grade,
+                                        CompletedAt = result.CompletedAt!.Value,
+                                        SubjectName = subjectName
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogWarning(ex, "Ошибка при получении данных пользователя для студента {StudentId}", result.StudentId);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Ошибка при получении результатов теста по пунктуации {TestId}", test.Id);
+                    }
+                }
+
+                // Получаем результаты тестов по орфоэпии (только завершенные, ограничиваем количество)
+                foreach (var test in orthoeopyTests.Take(20)) // Ограничиваем до 20 тестов
+                {
+                    try
+                    {
+                        var testResults = await _orthoeopyTestResultRepository.GetByTestIdAsync(test.Id);
+                        var completedResults = testResults
+                            .Where(r => r.IsCompleted && r.CompletedAt.HasValue)
+                            .OrderByDescending(r => r.CompletedAt)
+                            .Take(5) // Берем только последние 5 завершенных
+                            .ToList();
+
+                        var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
+                            ? assignmentsDict[test.AssignmentId] 
+                            : null;
+                        var subjectName = assignment != null && subjectsDict.ContainsKey(assignment.SubjectId)
+                            ? subjectsDict[assignment.SubjectId]
+                            : "Не указан";
+
+                        foreach (var result in completedResults)
+                        {
+                            if (studentsDict.TryGetValue(result.StudentId, out var student) && student != null)
+                            {
+                                try
+                                {
+                                    var user = await _userManager.FindByIdAsync(student.UserId);
+                                    var className = student.ClassId.HasValue && classesDict.ContainsKey(student.ClassId.Value)
+                                        ? classesDict[student.ClassId.Value]?.Name 
+                                        : null;
+
+                                    completions.Add(new RecentTestCompletionViewModel
+                                    {
+                                        TestResultId = result.Id,
+                                        TestId = result.OrthoeopyTestId,
+                                        TestTitle = test.Title,
+                                        TestType = "orthoeopy",
+                                        StudentId = result.StudentId,
+                                        StudentName = user?.FullName ?? "Неизвестный студент",
+                                        ClassName = className,
+                                        Score = result.Score,
+                                        MaxScore = result.MaxScore,
+                                        Percentage = result.Percentage,
+                                        Grade = result.Grade,
+                                        CompletedAt = result.CompletedAt!.Value,
+                                        SubjectName = subjectName
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogWarning(ex, "Ошибка при получении данных пользователя для студента {StudentId}", result.StudentId);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Ошибка при получении результатов теста по орфоэпии {TestId}", test.Id);
+                    }
+                }
+
+                // Получаем результаты классических тестов (только завершенные, ограничиваем количество)
+                foreach (var test in regularTests.Take(20)) // Ограничиваем до 20 тестов
+                {
+                    try
+                    {
+                        var testResults = await _regularTestResultRepository.GetByTestIdAsync(test.Id);
+                        var completedResults = testResults
+                            .Where(r => r.IsCompleted && r.CompletedAt.HasValue)
+                            .OrderByDescending(r => r.CompletedAt)
+                            .Take(5) // Берем только последние 5 завершенных
+                            .ToList();
+
+                        var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
+                            ? assignmentsDict[test.AssignmentId] 
+                            : null;
+                        var subjectName = assignment != null && subjectsDict.ContainsKey(assignment.SubjectId)
+                            ? subjectsDict[assignment.SubjectId]
+                            : "Не указан";
+
+                        foreach (var result in completedResults)
+                        {
+                            if (studentsDict.TryGetValue(result.StudentId, out var student) && student != null)
+                            {
+                                try
+                                {
+                                    var user = await _userManager.FindByIdAsync(student.UserId);
+                                    var className = student.ClassId.HasValue && classesDict.ContainsKey(student.ClassId.Value)
+                                        ? classesDict[student.ClassId.Value]?.Name 
+                                        : null;
+
+                                    completions.Add(new RecentTestCompletionViewModel
+                                    {
+                                        TestResultId = result.Id,
+                                        TestId = result.RegularTestId,
+                                        TestTitle = test.Title,
+                                        TestType = "regular",
+                                        StudentId = result.StudentId,
+                                        StudentName = user?.FullName ?? "Неизвестный студент",
+                                        ClassName = className,
+                                        Score = result.Score,
+                                        MaxScore = result.MaxScore,
+                                        Percentage = result.Percentage,
+                                        Grade = result.Grade,
+                                        CompletedAt = result.CompletedAt!.Value,
+                                        SubjectName = subjectName
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogWarning(ex, "Ошибка при получении данных пользователя для студента {StudentId}", result.StudentId);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Ошибка при получении результатов классического теста {TestId}", test.Id);
                     }
                 }
             }
-
-            // Получаем результаты тестов по пунктуации
-            foreach (var test in punctuationTests)
+            catch (Exception ex)
             {
-                var testResults = await _punctuationTestResultRepository.GetByTestIdAsync(test.Id);
-                var completedResults = testResults.Where(r => r.IsCompleted && r.CompletedAt.HasValue).ToList();
-
-                var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
-                    ? assignmentsDict[test.AssignmentId] 
-                    : null;
-                var subjectName = assignment != null && subjectsDict.ContainsKey(assignment.SubjectId)
-                    ? subjectsDict[assignment.SubjectId]
-                    : "Не указан";
-
-                foreach (var result in completedResults)
-                {
-                    var student = await _studentService.GetByIdAsync(result.StudentId);
-                    if (student != null)
-                    {
-                        var user = await _userManager.FindByIdAsync(student.UserId);
-                        var className = student.ClassId.HasValue 
-                            ? (await _classService.GetByIdAsync(student.ClassId.Value))?.Name 
-                            : null;
-
-                        completions.Add(new RecentTestCompletionViewModel
-                        {
-                            TestResultId = result.Id,
-                            TestId = result.PunctuationTestId,
-                            TestTitle = test.Title,
-                            TestType = "punctuation",
-                            StudentId = result.StudentId,
-                            StudentName = user?.FullName ?? "Неизвестный студент",
-                            ClassName = className,
-                            Score = result.Score,
-                            MaxScore = result.MaxScore,
-                            Percentage = result.Percentage,
-                            Grade = result.Grade,
-                            CompletedAt = result.CompletedAt!.Value,
-                            SubjectName = subjectName
-                        });
-                    }
-                }
-            }
-
-            // Получаем результаты тестов по орфоэпии
-            foreach (var test in orthoeopyTests)
-            {
-                var testResults = await _orthoeopyTestResultRepository.GetByTestIdAsync(test.Id);
-                var completedResults = testResults.Where(r => r.IsCompleted && r.CompletedAt.HasValue).ToList();
-
-                var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
-                    ? assignmentsDict[test.AssignmentId] 
-                    : null;
-                var subjectName = assignment != null && subjectsDict.ContainsKey(assignment.SubjectId)
-                    ? subjectsDict[assignment.SubjectId]
-                    : "Не указан";
-
-                foreach (var result in completedResults)
-                {
-                    var student = await _studentService.GetByIdAsync(result.StudentId);
-                    if (student != null)
-                    {
-                        var user = await _userManager.FindByIdAsync(student.UserId);
-                        var className = student.ClassId.HasValue 
-                            ? (await _classService.GetByIdAsync(student.ClassId.Value))?.Name 
-                            : null;
-
-                        completions.Add(new RecentTestCompletionViewModel
-                        {
-                            TestResultId = result.Id,
-                            TestId = result.OrthoeopyTestId,
-                            TestTitle = test.Title,
-                            TestType = "orthoeopy",
-                            StudentId = result.StudentId,
-                            StudentName = user?.FullName ?? "Неизвестный студент",
-                            ClassName = className,
-                            Score = result.Score,
-                            MaxScore = result.MaxScore,
-                            Percentage = result.Percentage,
-                            Grade = result.Grade,
-                            CompletedAt = result.CompletedAt!.Value,
-                            SubjectName = subjectName
-                        });
-                    }
-                }
-            }
-
-            // Получаем результаты классических тестов
-            foreach (var test in regularTests)
-            {
-                var testResults = await _regularTestResultRepository.GetByTestIdAsync(test.Id);
-                var completedResults = testResults.Where(r => r.IsCompleted && r.CompletedAt.HasValue).ToList();
-
-                var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
-                    ? assignmentsDict[test.AssignmentId] 
-                    : null;
-                var subjectName = assignment != null && subjectsDict.ContainsKey(assignment.SubjectId)
-                    ? subjectsDict[assignment.SubjectId]
-                    : "Не указан";
-
-                foreach (var result in completedResults)
-                {
-                    var student = await _studentService.GetByIdAsync(result.StudentId);
-                    if (student != null)
-                    {
-                        var user = await _userManager.FindByIdAsync(student.UserId);
-                        var className = student.ClassId.HasValue 
-                            ? (await _classService.GetByIdAsync(student.ClassId.Value))?.Name 
-                            : null;
-
-                        completions.Add(new RecentTestCompletionViewModel
-                        {
-                            TestResultId = result.Id,
-                            TestId = result.RegularTestId,
-                            TestTitle = test.Title,
-                            TestType = "regular",
-                            StudentId = result.StudentId,
-                            StudentName = user?.FullName ?? "Неизвестный студент",
-                            ClassName = className,
-                            Score = result.Score,
-                            MaxScore = result.MaxScore,
-                            Percentage = result.Percentage,
-                            Grade = result.Grade,
-                            CompletedAt = result.CompletedAt!.Value,
-                            SubjectName = subjectName
-                        });
-                    }
-                }
+                _logger.LogError(ex, "Критическая ошибка в GetRecentTestCompletionsAsync");
+                // Возвращаем пустой список вместо исключения
             }
 
             // Сортируем по дате завершения (от новых к старым) и берем последние 10
