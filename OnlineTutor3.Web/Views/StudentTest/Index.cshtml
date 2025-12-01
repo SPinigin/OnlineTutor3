@@ -208,6 +208,7 @@ else
                                                                 <a asp-action="TakeSpelling" asp-route-id="@test.OngoingTestResultId.Value" 
                                                                    class="btn btn-sm btn-warning" title="Продолжить">
                                                                     <i class="fas fa-play"></i>
+                                                                    <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                                                 </a>
                                                             }
                                                             else if (test.Status == TestStatus.CanStart)
@@ -215,6 +216,7 @@ else
                                                                 <button type="button" class="btn btn-sm btn-success"
                                                                         onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, 'spelling')" title="Начать">
                                                                     <i class="fas fa-play"></i>
+                                                                    <span class="d-none d-lg-inline ms-1">Начать</span>
                                                                 </button>
                                                             }
                                                             else if (test.Status == TestStatus.Exhausted)
@@ -278,6 +280,7 @@ else
                                                                 <a asp-action="TakePunctuation" asp-route-id="@test.OngoingTestResultId.Value" 
                                                                    class="btn btn-sm btn-warning" title="Продолжить">
                                                                     <i class="fas fa-play"></i>
+                                                                    <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                                                 </a>
                                                             }
                                                             else if (test.Status == TestStatus.CanStart)
@@ -285,6 +288,7 @@ else
                                                                 <button type="button" class="btn btn-sm btn-success"
                                                                         onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, 'punctuation')" title="Начать">
                                                                     <i class="fas fa-play"></i>
+                                                                    <span class="d-none d-lg-inline ms-1">Начать</span>
                                                                 </button>
                                                             }
                                                             else if (test.Status == TestStatus.Exhausted)
@@ -348,6 +352,7 @@ else
                                                                 <a asp-action="TakeOrthoeopy" asp-route-id="@test.OngoingTestResultId.Value" 
                                                                    class="btn btn-sm btn-warning" title="Продолжить">
                                                                     <i class="fas fa-play"></i>
+                                                                    <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                                                 </a>
                                                             }
                                                             else if (test.Status == TestStatus.CanStart)
@@ -355,6 +360,7 @@ else
                                                                 <button type="button" class="btn btn-sm btn-success"
                                                                         onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, 'orthoepy')" title="Начать">
                                                                     <i class="fas fa-play"></i>
+                                                                    <span class="d-none d-lg-inline ms-1">Начать</span>
                                                                 </button>
                                                             }
                                                             else if (test.Status == TestStatus.Exhausted)
@@ -418,6 +424,7 @@ else
                                                                 <a asp-action="TakeRegular" asp-route-id="@test.OngoingTestResultId.Value" 
                                                                    class="btn btn-sm btn-warning" title="Продолжить">
                                                                     <i class="fas fa-play"></i>
+                                                                    <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                                                 </a>
                                                             }
                                                             else if (test.Status == TestStatus.CanStart)
@@ -425,6 +432,7 @@ else
                                                                 <button type="button" class="btn btn-sm btn-success"
                                                                         onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, 'regular')" title="Начать">
                                                                     <i class="fas fa-play"></i>
+                                                                    <span class="d-none d-lg-inline ms-1">Начать</span>
                                                                 </button>
                                                             }
                                                             else if (test.Status == TestStatus.Exhausted)
@@ -503,6 +511,27 @@ else
         </div>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        /* Предотвращаем перенос текста в кнопках действий */
+        .test-row .btn {
+            white-space: nowrap;
+        }
+        
+        /* Дополнительная защита от переноса для контейнера с кнопками */
+        .test-row .d-flex.gap-1 {
+            flex-wrap: nowrap;
+        }
+        
+        /* Адаптивное отображение текста на кнопках */
+        @@media (max-width: 991.98px) {
+            .test-row .btn span.d-lg-inline {
+                display: none !important;
+            }
+        }
+    </style>
+}
 
 @section Scripts {
     <script>

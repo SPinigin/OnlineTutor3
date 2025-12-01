@@ -98,7 +98,7 @@
                                     <a asp-action="TakeSpelling" asp-route-id="@test.OngoingTestResultId.Value" 
                                        class="btn btn-warning btn-sm">
                                         <i class="fas fa-play"></i>
-                                        <span class="d-none d-md-inline">Продолжить</span>
+                                        <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                     </a>
                                 }
                                 else if (testType == "Punctuation")
@@ -106,7 +106,7 @@
                                     <a asp-action="TakePunctuation" asp-route-id="@test.OngoingTestResultId.Value" 
                                        class="btn btn-warning btn-sm">
                                         <i class="fas fa-play"></i>
-                                        <span class="d-none d-md-inline">Продолжить</span>
+                                        <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                     </a>
                                 }
                                 else if (testType == "Orthoeopy")
@@ -114,7 +114,7 @@
                                     <a asp-action="TakeOrthoeopy" asp-route-id="@test.OngoingTestResultId.Value" 
                                        class="btn btn-warning btn-sm">
                                         <i class="fas fa-play"></i>
-                                        <span class="d-none d-md-inline">Продолжить</span>
+                                        <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                     </a>
                                 }
                                 else if (testType == "Regular")
@@ -122,7 +122,7 @@
                                     <a asp-action="TakeRegular" asp-route-id="@test.OngoingTestResultId.Value" 
                                        class="btn btn-warning btn-sm">
                                         <i class="fas fa-play"></i>
-                                        <span class="d-none d-md-inline">Продолжить</span>
+                                        <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                     </a>
                                 }
                             }
@@ -131,14 +131,14 @@
                                 <button type="button" class="btn btn-success btn-sm"
                                         onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, '@testType.ToLower()')">
                                     <i class="fas fa-play"></i>
-                                    <span class="d-none d-md-inline">Начать</span>
+                                    <span class="d-none d-lg-inline ms-1">Начать</span>
                                 </button>
                             }
                             else if (test.Status == TestStatus.Exhausted)
                             {
                                 <button type="button" class="btn btn-secondary btn-sm" disabled>
                                     <i class="fas fa-ban"></i>
-                                    <span class="d-none d-md-inline">Исчерпано</span>
+                                    <span class="d-none d-lg-inline ms-1">Исчерпано</span>
                                 </button>
                             }
                         </td>

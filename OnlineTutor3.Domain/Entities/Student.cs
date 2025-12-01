@@ -23,6 +23,9 @@ namespace OnlineTutor3.Domain.Entities
         public int? Grade { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // Навигационное свойство для ApplicationUser (не маппится в БД)
+        public ApplicationUser? User { get; set; }
     }
 }
 
