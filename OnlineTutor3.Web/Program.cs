@@ -44,9 +44,18 @@ builder.Services.AddScoped<OnlineTutor3.Web.Services.RegularQuestionImportServic
     var app = builder.Build();
 
     // Инициализация базы данных
-    using (var scope = app.Services.CreateScope())
+    // ВАЖНО: Не прерываем запуск приложения, если инициализация БД не удалась
+    try
     {
-        await DbInitializer.Initialize(scope.ServiceProvider);
+        using (var scope = app.Services.CreateScope())
+        {
+            await DbInitializer.Initialize(scope.ServiceProvider);
+        }
+    }
+    catch (Exception dbInitEx)
+    {
+        logger.Error(dbInitEx, "Ошибка при инициализации базы данных. Приложение продолжит работу, но некоторые функции могут быть недоступны.");
+        // Не бросаем исключение, чтобы приложение могло запуститься
     }
 
     // Настройка middleware
