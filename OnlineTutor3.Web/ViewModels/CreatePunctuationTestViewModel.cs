@@ -34,7 +34,7 @@ namespace OnlineTutor3.Web.ViewModels
         public DateTime? EndDate { get; set; }
 
         [Display(Name = "Показывать подсказки")]
-        public bool ShowHints { get; set; } = true;
+        public bool ShowHints { get; set; } = false;
 
         [Display(Name = "Показывать правильные ответы")]
         public bool ShowCorrectAnswers { get; set; } = true;

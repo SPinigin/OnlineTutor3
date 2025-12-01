@@ -28,8 +28,8 @@ namespace OnlineTutor3.Infrastructure.Repositories
         public async Task<int> GetCountByTestIdAsync(int testId)
         {
             var sql = "SELECT COUNT(*) FROM OrthoeopyQuestions WHERE OrthoeopyTestId = @TestId";
-            var result = await _db.QueryScalarAsync<int?>(sql, new { TestId = testId });
-            return result ?? 0;
+            long? result = await _db.QueryScalarAsync<long>(sql, new { TestId = testId });
+            return result.HasValue ? (int)result.Value : 0;
         }
     }
 }
