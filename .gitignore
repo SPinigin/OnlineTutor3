@@ -189,3 +189,6 @@ FodyWeavers.xsd
 /OnlineTutor3.Infrastructure/Data/OptimizeDatabaseIndexes.sql
 /README.md
 /STUDENT_PART_PLAN.md
+/OnlineTutor3.Web/appsettings.Production.json
+/DEPLOYMENT.md
+/OnlineTutor3.Web/Properties/PublishProfiles
