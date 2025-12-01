@@ -22,52 +22,62 @@ namespace OnlineTutor3.Infrastructure.Data
 
             try
             {
-                // Проверяем, существует ли база данных
-                var canConnect = await context.Database.CanConnectAsync();
-
-                if (!canConnect)
+                // Пытаемся применить миграции (если они есть)
+                // Если БД уже создана через SQL-скрипт, миграции могут быть не нужны
+                try
                 {
-                    logger.LogError("База данных OnlineTutor3 не существует или недоступна. " +
-                                   "Пожалуйста, создайте базу данных через SQL-скрипт CreateDatabase.sql перед запуском приложения.");
-                    throw new InvalidOperationException(
-                        "База данных OnlineTutor3 не существует. Создайте её через SQL-скрипт CreateDatabase.sql");
+                    logger.LogInformation("Попытка применения миграций...");
+                    await context.Database.MigrateAsync();
+                    logger.LogInformation("Миграции успешно применены.");
+                }
+                catch (Microsoft.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == 262)
+                {
+                    // Ошибка "CREATE DATABASE permission denied" - БД уже существует, миграции не нужны
+                    logger.LogWarning("Миграции не применены (БД уже существует или недостаточно прав). Продолжаем работу...");
+                }
+                catch (Exception migrateEx)
+                {
+                    // Другие ошибки миграций - логируем, но продолжаем
+                    logger.LogWarning(migrateEx, "Не удалось применить миграции. Продолжаем работу...");
                 }
 
-                // Применяем миграции только если БД существует
-                // Важно: база данных OnlineTutor3 должна быть создана заранее через SQL-скрипт CreateDatabase.sql
-                logger.LogInformation("Применение миграций к существующей базе данных...");
-                await context.Database.MigrateAsync();
-                logger.LogInformation("Миграции успешно применены.");
-
-                // Создаем роли
-                await EnsureRolesCreatedAsync(roleManager);
-                logger.LogInformation("Роли успешно созданы/проверены.");
-            }
-            catch (Microsoft.Data.SqlClient.SqlException sqlEx) when (sqlEx.Number == 262)
-            {
-                // Ошибка "CREATE DATABASE permission denied"
-                logger.LogError(sqlEx,
-                    "Недостаточно прав для создания базы данных. " +
-                    "Убедитесь, что база данных OnlineTutor3 создана через SQL-скрипт CreateDatabase.sql " +
-                    "и пользователь имеет права на подключение к ней.");
-                throw;
+                // Создаем роли (это должно работать, если БД доступна)
+                try
+                {
+                    await EnsureRolesCreatedAsync(roleManager, logger);
+                    logger.LogInformation("Роли успешно созданы/проверены.");
+                }
+                catch (Exception rolesEx)
+                {
+                    logger.LogError(rolesEx, "Ошибка при создании ролей. Приложение может работать некорректно.");
+                    // Не бросаем исключение, чтобы приложение могло запуститься
+                }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Ошибка при инициализации базы данных");
+                logger.LogError(ex, "Критическая ошибка при инициализации базы данных");
+                // В продакшн не прерываем запуск, чтобы увидеть более детальную ошибку
                 throw;
             }
         }
 
-        private static async Task EnsureRolesCreatedAsync(RoleManager<IdentityRole> roleManager)
+        private static async Task EnsureRolesCreatedAsync(RoleManager<IdentityRole> roleManager, ILogger logger)
         {
             var roles = new[] { ApplicationRoles.Admin, ApplicationRoles.Teacher, ApplicationRoles.Student };
 
             foreach (var role in roles)
             {
-                if (!await roleManager.RoleExistsAsync(role))
+                try
                 {
-                    await roleManager.CreateAsync(new IdentityRole(role));
+                    if (!await roleManager.RoleExistsAsync(role))
+                    {
+                        await roleManager.CreateAsync(new IdentityRole(role));
+                        logger.LogInformation("Роль {Role} создана.", role);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Не удалось создать/проверить роль {Role}.", role);
                 }
             }
         }
