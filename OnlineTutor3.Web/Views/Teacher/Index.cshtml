@@ -307,11 +307,43 @@
                 })
                 .done(function(data) {
                     $('#testResultModalBody').html(data);
+                    // Инициализируем фильтр "Только ошибки" после загрузки контента
+                    initializeResultFilter();
                 })
                 .fail(function() {
                     $('#testResultModalBody').html('<div class="alert alert-danger">Ошибка при загрузке результата теста.</div>');
                 });
             });
+
+            // Функция инициализации фильтра "Только ошибки"
+            function initializeResultFilter() {
+                var filterCheckbox = document.querySelector('#testResultModal #showErrorsOnly');
+                if (filterCheckbox) {
+                    function applyFilter() {
+                        var questions = document.querySelectorAll('#testResultModal .question-result');
+                        
+                        questions.forEach(function(question) {
+                            var isCorrect = question.getAttribute('data-correct') === 'true';
+                            
+                            if (filterCheckbox.checked) {
+                                // Показываем только неправильные ответы (скрываем правильные)
+                                question.style.display = isCorrect ? 'none' : 'block';
+                            } else {
+                                // Показываем все ответы
+                                question.style.display = 'block';
+                            }
+                        });
+                    }
+
+                    // Удаляем старый обработчик, если есть
+                    filterCheckbox.removeEventListener('change', applyFilter);
+                    // Добавляем новый обработчик
+                    filterCheckbox.addEventListener('change', applyFilter);
+                    
+                    // Применяем фильтр сразу, если он включен
+                    applyFilter();
+                }
+            }
         });
     </script>
 }
