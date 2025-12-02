@@ -16,8 +16,8 @@
 </div>
 
 <div class="test-container">
-    <div class="card shadow-sm mb-3">
-        <div class="card-header bg-info text-white py-2">
+    <div class="card modern-card mb-3">
+        <div class="card-header modern-card-header" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
             <div class="d-flex justify-content-between align-items-center gap-2">
                 <div class="flex-grow-1 min-w-0">
                     <h6 class="mb-0 d-flex align-items-center">
@@ -38,21 +38,21 @@
         
         <div class="card-body p-2 p-md-3">
             <div class="progress mb-2" style="height: 8px;">
-                <div class="progress-bar bg-info" role="progressbar" style="width: 0%" id="progressBar"></div>
+                <div class="progress-bar" role="progressbar" style="width: 0%; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);" id="progressBar"></div>
             </div>
             
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <small class="text-muted mb-0">
+                <small class="text-muted-modern mb-0">
                     <i class="fas fa-redo-alt"></i>
                     Попытка @Model.TestResult.AttemptNumber из @Model.Test.MaxAttempts
                 </small>
-                <small class="text-muted mb-0">
+                <small class="text-muted-modern mb-0">
                     <i class="fas fa-question-circle"></i>
-                    Вопрос <span id="currentQuestion" class="fw-bold">1</span> из @Model.Questions.Count
+                    Вопрос <span id="currentQuestion" class="fw-bold text-dark-modern">1</span> из @Model.Questions.Count
                 </small>
-                <small class="text-muted mb-0" id="answeredInfo">
-                    <i class="fas fa-check-circle text-success"></i>
-                    Отвечено: <span id="answeredCount">0</span>
+                <small class="text-muted-modern mb-0" id="answeredInfo">
+                    <i class="fas fa-check-circle nav-link-icon-green"></i>
+                    Отвечено: <span id="answeredCount" class="text-dark-modern">0</span>
                 </small>
             </div>
         </div>
@@ -66,8 +66,8 @@
             var questionOptions = Model.Options.Where(o => o.RegularQuestionId == question.Id).OrderBy(o => o.OrderIndex).ToList();
 
             <div class="question-card @(i == 0 ? "active" : "d-none")" data-question-index="@i" data-question-id="@question.Id" data-question-type="@((int)question.Type)">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-light py-2">
+                <div class="card modern-card">
+                    <div class="card-header modern-card-header py-2">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <span class="badge bg-secondary">Вопрос @(i + 1)/@Model.Questions.Count</span>
@@ -85,7 +85,7 @@
                                         <i class="fas fa-toggle-on"></i> <text>Верно/Неверно</text>
                                     }
                                 </span>
-                                <span class="badge bg-info">@question.Points б.</span>
+                                <span class="badge badge-modern-info">@question.Points б.</span>
                             </div>
                             <span class="answer-status" id="answerStatus_@i"></span>
                         </div>
@@ -95,7 +95,7 @@
 
                         @if (Model.Test.ShowHints && !string.IsNullOrEmpty(question.Hint))
                         {
-                            <div class="alert alert-info alert-sm mb-3">
+                            <div class="alert modern-alert-info alert-sm mb-3">
                                 <i class="fas fa-lightbulb"></i>
                                 <strong>Подсказка:</strong> @question.Hint
                             </div>
@@ -166,11 +166,11 @@
         }
     </div>
 
-    <div class="card shadow-sm mt-3 navigation-card">
+    <div class="card modern-card mt-3 navigation-card">
         <div class="card-body p-2 p-md-3">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <button type="button" 
-                        class="btn btn-outline-secondary btn-sm" 
+                        class="btn btn-modern-outline-secondary btn-sm" 
                         id="prevButton" 
                         onclick="previousQuestion()" 
                         disabled>
@@ -182,7 +182,7 @@
                     @for (int i = 0; i < Model.Questions.Count; i++)
                     {
                         <button type="button" 
-                                class="btn btn-sm btn-outline-secondary question-nav-btn" 
+                                class="btn btn-sm btn-modern-outline-secondary question-nav-btn" 
                                 data-question-index="@i"
                                 onclick="goToQuestion(@i)">
                             @(i + 1)
@@ -199,7 +199,7 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
                     <button type="button" 
-                            class="btn btn-success btn-sm" 
+                            class="btn btn-modern-success btn-sm" 
                             id="finishButton" 
                             onclick="showFinishModal()">
                         <i class="fas fa-check"></i>
@@ -221,7 +221,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-3">
-                <div class="alert alert-warning alert-sm py-2 mb-3">
+                <div class="alert modern-alert-info alert-sm py-2 mb-3">
                     <div class="d-flex align-items-start">
                         <i class="fas fa-exclamation-triangle mt-1 me-2"></i>
                         <div>
@@ -249,13 +249,13 @@
                 </div>
             </div>
             <div class="modal-footer py-2">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-modern-outline-secondary btn-sm" data-bs-dismiss="modal">
                     <i class="fas fa-times"></i> Продолжить
                 </button>
                 <form asp-action="CompleteRegularTest" method="post" class="d-inline">
                     <input type="hidden" name="id" value="@Model.TestResult.Id" />
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-success btn-sm">
+                    <button type="submit" class="btn btn-modern-success btn-sm">
                         <i class="fas fa-check"></i> Завершить
                     </button>
                 </form>
@@ -527,15 +527,15 @@
                 const idx = $(this).data('question-index');
                 const questionId = $(`.question-card[data-question-index="${idx}"]`).data('question-id');
                 if (answers[questionId]) {
-                    $(this).removeClass('btn-outline-secondary').addClass('btn-success');
+                    $(this).removeClass('btn-modern-outline-secondary').addClass('btn-modern-success');
                 } else {
-                    $(this).removeClass('btn-success').addClass('btn-outline-secondary');
+                    $(this).removeClass('btn-modern-success').addClass('btn-modern-outline-secondary');
                 }
             });
 
             // Подсвечиваем текущий вопрос
-            $('.question-nav-btn').removeClass('active btn-primary');
-            $(`.question-nav-btn[data-question-index="${currentQuestionIndex}"]`).addClass('active btn-primary');
+            $('.question-nav-btn').removeClass('active btn-modern-primary');
+            $(`.question-nav-btn[data-question-index="${currentQuestionIndex}"]`).addClass('active btn-modern-primary');
         }
 
         function updateNavigation() {
