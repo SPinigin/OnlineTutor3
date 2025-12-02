@@ -5,152 +5,150 @@
 
 <div class="container-fluid">
     <!-- Приветствие -->
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <h4 class="mb-0 d-flex align-items-center gap-2">
-                <i class="fas fa-chalkboard-teacher text-primary"></i>
-                <span>Добро пожаловать, @Model.Teacher.FirstName @Model.Teacher.LastName!</span>
-            </h4>
-            <p class="text-muted mb-0 mt-1">
-                <i class="fas fa-user-tie"></i> Учитель
-            </p>
+    <div class="mb-4">
+        <div class="card border-0 shadow-sm welcome-card">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="welcome-icon gradient-icon-purple">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div>
+                        <h4 class="welcome-title">
+                            Добро пожаловать, @Model.Teacher.FirstName @Model.Teacher.LastName!
+                        </h4>
+                        <p class="mb-0 welcome-subtitle">
+                            <i class="fas fa-user-tie"></i> Учитель
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Карточки навигации -->
-    <div class="row g-2 g-md-3 mb-4">
+    <div class="row g-3 mb-4">
         <div class="col-6 col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-users"></i> Классы
-                    </h5>
+            <a asp-controller="Class" asp-action="Index" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm nav-card">
+                    <div class="card-body text-center p-3 d-flex flex-column justify-content-center align-items-center" style="min-height: 100px;">
+                        <div class="nav-icon-large gradient-icon-purple">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h6 class="mb-0 nav-title">Классы</h6>
+                    </div>
                 </div>
-                <div class="card-body d-flex flex-column">
-                    <p class="card-text d-none d-md-block">Управляйте классами и учениками</p>
-                    <a asp-controller="Class" asp-action="Index" class="btn btn-primary mt-auto w-100">
-                        <i class="fas fa-list"></i> Управление классами
-                    </a>
-                </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-6 col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-user-graduate"></i> Ученики
-                    </h5>
+            <a asp-controller="StudentManagement" asp-action="Index" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm nav-card">
+                    <div class="card-body text-center p-3 d-flex flex-column justify-content-center align-items-center" style="min-height: 100px;">
+                        <div class="nav-icon-large gradient-icon-pink">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <h6 class="mb-0 nav-title">Ученики</h6>
+                    </div>
                 </div>
-                <div class="card-body d-flex flex-column">
-                    <p class="card-text d-none d-md-block">Просматривайте и управляйте учениками</p>
-                    <a asp-controller="StudentManagement" asp-action="Index" class="btn btn-primary mt-auto w-100">
-                        <i class="fas fa-list"></i> Управление учениками
-                    </a>
-                </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-6 col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-tasks"></i> Задания
-                    </h5>
+            <a asp-controller="Assignment" asp-action="Index" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm nav-card">
+                    <div class="card-body text-center p-3 d-flex flex-column justify-content-center align-items-center" style="min-height: 100px;">
+                        <div class="nav-icon-large gradient-icon-blue">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <h6 class="mb-0 nav-title">Задания</h6>
+                    </div>
                 </div>
-                <div class="card-body d-flex flex-column">
-                    <p class="card-text d-none d-md-block">Создавайте и управляйте заданиями и тестами</p>
-                    <a asp-controller="Assignment" asp-action="Index" class="btn btn-primary mt-auto w-100">
-                        <i class="fas fa-list"></i> Управление заданиями
-                    </a>
-                </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-6 col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-tachometer-alt"></i> Мониторинг
-                    </h5>
+            <a asp-controller="TeacherDashboard" asp-action="Index" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm nav-card">
+                    <div class="card-body text-center p-3 d-flex flex-column justify-content-center align-items-center" style="min-height: 100px;">
+                        <div class="nav-icon-large gradient-icon-green">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <h6 class="mb-0 nav-title">Мониторинг</h6>
+                    </div>
                 </div>
-                <div class="card-body d-flex flex-column">
-                    <p class="card-text d-none d-md-block">Отслеживайте активность учеников в реальном времени</p>
-                    <a asp-controller="TeacherDashboard" asp-action="Index" class="btn btn-primary mt-auto w-100">
-                        <i class="fas fa-chart-line"></i> Панель мониторинга
-                    </a>
-                </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-6 col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-book"></i> Материалы
-                    </h5>
+            <a asp-controller="Material" asp-action="Index" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm nav-card">
+                    <div class="card-body text-center p-3 d-flex flex-column justify-content-center align-items-center" style="min-height: 100px;">
+                        <div class="nav-icon-large gradient-icon-yellow">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h6 class="mb-0 nav-title">Материалы</h6>
+                    </div>
                 </div>
-                <div class="card-body d-flex flex-column">
-                    <p class="card-text d-none d-md-block">Управляйте учебными материалами</p>
-                    <a asp-controller="Material" asp-action="Index" class="btn btn-primary mt-auto w-100">
-                        <i class="fas fa-list"></i> Материалы
-                    </a>
-                </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-6 col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-calendar-alt"></i> Календарь
-                    </h5>
+            <a asp-controller="Calendar" asp-action="Index" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm nav-card">
+                    <div class="card-body text-center p-3 d-flex flex-column justify-content-center align-items-center" style="min-height: 100px;">
+                        <div class="nav-icon-large gradient-icon-teal">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h6 class="mb-0 nav-title">Календарь</h6>
+                    </div>
                 </div>
-                <div class="card-body d-flex flex-column">
-                    <p class="card-text d-none d-md-block">Управляйте расписанием занятий</p>
-                    <a asp-controller="Calendar" asp-action="Index" class="btn btn-primary mt-auto w-100">
-                        <i class="fas fa-calendar"></i> Календарь
-                    </a>
-                </div>
-            </div>
+            </a>
         </div>
     </div>
 
     <!-- Статистика -->
-    <div class="row g-2 g-md-3 mb-4">
+    <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center p-2">
-                    <i class="fas fa-users text-primary" style="font-size: 1.5rem;"></i>
-                    <h4 class="mt-1 mb-0" style="font-size: 1.5rem;">@Model.TotalClasses</h4>
-                    <small class="text-muted" style="font-size: 0.75rem;">Активных классов</small>
+            <div class="card border-0 shadow-sm stat-card">
+                <div class="card-body text-center py-1 px-2">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-card-value">@Model.TotalClasses</div>
+                    <small class="stat-card-label">Классов</small>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center p-2">
-                    <i class="fas fa-user-graduate text-success" style="font-size: 1.5rem;"></i>
-                    <h4 class="mt-1 mb-0" style="font-size: 1.5rem;">@Model.TotalStudents</h4>
-                    <small class="text-muted" style="font-size: 0.75rem;">Учеников</small>
+            <div class="card border-0 shadow-sm stat-card stat-card-pink">
+                <div class="card-body text-center py-1 px-2">
+                    <div class="stat-card-icon stat-icon-pink">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="stat-card-value">@Model.TotalStudents</div>
+                    <small class="stat-card-label">Учеников</small>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center p-2">
-                    <i class="fas fa-tasks text-info" style="font-size: 1.5rem;"></i>
-                    <h4 class="mt-1 mb-0" style="font-size: 1.5rem;">@Model.TotalActiveAssignments</h4>
-                    <small class="text-muted" style="font-size: 0.75rem;">Активных заданий</small>
+            <div class="card border-0 shadow-sm stat-card stat-card-blue">
+                <div class="card-body text-center py-1 px-2">
+                    <div class="stat-card-icon stat-icon-blue">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="stat-card-value">@Model.TotalActiveAssignments</div>
+                    <small class="stat-card-label">Заданий</small>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center p-2">
-                    <i class="fas fa-clipboard-list text-warning" style="font-size: 1.5rem;"></i>
-                    <h4 class="mt-1 mb-0" style="font-size: 1.5rem;">@Model.TotalActiveTests</h4>
-                    <small class="text-muted" style="font-size: 0.75rem;">Активных тестов</small>
+            <div class="card border-0 shadow-sm stat-card stat-card-green">
+                <div class="card-body text-center py-1 px-2">
+                    <div class="stat-card-icon stat-icon-green">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="stat-card-value">@Model.TotalActiveTests</div>
+                    <small class="stat-card-label">Тестов</small>
                 </div>
             </div>
         </div>
@@ -159,17 +157,17 @@
     <div class="row">
         <!-- Последние результаты -->
         <div class="col-md-12 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
+            <div class="card shadow-sm border-0 modern-card">
+                <div class="card-header modern-card-header">
+                    <h5 class="modern-card-title">
                         <i class="fas fa-clock text-primary"></i> Последние результаты
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body modern-card-body">
                     @if (Model.RecentCompletions.Any())
                     {
                         <div class="table-responsive">
-                            <table class="table table-sm table-hover">
+                            <table class="table table-hover mb-0 modern-table">
                                 <thead>
                                     <tr>
                                         <th>Ученик</th>
@@ -210,39 +208,39 @@
                                         } : "secondary";
                                         <tr>
                                             <td>
-                                                <small class="fw-bold">@completion.StudentName</small>
+                                                <span class="fw-bold text-dark-modern">@completion.StudentName</span>
                                             </td>
                                             <td>
-                                                <small class="text-muted">@(completion.ClassName ?? "—")</small>
+                                                <span class="text-muted-modern">@(completion.ClassName ?? "—")</span>
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center gap-2">
-                                                    <i class="fas @testTypeIcon text-primary"></i>
-                                                    <small class="fw-bold">@completion.TestTitle</small>
+                                                    <i class="fas @testTypeIcon" style="color: #667eea;"></i>
+                                                    <span class="fw-bold text-dark-modern">@completion.TestTitle</span>
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="badge bg-secondary">@completion.SubjectName</span>
+                                                <span class="badge modern-badge">@completion.SubjectName</span>
                                             </td>
                                             <td class="text-center">
                                                 @if (completion.Grade.HasValue)
                                                 {
-                                                    <span class="badge bg-@gradeColor rounded-pill" style="font-size: 0.9rem; min-width: 2rem;">
+                                                    <span class="badge bg-@gradeColor rounded-pill" style="font-size: 0.85rem; min-width: 2rem; padding: 0.4rem 0.6rem; font-weight: 600;">
                                                         @completion.Grade.Value
                                                     </span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="text-muted">—</span>
+                                                    <span class="text-muted-modern">—</span>
                                                 }
                                             </td>
                                             <td class="text-center">
-                                                <small class="text-muted d-none d-md-inline">@completion.CompletedAt.ToString("dd.MM.yyyy HH:mm")</small>
-                                                <small class="text-muted d-md-none">@completion.CompletedAt.ToString("dd.MM.yyyy")</small>
+                                                <span class="text-muted-modern d-none d-md-inline">@completion.CompletedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                                                <span class="text-muted-modern d-md-none">@completion.CompletedAt.ToString("dd.MM.yyyy")</span>
                                             </td>
                                             <td class="text-center">
                                                 <a href="#" 
-                                                   class="btn btn-sm btn-outline-primary view-test-result"
+                                                   class="btn btn-sm btn-modern-outline-info view-test-result"
                                                    data-test-result-id="@completion.TestResultId"
                                                    data-test-type="@completion.TestType"
                                                    title="Детали">
@@ -258,7 +256,12 @@
                     }
                     else
                     {
-                        <p class="text-muted text-center mb-0">Пока нет завершенных прохождений тестов</p>
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-inbox"></i>
+                            </div>
+                            <p class="empty-state-text">Пока нет завершенных прохождений тестов</p>
+                        </div>
                     }
                 </div>
             </div>
@@ -287,6 +290,7 @@
         </div>
     </div>
 </div>
+
 
 @section Scripts {
     <script>
