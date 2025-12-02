@@ -30,26 +30,53 @@ body {
     left: 0;
     right: 0;
     z-index: 1030;
-    background-color: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 15px rgba(102, 126, 234, 0.1);
     transition: all 0.3s ease;
 }
 
     .navbar-fixed.scrolled {
-        background-color: rgba(248, 249, 250, 0.95) !important;
+        background-color: rgba(255, 255, 255, 0.95) !important;
         backdrop-filter: blur(10px);
     }
 
 .navbar-brand {
     font-weight: 700;
-    font-size: 1.3rem;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
 }
+
+    .navbar-brand:hover {
+        transform: scale(1.05);
+    }
 
 .navbar-fixed .dropdown-menu {
     margin-top: 8px;
-    border: none;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem;
 }
+
+.nav-link {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem !important;
+}
+
+    .nav-link:hover {
+        background-color: rgba(102, 126, 234, 0.05);
+        transform: translateY(-1px);
+    }
+
+.dropdown-item {
+    transition: all 0.2s ease;
+    padding: 0.5rem 1rem;
+}
+
+    .dropdown-item:hover {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        transform: translateX(3px);
+    }
 
 /* ===== MAIN CONTENT ===== */
 .main-content {
@@ -67,75 +94,73 @@ body {
 /* ===== FOOTER ===== */
 .footer-fixed {
     grid-row: 3;
-    background-color: #f8f9fa;
-    border-top: 1px solid #dee2e6;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -2px 15px rgba(102, 126, 234, 0.1);
     flex-shrink: 0;
 }
 
 .footer-compact {
-    padding: 8px 0;
+    padding: 12px 0;
     font-size: 0.875rem;
 }
 
 .footer-column h6 {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    color: #495057;
-    margin-bottom: 4px;
+    color: #2d3748;
+    margin-bottom: 8px;
 }
 
 .footer-column p {
-    margin-bottom: 1px;
-    font-size: 0.7rem;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
     color: #6c757d;
-    line-height: 1.2;
+    line-height: 1.4;
 }
 
 .footer-column a {
     color: #6c757d;
     text-decoration: none;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
     .footer-column a:hover {
-        color: #007bff;
+        color: #667eea;
+        transform: translateY(-1px);
     }
 
 /* ===== SOCIAL LINKS ===== */
 .social-links {
     display: flex;
-    gap: 6px;
-    margin-top: 4px;
+    gap: 8px;
+    margin-top: 8px;
+    justify-content: center;
 }
 
     .social-links a {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 28px;
-        height: 28px;
-        background-color: #e9ecef;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
-        color: #6c757d;
-        font-size: 0.9rem;
-        transition: all 0.2s ease;
+        font-size: 1rem;
+        transition: all 0.3s ease;
         text-decoration: none;
     }
 
         .social-links a:hover {
-            background-color: #007bff;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
     .social-links .telegram:hover {
-        background-color: #0088cc;
+        background: linear-gradient(135deg, #0088cc 0%, #0066aa 100%) !important;
+        color: white !important;
     }
 
     .social-links .github:hover {
-        background-color: #333;
+        background: linear-gradient(135deg, #333 0%, #1a1a1a 100%) !important;
+        color: white !important;
     }
 
 /* ===== MOBILE FOOTER ===== */
@@ -168,29 +193,29 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
-    background-color: #e9ecef;
-    border: 1px solid #dee2e6;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    color: #6c757d;
     text-decoration: none;
-    font-size: 0.7rem;
-    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
 }
 
     .footer-contact-icon:hover {
-        background-color: #007bff;
-        color: white;
-        transform: translateY(-2px);
+        transform: translateY(-3px) scale(1.1);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
     .footer-contact-icon.telegram:hover {
-        background-color: #0088cc;
+        background: linear-gradient(135deg, #0088cc 0%, #0066aa 100%) !important;
+        color: white !important;
+        border-color: #0088cc !important;
     }
 
     .footer-contact-icon.github:hover {
-        background-color: #333;
+        background: linear-gradient(135deg, #333 0%, #1a1a1a 100%) !important;
+        color: white !important;
+        border-color: #333 !important;
     }
 
 /* ===== COMPACT ASSIGNMENT PAGE ===== */
