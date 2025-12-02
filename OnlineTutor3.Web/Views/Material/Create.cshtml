@@ -5,41 +5,41 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
+        <div class="card shadow modern-card">
+            <div class="card-header auth-card-header" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
                 <h4 class="mb-0">
                     <i class="fas fa-upload"></i> Загрузка учебного материала
                 </h4>
             </div>
-            <div class="card-body py-3">
+            <div class="card-body auth-card-body py-3">
                 <div class="alert alert-info py-2 mb-3">
                     <h6 class="mb-2"><i class="fas fa-info-circle"></i> Поддерживаемые форматы:</h6>
                     <div class="row">
                         <div class="col-md-3">
-                            <strong class="small">Документы:</strong>
-                            <ul class="small mb-0">
+                            <strong class="small text-dark-modern">Документы:</strong>
+                            <ul class="small mb-0 text-muted-modern">
                                 <li>PDF (до 50 МБ)</li>
                                 <li>Word (до 25 МБ)</li>
                                 <li>TXT, RTF</li>
                             </ul>
                         </div>
                         <div class="col-md-3">
-                            <strong class="small">Презентации:</strong>
-                            <ul class="small mb-0">
+                            <strong class="small text-dark-modern">Презентации:</strong>
+                            <ul class="small mb-0 text-muted-modern">
                                 <li>PowerPoint (до 50 МБ)</li>
                             </ul>
                         </div>
                         <div class="col-md-3">
-                            <strong class="small">Медиа:</strong>
-                            <ul class="small mb-0">
+                            <strong class="small text-dark-modern">Медиа:</strong>
+                            <ul class="small mb-0 text-muted-modern">
                                 <li>Изображения (до 10 МБ)</li>
                                 <li>Аудио (до 25 МБ)</li>
                                 <li>Видео (до 200 МБ)</li>
                             </ul>
                         </div>
                         <div class="col-md-3">
-                            <strong class="small">Таблицы:</strong>
-                            <ul class="small mb-0">
+                            <strong class="small text-dark-modern">Таблицы:</strong>
+                            <ul class="small mb-0 text-muted-modern">
                                 <li>Excel (до 25 МБ)</li>
                                 <li>CSV (до 5 МБ)</li>
                             </ul>
@@ -56,18 +56,18 @@
                         </legend>
 
                         <div class="mb-2">
-                            <label asp-for="Title" class="form-label small">
+                            <label asp-for="Title" class="form-label form-label-modern small">
                                 <i class="fas fa-heading"></i> Название материала <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="Title" class="form-control form-control-sm" placeholder="Например: Правила орфографии - Безударные гласные" />
+                            <input asp-for="Title" class="form-control form-control-modern form-control-sm" placeholder="Например: Правила орфографии - Безударные гласные" />
                             <span asp-validation-for="Title" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-2">
-                            <label asp-for="Description" class="form-label small">
+                            <label asp-for="Description" class="form-label form-label-modern small">
                                 <i class="fas fa-align-left"></i> Описание
                             </label>
-                            <textarea asp-for="Description" class="form-control form-control-sm" rows="3"
+                            <textarea asp-for="Description" class="form-control form-control-modern form-control-sm" rows="3"
                                       placeholder="Краткое описание содержания материала..."></textarea>
                             <span asp-validation-for="Description" class="text-danger small"></span>
                         </div>
@@ -79,20 +79,20 @@
                         </legend>
 
                         <div class="mb-2">
-                            <label asp-for="File" class="form-label small">
+                            <label asp-for="File" class="form-label form-label-modern small">
                                 <i class="fas fa-paperclip"></i> Выберите файл <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="File" class="form-control form-control-sm" type="file" id="fileInput"
+                            <input asp-for="File" class="form-control form-control-modern form-control-sm" type="file" id="fileInput"
                                    accept=".pdf,.doc,.docx,.txt,.rtf,.ppt,.pptx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.gif,.bmp,.mp3,.wav,.m4a,.mp4,.avi,.mov,.wmv" />
                             <span asp-validation-for="File" class="text-danger small"></span>
 
                             <div id="fileInfo" class="mt-2" style="display: none;">
                                 <div class="alert alert-light border py-2">
                                     <div class="d-flex align-items-center">
-                                        <i id="fileIcon" class="fas fa-file fa-lg text-muted me-2"></i>
+                                        <i id="fileIcon" class="fas fa-file fa-lg text-muted-modern me-2"></i>
                                         <div>
-                                            <div id="fileName" class="fw-bold small"></div>
-                                            <div id="fileSize" class="small text-muted"></div>
+                                            <div id="fileName" class="fw-bold small text-dark-modern"></div>
+                                            <div id="fileSize" class="small text-muted-modern"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -106,24 +106,24 @@
                         </legend>
 
                         <div class="mb-2">
-                            <label asp-for="ClassId" class="form-label small">
+                            <label asp-for="ClassId" class="form-label form-label-modern small">
                                 <i class="fas fa-graduation-cap"></i> Класс
                             </label>
-                            <select asp-for="ClassId" asp-items="@ViewBag.Classes" class="form-select form-select-sm">
+                            <select asp-for="ClassId" asp-items="@ViewBag.Classes" class="form-select form-control-modern form-select-sm">
                                 <option value="">Не выбран</option>
                             </select>
                             <span asp-validation-for="ClassId" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-2">
-                            <label asp-for="AssignmentId" class="form-label small">
+                            <label asp-for="AssignmentId" class="form-label form-label-modern small">
                                 <i class="fas fa-tasks"></i> Задание
                             </label>
-                            <select asp-for="AssignmentId" asp-items="@ViewBag.Assignments" class="form-select form-select-sm">
+                            <select asp-for="AssignmentId" asp-items="@ViewBag.Assignments" class="form-select form-control-modern form-select-sm">
                                 <option value="">Не выбрано</option>
                             </select>
                             <span asp-validation-for="AssignmentId" class="text-danger small"></span>
-                            <div class="form-text small">
+                            <div class="form-text small text-muted-modern">
                                 <i class="fas fa-lightbulb"></i> Выберите класс или задание (или оба) для привязки материала
                             </div>
                         </div>
@@ -131,21 +131,21 @@
                         <div class="mb-2">
                             <div class="form-check form-switch">
                                 <input asp-for="IsActive" class="form-check-input" />
-                                <label asp-for="IsActive" class="form-check-label small">
+                                <label asp-for="IsActive" class="form-check-label text-dark-modern small">
                                     <i class="fas fa-toggle-on"></i> Материал активен
                                 </label>
                             </div>
-                            <div class="form-text small">
+                            <div class="form-text small text-muted-modern">
                                 <i class="fas fa-info-circle"></i> Неактивные материалы скрыты от учеников
                             </div>
                         </div>
                     </fieldset>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                        <a asp-action="Index" class="btn btn-sm btn-modern-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Отмена
                         </a>
-                        <button type="submit" class="btn btn-success btn-sm" id="submitBtn">
+                        <button type="submit" class="btn btn-modern-success btn-sm" id="submitBtn">
                             <i class="fas fa-upload"></i> Загрузить материал
                         </button>
                     </div>

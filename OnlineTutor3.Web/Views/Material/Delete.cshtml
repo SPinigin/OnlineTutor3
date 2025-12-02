@@ -5,66 +5,66 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-header bg-danger text-white">
+        <div class="card shadow modern-card" style="border-left: 4px solid #dc3545;">
+            <div class="card-header auth-card-header" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
                 <h4 class="mb-0">
                     <i class="fas fa-trash"></i> Удаление материала
                 </h4>
             </div>
-            <div class="card-body">
+            <div class="card-body auth-card-body">
                 <div class="alert alert-warning">
                     <h5><i class="fas fa-exclamation-triangle"></i> Внимание!</h5>
                     <p>Вы уверены, что хотите удалить этот материал? Это действие нельзя отменить.</p>
                 </div>
 
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">
+                <div class="card mb-3 modern-card">
+                    <div class="card-body modern-card-body">
+                        <h5 class="modern-card-title">
                             @switch (Model.Type)
                             {
                                 case MaterialType.Document:
-                                    <i class="fas fa-file-alt text-danger me-2"></i>
+                                    <i class="fas fa-file-alt nav-link-icon-danger me-2"></i>
                                     break;
                                 case MaterialType.Presentation:
-                                    <i class="fas fa-file-powerpoint text-warning me-2"></i>
+                                    <i class="fas fa-file-powerpoint nav-link-icon-yellow me-2"></i>
                                     break;
                                 case MaterialType.Image:
-                                    <i class="fas fa-file-image text-info me-2"></i>
+                                    <i class="fas fa-file-image nav-link-icon me-2"></i>
                                     break;
                                 case MaterialType.Audio:
-                                    <i class="fas fa-file-audio text-success me-2"></i>
+                                    <i class="fas fa-file-audio nav-link-icon-green me-2"></i>
                                     break;
                                 case MaterialType.Video:
-                                    <i class="fas fa-file-video text-primary me-2"></i>
+                                    <i class="fas fa-file-video nav-link-icon-blue me-2"></i>
                                     break;
                                 default:
-                                    <i class="fas fa-file text-secondary me-2"></i>
+                                    <i class="fas fa-file nav-link-icon me-2"></i>
                                     break;
                             }
                             @Model.Title
                         </h5>
                         @if (!string.IsNullOrEmpty(Model.Description))
                         {
-                            <p class="card-text">@Model.Description</p>
+                            <p class="text-muted-modern">@Model.Description</p>
                         }
                         <div class="row mt-3">
                             <div class="col-md-6">
-                                <small class="text-muted">
+                                <small class="text-muted-modern">
                                     <i class="fas fa-file"></i> Файл: @Model.FileName
                                 </small>
                             </div>
                             <div class="col-md-6">
-                                <small class="text-muted">
+                                <small class="text-muted-modern">
                                     <i class="fas fa-hdd"></i> Размер: @FormatFileSize(Model.FileSize)
                                 </small>
                             </div>
                             <div class="col-md-6 mt-2">
-                                <small class="text-muted">
+                                <small class="text-muted-modern">
                                     <i class="fas fa-calendar"></i> Загружен: @Model.UploadedAt.ToString("dd.MM.yyyy HH:mm")
                                 </small>
                             </div>
                             <div class="col-md-6 mt-2">
-                                <small class="text-muted">
+                                <small class="text-muted-modern">
                                     <i class="fas fa-toggle-@(Model.IsActive ? "on" : "off")"></i> 
                                     Статус: @(Model.IsActive ? "Активен" : "Неактивен")
                                 </small>
@@ -77,10 +77,10 @@
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="Id" />
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a asp-action="Index" class="btn btn-outline-secondary">
+                        <a asp-action="Index" class="btn btn-modern-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Отмена
                         </a>
-                        <button type="submit" class="btn btn-danger">
+                        <button type="submit" class="btn btn-modern-outline-danger">
                             <i class="fas fa-trash"></i> Удалить материал
                         </button>
                     </div>
