@@ -6,58 +6,62 @@
     var studentsWithUsers = ViewBag.StudentsWithUsers as List<(Student Student, ApplicationUser? User)> ?? new List<(Student Student, ApplicationUser? User)>();
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="page-header">
     <div>
-        <h4 class="mb-1">
-            <i class="fas fa-graduation-cap text-primary"></i> @Model.Name
-            <span class="badge bg-@(Model.IsActive ? "success" : "secondary") ms-2 badge-sm">
+        <h4 class="page-header-title">
+            <i class="fas fa-graduation-cap page-header-icon"></i> @Model.Name
+            <span class="badge badge-modern-@(Model.IsActive ? "success" : "secondary") ms-2 badge-sm">
                 @(Model.IsActive ? "Активный" : "Неактивный")
             </span>
         </h4>
         @if (!string.IsNullOrEmpty(Model.Description))
         {
-            <p class="text-muted mb-0 small">@Model.Description</p>
+            <p class="text-muted-modern mb-0 small">@Model.Description</p>
         }
     </div>
     <div>
-        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+        <a asp-action="Index" class="btn btn-sm btn-modern-outline-secondary">
             <i class="fas fa-arrow-left"></i> Назад к списку
         </a>
     </div>
 </div>
 
-<div class="row mb-3 g-1 g-md-2">
+<div class="row mb-3 g-3">
     <div class="col-6 col-md-3">
-        <div class="card text-center border-primary">
-            <div class="card-body py-2 px-2">
-                <i class="fas fa-users text-primary" style="font-size: 1.25rem;"></i>
-                <div class="mt-1 mb-0 small fw-bold">@students.Count</div>
-                <p class="text-muted mb-0" style="font-size: 0.75rem;">Учеников</p>
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body text-center py-1 px-2">
+                <div class="stat-card-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-card-value">@students.Count</div>
+                <small class="stat-card-label">Учеников</small>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card text-center border-success">
-            <div class="card-body py-2 px-2">
-                <i class="fas fa-calendar-plus text-success" style="font-size: 1.25rem;"></i>
-                <div class="mt-1 mb-0 small fw-bold">@Model.CreatedAt.ToString("dd.MM.yyyy")</div>
-                <p class="text-muted mb-0" style="font-size: 0.75rem;">Создан</p>
+        <div class="card border-0 shadow-sm stat-card stat-card-green">
+            <div class="card-body text-center py-1 px-2">
+                <div class="stat-card-icon stat-icon-green">
+                    <i class="fas fa-calendar-plus"></i>
+                </div>
+                <div class="stat-card-value">@Model.CreatedAt.ToString("dd.MM.yyyy")</div>
+                <small class="stat-card-label">Создан</small>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header">
-        <h5 class="mb-0">
+<div class="card border-0 shadow-sm modern-card">
+    <div class="card-header modern-card-header">
+        <h5 class="modern-card-title">
             <i class="fas fa-users"></i> Ученики (@students.Count)
         </h5>
     </div>
-    <div class="card-body">
+    <div class="card-body modern-card-body">
         @if (studentsWithUsers.Any())
         {
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover mb-0 modern-table">
                     <thead>
                         <tr>
                             <th>Имя</th>
@@ -72,10 +76,10 @@
                             var student = item.Student;
                             var user = item.User;
                             <tr>
-                                <td>@(user?.FullName ?? student.StudentNumber ?? "-")</td>
-                                <td>@(user?.Email ?? "-")</td>
-                                <td>@(student.School ?? "-")</td>
-                                <td>@(student.Grade?.ToString() ?? "-")</td>
+                                <td class="text-dark-modern">@(user?.FullName ?? student.StudentNumber ?? "-")</td>
+                                <td class="text-muted-modern">@(user?.Email ?? "-")</td>
+                                <td class="text-muted-modern">@(student.School ?? "-")</td>
+                                <td class="text-muted-modern">@(student.Grade?.ToString() ?? "-")</td>
                             </tr>
                         }
                     </tbody>
@@ -84,19 +88,21 @@
         }
         else
         {
-            <div class="text-center py-4">
-                <i class="fas fa-user-graduate text-muted" style="font-size: 3rem;"></i>
-                <p class="text-muted mt-3">В этом классе пока нет учеников</p>
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <p class="empty-state-text">В этом классе пока нет учеников</p>
             </div>
         }
     </div>
 </div>
 
 <div class="mt-3">
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-modern-primary">
         <i class="fas fa-edit"></i> Редактировать
     </a>
-    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-modern-outline-danger">
         <i class="fas fa-trash"></i> Удалить
     </a>
 </div>
