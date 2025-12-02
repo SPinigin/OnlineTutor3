@@ -33,7 +33,6 @@ namespace OnlineTutor3.Application.Services
         {
             try
             {
-                // Проверяем, существует ли уже ответ
                 var existingAnswers = await _spellingAnswerRepository.GetByTestResultIdAsync(testResultId);
                 var existingAnswer = existingAnswers.FirstOrDefault(a => a.SpellingQuestionId == questionId);
 

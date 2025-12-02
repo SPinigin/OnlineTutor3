@@ -159,7 +159,6 @@ else
         $(document).ready(function() {
             // Обработка клика на строку таблицы для перехода к деталям
             $('.class-row').on('click', function(e) {
-                // Проверяем, не был ли клик на кнопке или форме
                 if ($(e.target).closest('a, button, form').length === 0) {
                     var classId = $(this).data('class-id');
                     if (classId) {

@@ -445,7 +445,6 @@
                 $(`.question-card[data-question-index="${index}"] .answer-input`).focus();
             }, 100);
 
-            // Прокрутка вверх на мобильных
             if ($(window).width() < 768) {
                 $('html, body').animate({
                     scrollTop: $('.question-card.active').offset().top - 100
@@ -499,7 +498,6 @@
         }
 
         function showFinishModal() {
-            // Обновляем информацию в модальном окне
             $('#currentQuestionModal').text(currentQuestionIndex + 1);
             $('#answeredCountModal').text(Object.keys(answers).filter(key => answers[key] && answers[key].trim() !== '').length);
             

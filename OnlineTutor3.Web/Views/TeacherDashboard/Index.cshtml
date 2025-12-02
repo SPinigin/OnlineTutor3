@@ -242,7 +242,6 @@
                                 </tr>
                             </thead>
                             <tbody id="testsTableBody">
-                                @* Орфография *@
                                 @foreach (var test in Model.SpellingTests)
                                 {
                                     <tr class="test-row"
@@ -284,7 +283,6 @@
                                     </tr>
                                 }
 
-                                @* Пунктуация *@
                                 @foreach (var test in Model.PunctuationTests)
                                 {
                                     <tr class="test-row"
@@ -326,7 +324,6 @@
                                     </tr>
                                 }
 
-                                @* Орфоэпия *@
                                 @foreach (var test in Model.OrthoeopyTests)
                                 {
                                     <tr class="test-row"
@@ -368,7 +365,6 @@
                                     </tr>
                                 }
 
-                                @* Классические тесты *@
                                 @foreach (var test in Model.RegularTests)
                                 {
                                     <tr class="test-row"
@@ -491,8 +487,6 @@
                 });
         }
 
-        // ===== ОТОБРАЖЕНИЕ АКТИВНОСТИ С ГРУППИРОВКОЙ ПО ДНЯМ =====
-
         function renderActivities(activities) {
             displayActivities(activities);
         }
@@ -514,7 +508,6 @@
                 return;
             }
 
-            // Группируем по дням
             var groupedActivities = groupActivitiesByDate(activities);
             
             var html = '';
@@ -522,8 +515,8 @@
             
             Object.keys(groupedActivities).forEach(function(dateKey, index) {
                 var group = groupedActivities[dateKey];
-                var isToday = index === 0; // Первая группа - сегодня
-                var isExpanded = isToday; // По умолчанию раскрыта только сегодняшняя
+                var isToday = index === 0;
+                var isExpanded = isToday;
                 
                 html += createDateGroupHeader(group.label, group.activities.length, dateKey, isExpanded);
                 
@@ -537,8 +530,6 @@
             if (noResults) noResults.style.display = 'none';
             updateActivityCount(totalCount);
         }
-
-        // ===== ГРУППИРОВКА ПО ДАТАМ =====
 
         function groupActivitiesByDate(activities) {
             var groups = {};
@@ -577,7 +568,6 @@
                 groups[dateKey].activities.push(activity);
             });
             
-            // Сортируем группы по дате (новые первыми)
             var sortedGroups = {};
             Object.keys(groups)
                 .sort(function(a, b) {
@@ -590,7 +580,6 @@
             return sortedGroups;
         }
 
-        // ===== СОЗДАНИЕ ЗАГОЛОВКА ГРУППЫ =====
 
         function createDateGroupHeader(label, count, dateKey, isExpanded) {
             var icon = isExpanded ? 'fa-chevron-down' : 'fa-chevron-right';
@@ -608,7 +597,6 @@
                    '</tr>';
         }
 
-        // ===== СОЗДАНИЕ СТРОКИ АКТИВНОСТИ =====
 
         function createActivityRow(activity, dateKey, isVisible) {
             var statusBadge = activity.status === 'completed' 
@@ -620,7 +608,6 @@
             var percentageBadge = '';
             var gradeBadge = '';
 
-            // Для завершенных тестов показываем процент и оценку
             if (activity.status === 'completed' && activity.percentage !== undefined) {
                 var percentColor = activity.percentage >= 80 ? 'success' : 
                                   activity.percentage >= 60 ? 'warning' : 'danger';
@@ -689,7 +676,6 @@
                    '</tr>';
         }
 
-        // ===== ПЕРЕКЛЮЧЕНИЕ ГРУППЫ ДНЕЙ =====
 
         function toggleDateGroup(dateKey) {
             var rows = document.querySelectorAll('.date-group-' + dateKey);
@@ -710,7 +696,6 @@
             filterActivities();
         }
 
-        // ===== ФОРМАТИРОВАНИЕ ДАТЫ =====
 
         function formatDate(date) {
             return date.toLocaleDateString('ru-RU', { 
@@ -755,7 +740,6 @@
                 }
             });
 
-            // Обновляем счётчики в заголовках групп
             Object.keys(groupCounts).forEach(function(dateGroup) {
                 var header = document.querySelector('.date-group-header [id^="icon-' + dateGroup + '"]');
                 if (header) {

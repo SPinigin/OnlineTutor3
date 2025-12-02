@@ -46,12 +46,12 @@ namespace OnlineTutor3.Domain.Entities
     /// </summary>
     public enum MaterialType
     {
-        Document = 1,      // Документы
-        Video = 2,         // Видео
-        Audio = 3,         // Аудио
-        Image = 4,         // Изображения
-        Presentation = 5,  // Презентации
-        Other = 6          // Другое
+        Document = 1,
+        Video = 2,
+        Audio = 3,
+        Image = 4,
+        Presentation = 5,
+        Other = 6
     }
 }
 

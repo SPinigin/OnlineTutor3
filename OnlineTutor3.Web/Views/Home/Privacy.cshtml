@@ -407,7 +407,6 @@
 
 @section Scripts {
     <script>
-        // Скрипт для активации пункта меню при прокрутке
         document.addEventListener('DOMContentLoaded', function() {
             const sections = document.querySelectorAll('section[id]');
             const navLinks = document.querySelectorAll('#privacy-nav .nav-link');
@@ -431,7 +430,6 @@
                 });
             });
 
-            // Плавная прокрутка к разделам
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -447,7 +445,6 @@
                 });
             });
 
-            // Прокрутка к началу страницы
             document.getElementById('scrollToTop').addEventListener('click', function(e) {
                 e.preventDefault();
                 window.scrollTo({

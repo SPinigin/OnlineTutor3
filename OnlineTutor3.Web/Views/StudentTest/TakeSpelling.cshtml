@@ -396,7 +396,6 @@
                     if (response.success) {
                         answers[questionId] = answer;
                         updateProgress();
-                        // Показываем визуальную обратную связь
                         if (window.StudentTestEnhancements?.showSaveIndicator) {
                             window.StudentTestEnhancements.showSaveIndicator(true, 'Ответ сохранен');
                         }
@@ -454,7 +453,6 @@
                 nextCard.find('.answer-input').focus();
             }, 200);
 
-            // Прокрутка вверх на мобильных
             if ($(window).width() < 768) {
                 $('html, body').animate({
                     scrollTop: nextCard.offset().top - 100
@@ -508,7 +506,6 @@
         }
 
         function showFinishModal() {
-            // Обновляем информацию в модальном окне
             $('#currentQuestionModal').text(currentQuestionIndex + 1);
             $('#answeredCountModal').text(Object.keys(answers).length);
             

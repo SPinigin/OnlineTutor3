@@ -96,7 +96,6 @@ namespace OnlineTutor3.Web.Controllers
             _logger = logger;
         }
 
-        // GET: StudentTest
         public async Task<IActionResult> Index(string? category, string? search, int? assignment)
         {
             try
@@ -122,16 +121,13 @@ namespace OnlineTutor3.Web.Controllers
                     AssignmentFilter = assignment
                 };
 
-                // Загружаем класс, если есть
                 if (student.ClassId.HasValue)
                 {
                     viewModel.Class = await _classRepository.GetByIdAsync(student.ClassId.Value);
                 }
 
-                // Получаем доступные тесты
                 var availableTests = await _studentTestService.GetAvailableTestsAsync(student.Id, category);
 
-                // Получаем все доступные задания
                 var allAssignments = new List<Assignment>();
                 if (viewModel.Class != null)
                 {
@@ -139,11 +135,8 @@ namespace OnlineTutor3.Web.Controllers
                     allAssignments = allAssignments.Where(a => a.IsActive).ToList();
                 }
 
-                // Создаем словарь для группировки тестов по заданиям
                 var assignmentsDict = new Dictionary<int, AssignmentTestsInfo>();
                 var subjectsDict = new Dictionary<int, string>();
-
-                // Загружаем предметы
                 var subjectRepository = HttpContext.RequestServices.GetRequiredService<ISubjectRepository>();
                 foreach (var assignmentEntity in allAssignments)
                 {
@@ -155,15 +148,12 @@ namespace OnlineTutor3.Web.Controllers
                 }
                 viewModel.SubjectsDict = subjectsDict;
 
-                // Обрабатываем тесты по орфографии
                 foreach (var test in availableTests.SpellingTests)
                 {
                     var testInfo = await BuildSpellingTestInfoAsync(test, student.Id);
                     if (testInfo != null)
                     {
                         viewModel.SpellingTests.Add(testInfo);
-                        
-                        // Группируем по заданию
                         if (!assignmentsDict.ContainsKey(testInfo.AssignmentId))
                         {
                             var assignmentEntity = await _assignmentRepository.GetByIdAsync(testInfo.AssignmentId);
@@ -179,15 +169,12 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                // Обрабатываем тесты по пунктуации
                 foreach (var test in availableTests.PunctuationTests)
                 {
                     var testInfo = await BuildPunctuationTestInfoAsync(test, student.Id);
                     if (testInfo != null)
                     {
                         viewModel.PunctuationTests.Add(testInfo);
-                        
-                        // Группируем по заданию
                         if (!assignmentsDict.ContainsKey(testInfo.AssignmentId))
                         {
                             var assignmentEntity = await _assignmentRepository.GetByIdAsync(testInfo.AssignmentId);
@@ -203,15 +190,12 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                // Обрабатываем тесты по орфоэпии
                 foreach (var test in availableTests.OrthoeopyTests)
                 {
                     var testInfo = await BuildOrthoeopyTestInfoAsync(test, student.Id);
                     if (testInfo != null)
                     {
                         viewModel.OrthoeopyTests.Add(testInfo);
-                        
-                        // Группируем по заданию
                         if (!assignmentsDict.ContainsKey(testInfo.AssignmentId))
                         {
                             var assignmentEntity = await _assignmentRepository.GetByIdAsync(testInfo.AssignmentId);
@@ -227,15 +211,12 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                // Обрабатываем классические тесты
                 foreach (var test in availableTests.RegularTests)
                 {
                     var testInfo = await BuildRegularTestInfoAsync(test, student.Id);
                     if (testInfo != null)
                     {
                         viewModel.RegularTests.Add(testInfo);
-                        
-                        // Группируем по заданию
                         if (!assignmentsDict.ContainsKey(testInfo.AssignmentId))
                         {
                             var assignmentEntity = await _assignmentRepository.GetByIdAsync(testInfo.AssignmentId);
@@ -251,13 +232,10 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                // Применяем фильтр по заданию, если указан
                 if (assignment.HasValue)
                 {
                     assignmentsDict = assignmentsDict.Where(kvp => kvp.Key == assignment.Value).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
                 }
-
-                // Применяем поиск, если указан
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     var searchLower = search.ToLower();
@@ -275,7 +253,6 @@ namespace OnlineTutor3.Web.Controllers
                             RegularTests = assignmentInfo.RegularTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList()
                         };
                         
-                        // Добавляем только если есть тесты или название задания совпадает
                         if (filteredInfo.TotalTestsCount > 0 || assignmentInfo.Assignment.Title.ToLower().Contains(searchLower))
                         {
                             filteredAssignments[kvp.Key] = filteredInfo;
@@ -298,7 +275,6 @@ namespace OnlineTutor3.Web.Controllers
             }
         }
 
-        // GET: StudentTest/History
         public async Task<IActionResult> History(string? search)
         {
             try
@@ -316,10 +292,8 @@ namespace OnlineTutor3.Web.Controllers
                     return RedirectToAction("Index", "Student");
                 }
 
-                // Получаем историю через сервис (без фильтра по типу)
                 var historyData = await _studentTestService.GetTestHistoryAsync(student.Id, null);
 
-                // Создаем ViewModel для Web слоя
                 var viewModel = new ViewModels.StudentTestHistoryViewModel
                 {
                     Student = student,
@@ -330,16 +304,12 @@ namespace OnlineTutor3.Web.Controllers
                     RegularResults = historyData.RegularResults
                 };
 
-                // Загружаем связанные данные (тесты) для каждого результата
                 await LoadTestDataForResultsAsync(viewModel);
 
-                // Применяем поиск, если указан
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     ApplySearchFilter(viewModel, search);
                 }
-
-                // Группируем результаты по заданиям
                 await GroupResultsByAssignmentsAsync(viewModel);
 
                 return View(viewModel);
@@ -356,7 +326,6 @@ namespace OnlineTutor3.Web.Controllers
         {
             var searchLower = searchQuery.ToLowerInvariant().Trim();
 
-            // Фильтруем результаты по названию теста
             viewModel.SpellingResults = viewModel.SpellingResults
                 .Where(r => r.SpellingTest != null && 
                            (r.SpellingTest.Title.ToLowerInvariant().Contains(searchLower) ||
@@ -384,7 +353,6 @@ namespace OnlineTutor3.Web.Controllers
 
         private async Task LoadTestDataForResultsAsync(ViewModels.StudentTestHistoryViewModel viewModel)
         {
-            // Загружаем тесты для результатов по орфографии
             foreach (var result in viewModel.SpellingResults)
             {
                 if (result.SpellingTest == null && result.SpellingTestId > 0)
@@ -393,7 +361,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
             }
 
-            // Загружаем тесты для результатов по пунктуации
             foreach (var result in viewModel.PunctuationResults)
             {
                 if (result.PunctuationTest == null && result.PunctuationTestId > 0)
@@ -402,7 +369,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
             }
 
-            // Загружаем тесты для результатов по орфоэпии
             foreach (var result in viewModel.OrthoeopyResults)
             {
                 if (result.OrthoeopyTest == null && result.OrthoeopyTestId > 0)
@@ -411,7 +377,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
             }
 
-            // Загружаем тесты для классических результатов
             foreach (var result in viewModel.RegularResults)
             {
                 if (result.RegularTest == null && result.RegularTestId > 0)
@@ -426,7 +391,6 @@ namespace OnlineTutor3.Web.Controllers
             var assignmentsDict = new Dictionary<int, ViewModels.AssignmentHistoryInfo>();
             var subjectsDict = new Dictionary<int, string>();
 
-            // Группируем результаты по орфографии
             foreach (var result in viewModel.SpellingResults)
             {
                 if (result.SpellingTest != null)
@@ -439,7 +403,6 @@ namespace OnlineTutor3.Web.Controllers
                         {
                             assignmentsDict[assignmentId] = new ViewModels.AssignmentHistoryInfo { Assignment = assignment };
                             
-                            // Загружаем предмет
                             if (!subjectsDict.ContainsKey(assignment.SubjectId))
                             {
                                 var subject = await _subjectRepository.GetByIdAsync(assignment.SubjectId);
@@ -454,7 +417,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
             }
 
-            // Группируем результаты по пунктуации
             foreach (var result in viewModel.PunctuationResults)
             {
                 if (result.PunctuationTest != null)
@@ -481,7 +443,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
             }
 
-            // Группируем результаты по орфоэпии
             foreach (var result in viewModel.OrthoeopyResults)
             {
                 if (result.OrthoeopyTest != null)
@@ -508,7 +469,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
             }
 
-            // Группируем классические результаты
             foreach (var result in viewModel.RegularResults)
             {
                 if (result.RegularTest != null)
@@ -539,7 +499,6 @@ namespace OnlineTutor3.Web.Controllers
             viewModel.SubjectsDict = subjectsDict;
         }
 
-        // GET: StudentTest/StartSpelling/{id}
         public async Task<IActionResult> StartSpelling(int id)
         {
             try
@@ -558,10 +517,7 @@ namespace OnlineTutor3.Web.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // Используем сервис для начала теста
                 var testResult = await _studentTestService.StartSpellingTestAsync(student.Id, id);
-                
-                // Отправляем уведомление через SignalR
                 await SendTestStartedNotificationAsync(testResult, "spelling", currentUser.FullName ?? currentUser.Email ?? "Студент");
                 
                 return RedirectToAction(nameof(TakeSpelling), new { id = testResult.Id });
@@ -580,7 +536,6 @@ namespace OnlineTutor3.Web.Controllers
             }
         }
 
-        // GET: StudentTest/TakeSpelling/{id}
         public async Task<IActionResult> TakeSpelling(int id)
         {
             try
@@ -597,7 +552,6 @@ namespace OnlineTutor3.Web.Controllers
                     return NotFound();
                 }
 
-                // Получаем результат теста через репозиторий
                 var testResult = await _spellingTestResultRepository.GetByIdAsync(id);
                 
                 if (testResult == null || testResult.StudentId != student.Id)
@@ -605,20 +559,17 @@ namespace OnlineTutor3.Web.Controllers
                     return NotFound();
                 }
 
-                // Проверяем, не завершен ли тест
                 if (testResult.IsCompleted)
                 {
                     return RedirectToAction("SpellingResult", new { id = testResult.Id });
                 }
 
-                // Загружаем тест
                 var test = await _spellingTestRepository.GetByIdAsync(testResult.SpellingTestId);
                 if (test == null)
                 {
                     return NotFound();
                 }
 
-                // Загружаем вопросы
                 var questions = await _spellingQuestionRepository.GetByTestIdOrderedAsync(test.Id);
                 if (!questions.Any())
                 {
@@ -626,25 +577,19 @@ namespace OnlineTutor3.Web.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // Загружаем ответы
                 var answers = await _answerService.GetSpellingAnswersAsync(testResult.Id);
 
-                // Вычисляем оставшееся время
-                // Если есть сохраненное время (пауза), используем его, иначе вычисляем на основе StartedAt
                 TimeSpan timeRemaining;
                 if (testResult.TimeRemainingSeconds.HasValue && testResult.TimeRemainingSeconds.Value > 0)
                 {
-                    // Используем сохраненное время (тест был на паузе)
                     timeRemaining = TimeSpan.FromSeconds(testResult.TimeRemainingSeconds.Value);
                 }
                 else
                 {
-                    // Вычисляем время на основе StartedAt
                     var timeElapsed = DateTime.Now - testResult.StartedAt;
                     var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
                     timeRemaining = timeLimit - timeElapsed;
                     
-                    // Сохраняем вычисленное время для будущих пауз
                     if (timeRemaining > TimeSpan.Zero)
                     {
                         testResult.TimeRemainingSeconds = (int)timeRemaining.TotalSeconds;
@@ -652,27 +597,17 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                // Если время истекло, завершаем тест автоматически
                 if (timeRemaining <= TimeSpan.Zero)
                 {
-                    // Вычисляем результат
                     var (score, maxScore, percentage) = await _testEvaluationService.CalculateSpellingTestResultAsync(testResult.Id, test.Id);
-                    
-                    // Вычисляем оценку
                     var grade = TestEvaluationService.CalculateGrade(percentage);
-                    
-                    // Обновляем результат теста
                     testResult.Score = score;
                     testResult.MaxScore = maxScore;
                     testResult.Percentage = percentage;
                     testResult.Grade = grade;
-                    
-                    // Завершаем тест
                     await _testResultService.CompleteTestResultAsync(testResult);
                     return RedirectToAction("SpellingResult", new { id = testResult.Id });
                 }
-
-                // Создаем ViewModel
                 var viewModel = new ViewModels.TakeSpellingTestViewModel
                 {
                     TestResult = testResult,
@@ -693,7 +628,6 @@ namespace OnlineTutor3.Web.Controllers
             }
         }
 
-        // POST: StudentTest/SubmitSpellingAnswer
         [HttpPost]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> SubmitSpellingAnswer([FromBody] ViewModels.SubmitSpellingAnswerViewModel model)
@@ -712,10 +646,8 @@ namespace OnlineTutor3.Web.Controllers
                     return Json(new { success = false, message = "Студент не найден" });
                 }
 
-                // Проверяем результат теста через репозиторий
                 var testResult = await _spellingTestResultRepository.GetByIdAsync(model.TestResultId);
                 
-                // Проверки безопасности
                 if (!_securityValidation.ValidateStudentAccessToResult(testResult, student.Id))
                 {
                     return Json(new { success = false, message = "Результат теста не найден" });
@@ -726,33 +658,27 @@ namespace OnlineTutor3.Web.Controllers
                     return Json(new { success = false, message = "Тест уже завершен" });
                 }
 
-                // Загружаем тест для проверки времени
                 var test = await _spellingTestRepository.GetByIdAsync(testResult.SpellingTestId);
                 if (test == null)
                 {
                     return Json(new { success = false, message = "Тест не найден" });
                 }
 
-                // Проверяем время (с буфером 30 секунд)
                 if (!_securityValidation.ValidateTimeLimit(testResult.StartedAt, test.TimeLimit, 30))
                 {
                     return Json(new { success = false, message = "Время теста истекло" });
                 }
 
-                // Проверяем вопрос
                 var question = await _spellingQuestionRepository.GetByIdAsync(model.QuestionId);
                 if (question == null || question.SpellingTestId != testResult.SpellingTestId)
                 {
                     return Json(new { success = false, message = "Вопрос не найден" });
                 }
-
-                // Валидация ответа
                 if (!_securityValidation.ValidateAnswer(model.StudentAnswer, 500))
                 {
                     return Json(new { success = false, message = "Некорректный ответ" });
                 }
 
-                // Проверяем, что вопрос принадлежит тесту
                 var allQuestionIds = (await _spellingQuestionRepository.GetByTestIdOrderedAsync(test.Id))
                     .Select(q => q.Id).ToList();
                 if (!_securityValidation.ValidateQuestionId(model.QuestionId, allQuestionIds))
@@ -760,16 +686,12 @@ namespace OnlineTutor3.Web.Controllers
                     return Json(new { success = false, message = "Вопрос не принадлежит тесту" });
                 }
 
-                // Сохраняем ответ
                 var answer = await _answerService.SaveSpellingAnswerAsync(model.TestResultId, model.QuestionId, model.StudentAnswer ?? "");
 
-                // Оцениваем ответ
                 var (isCorrect, points) = await _testEvaluationService.EvaluateSpellingAnswerAsync(
                     question, 
                     model.StudentAnswer ?? "", 
                     question.Points);
-
-                // Обновляем ответ с результатом оценки
                 answer.IsCorrect = isCorrect;
                 answer.Points = points;
                 await _answerService.UpdateAnswerAsync(answer);
@@ -789,7 +711,6 @@ namespace OnlineTutor3.Web.Controllers
             }
         }
 
-        // POST: StudentTest/UpdateTimeRemaining
         [HttpPost]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> UpdateTimeRemaining(int testResultId, int timeRemainingSeconds, string testType)
@@ -808,7 +729,6 @@ namespace OnlineTutor3.Web.Controllers
                     return Unauthorized();
                 }
 
-                // Обновляем время в зависимости от типа теста
                 switch (testType.ToLower())
                 {
                     case "spelling":
@@ -836,7 +756,6 @@ namespace OnlineTutor3.Web.Controllers
             }
         }
 
-        // POST: StudentTest/CompleteSpellingTest/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CompleteSpellingTest(int id)
@@ -855,10 +774,7 @@ namespace OnlineTutor3.Web.Controllers
                     return NotFound();
                 }
 
-                // Получаем результат теста через репозиторий
                 var testResult = await _spellingTestResultRepository.GetByIdAsync(id);
-                
-                // Проверки безопасности
                 if (!_securityValidation.ValidateStudentAccessToResult(testResult, student.Id))
                 {
                     _logger.LogWarning("Попытка завершить тест другого студента. ResultId: {ResultId}, StudentId: {StudentId}", 
@@ -871,37 +787,25 @@ namespace OnlineTutor3.Web.Controllers
                     return RedirectToAction("SpellingResult", new { id = testResult.Id });
                 }
 
-                // Загружаем тест для проверки времени
                 var test = await _spellingTestRepository.GetByIdAsync(testResult.SpellingTestId);
                 if (test == null)
                 {
                     return NotFound();
                 }
 
-                // Проверяем время (с буфером 60 секунд для завершения)
                 if (!_securityValidation.ValidateTimeLimit(testResult.StartedAt, test.TimeLimit, 60))
                 {
                     _logger.LogWarning("Попытка завершить тест после истечения времени. ResultId: {ResultId}", id);
                     TempData["ErrorMessage"] = "Время теста истекло. Тест будет завершен автоматически.";
-                    // Все равно завершаем тест, но логируем
                 }
 
-                // Вычисляем результат
                 var (score, maxScore, percentage) = await _testEvaluationService.CalculateSpellingTestResultAsync(testResult.Id, testResult.SpellingTestId);
-                
-                // Вычисляем оценку
                 var grade = TestEvaluationService.CalculateGrade(percentage);
-                
-                // Обновляем результат теста
                 testResult.Score = score;
                 testResult.MaxScore = maxScore;
                 testResult.Percentage = percentage;
                 testResult.Grade = grade;
-                
-                // Завершаем тест (устанавливает CompletedAt и IsCompleted)
                 await _testResultService.CompleteTestResultAsync(testResult);
-
-                // Отправляем уведомление через SignalR
                 await SendTestCompletedNotificationAsync(testResult, "spelling", currentUser.FullName ?? currentUser.Email ?? "Студент");
 
                 return RedirectToAction("SpellingResult", new { id = testResult.Id });
