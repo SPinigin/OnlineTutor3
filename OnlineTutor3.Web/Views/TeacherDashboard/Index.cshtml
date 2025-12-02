@@ -455,8 +455,6 @@
         var allActivities = [];
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Инициализация Dashboard');
-
             document.getElementById('signalr-status').style.display = 'inline-flex';
 
             loadRecentActivity();
@@ -481,7 +479,6 @@
                     updateActivityCount();
                 })
                 .catch(error => {
-                    console.error('Ошибка загрузки активности:', error);
                     document.getElementById('activity-feed').innerHTML = 
                         '<tr><td colspan="5" class="text-center py-5"><div class="empty-state-small"><small class="empty-state-text text-danger">Ошибка загрузки активности</small></div></td></tr>';
                 });

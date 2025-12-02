@@ -346,7 +346,7 @@
                     // Время успешно сохранено
                 },
                 error: function() {
-                    console.error('Ошибка при сохранении времени');
+                    // Ошибка при сохранении времени
                 }
             });
         }
@@ -410,12 +410,10 @@
                             delete answers[questionId];
                         }
                         updateProgress();
-                    } else {
-                        console.error('Ошибка сохранения:', response.message);
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Ошибка AJAX:', error);
+                    // Ошибка AJAX
                 }
             });
         }

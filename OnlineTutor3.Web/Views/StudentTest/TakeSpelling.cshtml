@@ -336,7 +336,7 @@
                     // Время успешно сохранено
                 },
                 error: function() {
-                    console.error('Ошибка при сохранении времени');
+                    // Ошибка при сохранении времени
                 }
             });
         }
@@ -402,14 +402,15 @@
                         // Сбрасываем флаг изменений для предотвращения предупреждения при закрытии
                         document.dispatchEvent(new Event('answerSaved'));
                     } else {
-                        console.error('Ошибка сохранения:', response.message);
                         if (window.StudentTestEnhancements?.showSaveIndicator) {
                             window.StudentTestEnhancements.showSaveIndicator(false, response.message || 'Ошибка сохранения');
                         }
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Ошибка AJAX:', error);
+                    if (window.StudentTestEnhancements?.showSaveIndicator) {
+                        window.StudentTestEnhancements.showSaveIndicator(false, 'Ошибка сохранения');
+                    }
                 }
             });
         }
