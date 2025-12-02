@@ -289,6 +289,17 @@
     color: #6c757d !important;
 }
 
+.text-link-modern {
+    color: #667eea;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.text-link-modern:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
 /* ===== SPACING ===== */
 .modern-card-body {
     padding: 0.75rem;
