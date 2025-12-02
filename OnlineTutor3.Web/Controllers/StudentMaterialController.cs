@@ -50,7 +50,6 @@ namespace OnlineTutor3.Web.Controllers
                 var student = await _studentService.GetByUserIdAsync(currentUser.Id);
                 if (student == null)
                 {
-                    _logger.LogWarning("Студент не найден для пользователя {UserId}", currentUser.Id);
                     TempData["ErrorMessage"] = "Профиль студента не найден. Обратитесь к администратору.";
                     return RedirectToAction("Index", "Student");
                 }
@@ -158,9 +157,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
 
                 var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
-
-                _logger.LogInformation("Студент {StudentId} скачал материал {MaterialId}: {Title}, Файл: {FileName}, Размер: {FileSize} байт",
-                    student.Id, id, material.Title, material.FileName, material.FileSize);
 
                 return File(fileBytes, material.ContentType ?? "application/octet-stream", material.FileName);
             }

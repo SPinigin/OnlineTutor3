@@ -481,14 +481,11 @@ namespace OnlineTutor3.Web.Controllers
                         break;
 
                     default:
-                        _logger.LogWarning("Неизвестный тип теста: {TestType}", testType);
                         return BadRequest($"Неизвестный тип теста: {testType}");
                 }
 
                 if (result == null)
                 {
-                    _logger.LogWarning("Результат теста не найден: TestType={TestType}, ResultId={ResultId}, TeacherId={TeacherId}", 
-                        testType, testResultId, currentUser.Id);
                     return NotFound();
                 }
 

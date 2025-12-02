@@ -56,15 +56,10 @@ namespace OnlineTutor3.Web.Controllers
 
             try
             {
-                _logger.LogInformation("Попытка входа пользователя: {Email}", model.Email);
-
                 ApplicationUser? user = null;
                 try
                 {
-                    var stopwatch = System.Diagnostics.Stopwatch.StartNew();
                     user = await _userManager.FindByEmailAsync(model.Email);
-                    stopwatch.Stop();
-                    _logger.LogInformation("FindByEmailAsync выполнен за {ElapsedMs}ms для {Email}", stopwatch.ElapsedMilliseconds, model.Email);
                 }
                 catch (Exception ex)
                 {
@@ -80,7 +75,6 @@ namespace OnlineTutor3.Web.Controllers
                         // Проверка активности аккаунта
                         if (!user.IsActive)
                         {
-                            _logger.LogWarning("Попытка входа заблокированного пользователя. UserId: {UserId}", user.Id);
                             ModelState.AddModelError(string.Empty, "Ваш аккаунт заблокирован. Обратитесь к администратору.");
                             return View(model);
                         }
@@ -129,13 +123,11 @@ namespace OnlineTutor3.Web.Controllers
                                 if (teacher != null && !teacher.IsApproved)
                                 {
                                     await _signInManager.SignOutAsync();
-                                    _logger.LogWarning("Попытка входа неодобренного учителя. UserId: {UserId}", user.Id);
                                     TempData["ErrorMessage"] = "Ваш аккаунт учителя еще не одобрен администратором.";
                                     return View(model);
                                 }
                             }
 
-                            _logger.LogInformation("Успешный вход пользователя. UserId: {UserId}, Email: {Email}", user.Id, model.Email);
                             return await RedirectToLocalAsync(returnUrl, user);
                         }
                         catch (Exception ex)
@@ -149,12 +141,10 @@ namespace OnlineTutor3.Web.Controllers
 
                 if (result.IsLockedOut)
                 {
-                    _logger.LogWarning("Аккаунт {Email} заблокирован", model.Email);
                     TempData["ErrorMessage"] = "Ваш аккаунт временно заблокирован. Попробуйте позже.";
                     return View(model);
                 }
 
-                _logger.LogWarning("Неудачная попытка входа. Email: {Email}", model.Email);
                 ModelState.AddModelError(string.Empty, "Неверный логин или пароль.");
                 return View(model);
             }
@@ -171,7 +161,6 @@ namespace OnlineTutor3.Web.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            _logger.LogInformation("Пользователь вышел из системы");
             TempData["InfoMessage"] = "Вы успешно вышли из системы.";
             return RedirectToAction("Index", "Home");
         }
@@ -201,8 +190,6 @@ namespace OnlineTutor3.Web.Controllers
                 return View(model);
             }
 
-            _logger.LogInformation("Попытка регистрации пользователя. Email: {Email}, Role: {Role}", model.Email, model.Role);
-
             var user = new ApplicationUser
             {
                 UserName = model.Email,
@@ -222,7 +209,6 @@ namespace OnlineTutor3.Web.Controllers
             {
                 // Добавляем роль
                 await _userManager.AddToRoleAsync(user, model.Role);
-                _logger.LogInformation("Роль {Role} назначена пользователю {UserId}", model.Role, user.Id);
 
                 try
                 {
@@ -237,7 +223,6 @@ namespace OnlineTutor3.Web.Controllers
                             CreatedAt = DateTime.Now
                         };
                         await _studentService.CreateAsync(student);
-                        _logger.LogInformation("Профиль студента создан. UserId: {UserId}", user.Id);
                     }
                     else if (model.Role == ApplicationRoles.Teacher)
                     {
@@ -250,7 +235,6 @@ namespace OnlineTutor3.Web.Controllers
                             CreatedAt = DateTime.Now
                         };
                         var teacherId = await _teacherService.CreateAsync(teacher);
-                        _logger.LogInformation("Профиль учителя создан. UserId: {UserId}, TeacherId: {TeacherId}", user.Id, teacherId);
 
                         // Добавляем выбранные предметы
                         if (model.SelectedSubjectIds != null && model.SelectedSubjectIds.Any())
@@ -262,7 +246,6 @@ namespace OnlineTutor3.Web.Controllers
                         }
                     }
 
-                    _logger.LogInformation("Пользователь успешно зарегистрирован. UserId: {UserId}, Email: {Email}", user.Id, model.Email);
                     TempData["SuccessMessage"] = "Регистрация успешна! Вы можете войти в систему.";
                     return RedirectToAction(nameof(Login));
                 }
@@ -387,10 +370,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
                 return View(model);
             }
-
-            // Обновляем метку времени смены пароля (если есть такое поле)
-            // Или просто логируем успешную смену
-            _logger.LogInformation("Пароль успешно изменен. UserId: {UserId}", user.Id);
 
             // Перезаходим пользователя, чтобы обновить cookie
             await _signInManager.RefreshSignInAsync(user);

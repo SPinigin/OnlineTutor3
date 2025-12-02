@@ -74,7 +74,6 @@ namespace OnlineTutor3.Web.Controllers
                 var teacher = await _teacherService.GetByUserIdAsync(currentUser.Id);
                 if (teacher == null)
                 {
-                    _logger.LogWarning("Учитель не найден для пользователя {UserId}", currentUser.Id);
                     TempData["ErrorMessage"] = "Профиль учителя не найден. Обратитесь к администратору.";
                     return RedirectToAction("Index", "Home");
                 }
@@ -105,7 +104,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Ошибка при загрузке последних завершенных тестов. Продолжаем работу без них.");
                     // Продолжаем работу без recentCompletions
                 }
 
@@ -209,14 +207,12 @@ namespace OnlineTutor3.Web.Controllers
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger.LogWarning(ex, "Ошибка при получении данных пользователя для студента {StudentId}", result.StudentId);
                                 }
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Ошибка при получении результатов теста по орфографии {TestId}", test.Id);
                     }
                 }
 
@@ -269,14 +265,12 @@ namespace OnlineTutor3.Web.Controllers
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger.LogWarning(ex, "Ошибка при получении данных пользователя для студента {StudentId}", result.StudentId);
                                 }
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Ошибка при получении результатов теста по пунктуации {TestId}", test.Id);
                     }
                 }
 
@@ -329,14 +323,12 @@ namespace OnlineTutor3.Web.Controllers
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger.LogWarning(ex, "Ошибка при получении данных пользователя для студента {StudentId}", result.StudentId);
                                 }
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Ошибка при получении результатов теста по орфоэпии {TestId}", test.Id);
                     }
                 }
 
@@ -389,14 +381,12 @@ namespace OnlineTutor3.Web.Controllers
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger.LogWarning(ex, "Ошибка при получении данных пользователя для студента {StudentId}", result.StudentId);
                                 }
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Ошибка при получении результатов классического теста {TestId}", test.Id);
                     }
                 }
             }

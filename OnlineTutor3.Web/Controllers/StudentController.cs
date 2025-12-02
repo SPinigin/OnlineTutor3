@@ -41,7 +41,6 @@ namespace OnlineTutor3.Web.Controllers
                 var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
                 if (student == null)
                 {
-                    _logger.LogWarning("Студент не найден для пользователя {UserId}", currentUser.Id);
                     TempData["ErrorMessage"] = "Профиль студента не найден. Обратитесь к администратору.";
                     return RedirectToAction("Index", "Home");
                 }

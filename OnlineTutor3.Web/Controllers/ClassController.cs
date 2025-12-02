@@ -35,7 +35,6 @@ namespace OnlineTutor3.Web.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null)
                 {
-                    _logger.LogWarning("Current user is null in Class/Index");
                     return Challenge();
                 }
 
@@ -70,14 +69,12 @@ namespace OnlineTutor3.Web.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null)
                 {
-                    _logger.LogWarning("Current user is null in Class/Details");
                     return Challenge();
                 }
 
                 var @class = await _classService.GetByIdAsync(id.Value);
                 if (@class == null || @class.TeacherId != currentUser.Id)
                 {
-                    _logger.LogWarning("Класс {ClassId} не найден для учителя {TeacherId}", id, currentUser.Id);
                     return NotFound();
                 }
 
@@ -95,9 +92,8 @@ namespace OnlineTutor3.Web.Controllers
                             var user = await _userManager.FindByIdAsync(student.UserId);
                             studentsWithUsers.Add((student, user));
                         }
-                        catch (Exception ex)
+                        catch
                         {
-                            _logger.LogWarning(ex, "Ошибка при загрузке пользователя для студента {StudentId}, UserId: {UserId}", student.Id, student.UserId);
                             studentsWithUsers.Add((student, null));
                         }
                     }
@@ -150,7 +146,6 @@ namespace OnlineTutor3.Web.Controllers
                 };
 
                 await _classService.CreateAsync(@class);
-                _logger.LogInformation("Учитель {TeacherId} создал класс: {ClassName}", currentUser.Id, @class.Name);
                 TempData["SuccessMessage"] = $"Класс \"{@class.Name}\" успешно создан!";
                 return RedirectToAction(nameof(Index));
             }
@@ -233,7 +228,6 @@ namespace OnlineTutor3.Web.Controllers
                 @class.IsActive = model.IsActive;
 
                 await _classService.UpdateAsync(@class);
-                _logger.LogInformation("Учитель {TeacherId} обновил класс {ClassId}: {ClassName}", currentUser.Id, id, @class.Name);
                 TempData["SuccessMessage"] = $"Класс \"{@class.Name}\" успешно обновлен!";
                 return RedirectToAction(nameof(Index));
             }
@@ -304,9 +298,6 @@ namespace OnlineTutor3.Web.Controllers
                 @class.IsActive = !@class.IsActive;
                 await _classService.UpdateAsync(@class);
                 
-                _logger.LogInformation("Учитель {TeacherId} {Action} класс {ClassId}: {ClassName}", 
-                    currentUser.Id, @class.IsActive ? "активировал" : "деактивировал", id, @class.Name);
-                
                 var actionText = @class.IsActive ? "активирован" : "деактивирован";
                 TempData["SuccessMessage"] = $"Класс \"{@class.Name}\" успешно {actionText}!";
                 return RedirectToAction(nameof(Index));
@@ -348,7 +339,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 var className = @class.Name;
                 await _classService.DeleteAsync(id);
-                _logger.LogInformation("Учитель {TeacherId} удалил класс {ClassId}: {ClassName}", currentUser.Id, id, className);
                 TempData["SuccessMessage"] = $"Класс \"{className}\" успешно удален!";
                 return RedirectToAction(nameof(Index));
             }

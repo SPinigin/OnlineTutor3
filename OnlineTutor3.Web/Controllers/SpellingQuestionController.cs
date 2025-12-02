@@ -118,8 +118,6 @@ namespace OnlineTutor3.Web.Controllers
 
                     await _questionRepository.CreateAsync(question);
 
-                    _logger.LogInformation("Учитель {TeacherId} создал вопрос по орфографии {QuestionId} для теста {TestId}",
-                        currentUser.Id, question.Id, model.SpellingTestId);
 
                     TempData["SuccessMessage"] = $"Вопрос успешно добавлен!";
                     return RedirectToAction("Details", "SpellingTest", new { id = model.SpellingTestId });
@@ -257,8 +255,6 @@ namespace OnlineTutor3.Web.Controllers
 
                     await _questionRepository.UpdateAsync(question);
 
-                    _logger.LogInformation("Учитель {TeacherId} обновил вопрос по орфографии {QuestionId}",
-                        currentUser.Id, id);
 
                     TempData["SuccessMessage"] = "Вопрос успешно обновлен!";
                     return RedirectToAction("Details", "SpellingTest", new { id = model.SpellingTestId });
@@ -361,8 +357,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 await _questionRepository.DeleteAsync(id);
 
-                _logger.LogInformation("Учитель {TeacherId} удалил вопрос по орфографии {QuestionId}",
-                    currentUser.Id, id);
 
                 TempData["SuccessMessage"] = "Вопрос успешно удален!";
                 return RedirectToAction("Details", "SpellingTest", new { id = testId });

@@ -171,8 +171,6 @@ namespace OnlineTutor3.Web.Controllers
                 var validationResult = ValidateFile(model.File);
                 if (!validationResult.IsValid)
                 {
-                    _logger.LogWarning("Учитель {TeacherId} попытался загрузить недопустимый файл. Ошибка: {Error}",
-                        currentUser.Id, validationResult.ErrorMessage);
 
                     ModelState.AddModelError("File", validationResult.ErrorMessage);
                     await LoadClassesAndAssignments();
@@ -202,9 +200,6 @@ namespace OnlineTutor3.Web.Controllers
 
                     await _materialService.CreateAsync(material);
 
-                    _logger.LogInformation("Учитель {TeacherId} загрузил материал {MaterialId}: {Title}, Файл: {FileName}, Размер: {FileSize} байт, ClassId: {ClassId}, AssignmentId: {AssignmentId}",
-                        currentUser.Id, material.Id, material.Title, material.FileName, material.FileSize, material.ClassId, material.AssignmentId);
-
                     TempData["SuccessMessage"] = $"Материал \"{material.Title}\" успешно загружен!";
                     return RedirectToAction(nameof(Index));
                 }
@@ -217,7 +212,6 @@ namespace OnlineTutor3.Web.Controllers
             }
             else
             {
-                _logger.LogWarning("Учитель {TeacherId} отправил невалидную форму создания материала", currentUser.Id);
             }
 
             await LoadClassesAndAssignments();
@@ -300,8 +294,6 @@ namespace OnlineTutor3.Web.Controllers
                         var validationResult = ValidateFile(model.NewFile);
                         if (!validationResult.IsValid)
                         {
-                            _logger.LogWarning("Учитель {TeacherId} попытался обновить материал {MaterialId} недопустимым файлом. Ошибка: {Error}",
-                                currentUser.Id, id, validationResult.ErrorMessage);
                             ModelState.AddModelError("NewFile", validationResult.ErrorMessage);
                             await LoadClassesAndAssignments();
                             return View(model);
@@ -319,14 +311,9 @@ namespace OnlineTutor3.Web.Controllers
                         material.ContentType = model.NewFile.ContentType;
                         material.Type = DetermineMaterialType(model.NewFile.FileName);
 
-                        _logger.LogInformation("Учитель {TeacherId} заменил файл материала {MaterialId}. Старый: {OldFile}, Новый: {NewFile}",
-                            currentUser.Id, id, oldFileName, model.NewFile.FileName);
                     }
 
                     await _materialService.UpdateAsync(material);
-
-                    _logger.LogInformation("Учитель {TeacherId} обновил материал {MaterialId}: {Title}, ClassId: {ClassId}, AssignmentId: {AssignmentId}",
-                        currentUser.Id, id, material.Title, material.ClassId, material.AssignmentId);
 
                     TempData["SuccessMessage"] = $"Материал \"{material.Title}\" успешно обновлен!";
                     return RedirectToAction(nameof(Index));
@@ -339,7 +326,6 @@ namespace OnlineTutor3.Web.Controllers
             }
             else
             {
-                _logger.LogWarning("Учитель {TeacherId} отправил невалидную форму обновления материала {MaterialId}", currentUser.Id, id);
             }
 
             await LoadClassesAndAssignments();
@@ -393,9 +379,6 @@ namespace OnlineTutor3.Web.Controllers
                 // Удаляем запись из БД
                 await _materialService.DeleteAsync(id);
 
-                _logger.LogInformation("Учитель {TeacherId} удалил материал {MaterialId}: {Title}, Файл: {FileName}",
-                    currentUser.Id, id, materialTitle, materialFileName);
-
                 TempData["SuccessMessage"] = $"Материал \"{materialTitle}\" успешно удален!";
             }
             catch (Exception ex)
@@ -433,9 +416,6 @@ namespace OnlineTutor3.Web.Controllers
 
             var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
 
-            _logger.LogInformation("Учитель {TeacherId} скачал материал {MaterialId}: {Title}, Файл: {FileName}, Размер: {FileSize} байт",
-                currentUser.Id, id, material.Title, material.FileName, material.FileSize);
-
             return File(fileBytes, material.ContentType ?? "application/octet-stream", material.FileName);
         }
 
@@ -458,9 +438,6 @@ namespace OnlineTutor3.Web.Controllers
             var oldStatus = material.IsActive;
             material.IsActive = !material.IsActive;
             await _materialService.UpdateAsync(material);
-
-            _logger.LogInformation("Учитель {TeacherId} изменил статус материала {MaterialId}: {Title} с {OldStatus} на {NewStatus}",
-                currentUser.Id, id, material.Title, oldStatus, material.IsActive);
 
             var status = material.IsActive ? "активирован" : "деактивирован";
             TempData["InfoMessage"] = $"Материал \"{material.Title}\" {status}.";
@@ -539,7 +516,6 @@ namespace OnlineTutor3.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Не удалось удалить файл {FilePath}", filePath);
             }
         }
 
