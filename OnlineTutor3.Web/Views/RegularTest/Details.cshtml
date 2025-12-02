@@ -5,92 +5,100 @@
     var questions = ViewBag.Questions as List<OnlineTutor3.Domain.Entities.RegularQuestion> ?? new List<OnlineTutor3.Domain.Entities.RegularQuestion>();
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="page-header">
     <div>
-        <h4 class="mb-1">
-            <i class="fas fa-clipboard-check text-primary"></i> @Model.Title
-            <span class="badge bg-@(Model.IsActive ? "success" : "secondary") ms-2 badge-sm">
+        <h4 class="page-header-title">
+            <i class="fas fa-clipboard-check page-header-icon"></i> @Model.Title
+            <span class="badge badge-modern-@(Model.IsActive ? "success" : "secondary") ms-2 badge-sm">
                 @(Model.IsActive ? "Активен" : "Неактивен")
             </span>
         </h4>
         @if (!string.IsNullOrEmpty(Model.Description))
         {
-            <p class="text-muted mb-0 small">@Model.Description</p>
+            <p class="text-muted-modern mb-0 small">@Model.Description</p>
         }
         @if (assignment != null)
         {
-            <p class="text-muted mb-0 small">
+            <p class="text-muted-modern mb-0 small">
                 <i class="fas fa-tasks"></i> 
-                <a asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id">@assignment.Title</a>
+                <a asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id" class="text-link-modern">@assignment.Title</a>
             </p>
         }
     </div>
     <div>
-        <a asp-controller="Assignment" asp-action="Details" asp-route-id="@Model.AssignmentId" class="btn btn-sm btn-outline-secondary">
+        <a asp-controller="Assignment" asp-action="Details" asp-route-id="@Model.AssignmentId" class="btn btn-sm btn-modern-outline-secondary">
             <i class="fas fa-arrow-left"></i> Назад к заданию
         </a>
     </div>
 </div>
 
-<div class="row mb-3 g-1 g-md-2">
+<div class="row mb-3 g-3">
     <div class="col-6 col-md-3">
-        <div class="card text-center border-primary">
-            <div class="card-body py-2 px-2">
-                <i class="fas fa-question-circle text-primary" style="font-size: 1.25rem;"></i>
-                <div class="mt-1 mb-0 small fw-bold">@questions.Count</div>
-                <p class="text-muted mb-0" style="font-size: 0.75rem;">Вопросов</p>
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body text-center py-1 px-2">
+                <div class="stat-card-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <div class="stat-card-value">@questions.Count</div>
+                <small class="stat-card-label">Вопросов</small>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card text-center border-info">
-            <div class="card-body py-2 px-2">
-                <i class="fas fa-clock text-info" style="font-size: 1.25rem;"></i>
-                <div class="mt-1 mb-0 small fw-bold">@Model.TimeLimit</div>
-                <p class="text-muted mb-0" style="font-size: 0.75rem;">Минут</p>
+        <div class="card border-0 shadow-sm stat-card stat-card-blue">
+            <div class="card-body text-center py-1 px-2">
+                <div class="stat-card-icon stat-icon-blue">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-card-value">@Model.TimeLimit</div>
+                <small class="stat-card-label">Минут</small>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card text-center border-success">
-            <div class="card-body py-2 px-2">
-                <i class="fas fa-redo text-success" style="font-size: 1.25rem;"></i>
-                <div class="mt-1 mb-0 small fw-bold">@Model.MaxAttempts</div>
-                <p class="text-muted mb-0" style="font-size: 0.75rem;">Попыток</p>
+        <div class="card border-0 shadow-sm stat-card stat-card-green">
+            <div class="card-body text-center py-1 px-2">
+                <div class="stat-card-icon stat-icon-green">
+                    <i class="fas fa-redo"></i>
+                </div>
+                <div class="stat-card-value">@Model.MaxAttempts</div>
+                <small class="stat-card-label">Попыток</small>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card text-center border-warning">
-            <div class="card-body py-2 px-2">
-                <i class="fas fa-calendar-plus text-warning" style="font-size: 1.25rem;"></i>
-                <div class="mt-1 mb-0 small fw-bold">@Model.CreatedAt.ToString("dd.MM.yyyy")</div>
-                <p class="text-muted mb-0" style="font-size: 0.75rem;">Создан</p>
+        <div class="card border-0 shadow-sm stat-card stat-card-yellow">
+            <div class="card-body text-center py-1 px-2">
+                <div class="stat-card-icon stat-icon-yellow">
+                    <i class="fas fa-calendar-plus"></i>
+                </div>
+                <div class="stat-card-value" style="font-size: 1rem;">@Model.CreatedAt.ToString("dd.MM.yyyy")</div>
+                <small class="stat-card-label">Создан</small>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card mb-3">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">
+<div class="card mb-3 modern-card">
+    <div class="card-header modern-card-header d-flex justify-content-between align-items-center">
+        <h5 class="modern-card-title mb-0">
             <i class="fas fa-question-circle"></i> Вопросы (@questions.Count)
         </h5>
         <div class="d-flex gap-1">
-            <a asp-controller="RegularQuestion" asp-action="Create" asp-route-testId="@Model.Id" class="btn btn-sm btn-success">
+            <a asp-controller="RegularQuestion" asp-action="Create" asp-route-testId="@Model.Id" class="btn btn-sm btn-modern-success">
                 <i class="fas fa-plus"></i> Добавить вопрос
             </a>
-            <a asp-action="ImportQuestions" asp-route-id="@Model.Id" class="btn btn-sm btn-info">
+            <a asp-action="ImportQuestions" asp-route-id="@Model.Id" class="btn btn-sm btn-modern-outline-info">
                 <i class="fas fa-file-import"></i> Импорт из Excel
             </a>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body modern-card-body">
         @if (questions.Any())
         {
             <div class="table-responsive">
-                <table class="table table-hover table-sm">
-                    <thead class="table-light">
+                <table class="table modern-table mb-0">
+                    <thead>
                         <tr>
                             <th style="width: 5%;" class="small">#</th>
                             <th style="width: 50%;" class="small">Текст вопроса</th>
@@ -103,8 +111,8 @@
                         @foreach (var question in questions.OrderBy(q => q.OrderIndex))
                         {
                             <tr>
-                                <td class="small">@question.OrderIndex</td>
-                                <td class="small">@question.Text</td>
+                                <td class="small text-muted-modern">@question.OrderIndex</td>
+                                <td class="small text-dark-modern">@question.Text</td>
                                 <td class="small">
                                     @{
                                         string typeName = question.Type switch
@@ -115,15 +123,15 @@
                                             _ => question.Type.ToString()
                                         };
                                     }
-                                    <span class="badge bg-secondary badge-sm">@typeName</span>
+                                    <span class="badge badge-modern-secondary badge-sm">@typeName</span>
                                 </td>
-                                <td class="small">@question.Points</td>
+                                <td class="small text-muted-modern">@question.Points</td>
                                 <td class="text-center">
                                     <div class="d-flex gap-1 justify-content-center">
-                                        <a asp-controller="RegularQuestion" asp-action="Edit" asp-route-id="@question.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                        <a asp-controller="RegularQuestion" asp-action="Edit" asp-route-id="@question.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a asp-controller="RegularQuestion" asp-action="Delete" asp-route-id="@question.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                        <a asp-controller="RegularQuestion" asp-action="Delete" asp-route-id="@question.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -136,10 +144,12 @@
         }
         else
         {
-            <div class="text-center py-4">
-                <i class="fas fa-question-circle text-muted" style="font-size: 3rem;"></i>
-                <p class="text-muted mt-3">В этом тесте пока нет вопросов</p>
-                <a asp-controller="RegularQuestion" asp-action="Create" asp-route-testId="@Model.Id" class="btn btn-primary">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <p class="empty-state-text">В этом тесте пока нет вопросов</p>
+                <a asp-controller="RegularQuestion" asp-action="Create" asp-route-testId="@Model.Id" class="btn btn-modern-primary">
                     <i class="fas fa-plus"></i> Добавить первый вопрос
                 </a>
             </div>
