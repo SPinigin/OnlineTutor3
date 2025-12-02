@@ -2,52 +2,60 @@
     ViewData["Title"] = User.IsInRole("Teacher") ? "Календарь" : "Расписание";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-header">
     <div>
-        <h2><i class="fas fa-calendar-alt text-primary"></i> @(User.IsInRole("Teacher") ? "Календарь" : "Расписание")</h2>
+        <h2 class="page-header-title" style="font-size: 1.75rem;">
+            <i class="fas fa-calendar-alt page-header-icon"></i> @(User.IsInRole("Teacher") ? "Календарь" : "Расписание")
+        </h2>
     </div>
     @if (User.IsInRole("Teacher"))
     {
         <div>
-            <a asp-action="Create" class="btn btn-success">
+            <a asp-action="Create" class="btn btn-modern-success">
                 <i class="fas fa-plus"></i> Добавить занятие
             </a>
         </div>
     }
 </div>
 
-<div class="row mb-4">
+<div class="row mb-4 g-3">
     <div class="col-4 col-md-4">
-        <div class="card text-center border-primary">
-            <div class="card-body p-2 p-md-3">
-                <i class="fas fa-clock text-primary" style="font-size: 1.5rem;"></i>
-                <h4 class="mt-2 text-primary fs-6 fs-md-4">@ViewBag.UpcomingEvents</h4>
-                <p class="text-muted mb-0 small">Предстоящих занятий</p>
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body text-center py-1 px-2">
+                <div class="stat-card-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-card-value">@ViewBag.UpcomingEvents</div>
+                <small class="stat-card-label">Предстоящих занятий</small>
             </div>
         </div>
     </div>
     <div class="col-4 col-md-4">
-        <div class="card text-center border-success">
-            <div class="card-body p-2 p-md-3">
-                <i class="fas fa-calendar-day text-success" style="font-size: 1.5rem;"></i>
-                <h4 class="mt-2 text-success fs-6 fs-md-4">@ViewBag.TodayEvents</h4>
-                <p class="text-muted mb-0 small">Занятий сегодня</p>
+        <div class="card border-0 shadow-sm stat-card stat-card-green">
+            <div class="card-body text-center py-1 px-2">
+                <div class="stat-card-icon stat-icon-green">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <div class="stat-card-value">@ViewBag.TodayEvents</div>
+                <small class="stat-card-label">Занятий сегодня</small>
             </div>
         </div>
     </div>
     <div class="col-4 col-md-4">
-        <div class="card text-center border-info">
-            <div class="card-body p-2 p-md-3">
-                <i class="fas fa-check-circle text-info" style="font-size: 1.5rem;"></i>
-                <h4 class="mt-2 text-info fs-6 fs-md-4">@ViewBag.CompletedThisMonth</h4>
-                <p class="text-muted mb-0 small">Проведено за месяц</p>
+        <div class="card border-0 shadow-sm stat-card stat-card-blue">
+            <div class="card-body text-center py-1 px-2">
+                <div class="stat-card-icon stat-icon-blue">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-card-value">@ViewBag.CompletedThisMonth</div>
+                <small class="stat-card-label">Проведено за месяц</small>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card shadow">
-    <div class="card-body">
+<div class="card shadow modern-card">
+    <div class="card-body modern-card-body">
         <div id="calendar"></div>
     </div>
 </div>
@@ -62,11 +70,11 @@
             <div class="modal-body" id="eventModalBody">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                <a href="#" id="eventEditBtn" class="btn btn-primary">
+                <button type="button" class="btn btn-modern-outline-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <a href="#" id="eventEditBtn" class="btn btn-modern-primary">
                     <i class="fas fa-edit"></i> Редактировать
                 </a>
-                <a href="#" id="eventDetailsBtn" class="btn btn-info">
+                <a href="#" id="eventDetailsBtn" class="btn btn-modern-outline-info">
                     <i class="fas fa-info-circle"></i> Подробнее
                 </a>
             </div>

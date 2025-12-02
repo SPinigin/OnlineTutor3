@@ -5,48 +5,48 @@
 
 <div class="row justify-content-center">
     <div class="col-md-10">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
+        <div class="card shadow modern-card">
+            <div class="card-header auth-card-header">
                 <h4 class="mb-0">
                     @switch (Model.Type)
                     {
                         case MaterialType.Document:
-                            <i class="fas fa-file-alt me-2"></i>
+                            <i class="fas fa-file-alt me-2 nav-link-icon-danger"></i>
                             break;
                         case MaterialType.Presentation:
-                            <i class="fas fa-file-powerpoint me-2"></i>
+                            <i class="fas fa-file-powerpoint me-2 nav-link-icon-yellow"></i>
                             break;
                         case MaterialType.Image:
-                            <i class="fas fa-file-image me-2"></i>
+                            <i class="fas fa-file-image me-2 nav-link-icon"></i>
                             break;
                         case MaterialType.Audio:
-                            <i class="fas fa-file-audio me-2"></i>
+                            <i class="fas fa-file-audio me-2 nav-link-icon-green"></i>
                             break;
                         case MaterialType.Video:
-                            <i class="fas fa-file-video me-2"></i>
+                            <i class="fas fa-file-video me-2 nav-link-icon-blue"></i>
                             break;
                         default:
-                            <i class="fas fa-file me-2"></i>
+                            <i class="fas fa-file me-2 nav-link-icon"></i>
                             break;
                     }
                     @Model.Title
                 </h4>
             </div>
-            <div class="card-body">
-                <div class="row mb-3">
+            <div class="card-body auth-card-body">
+                <div class="row mb-3 g-3">
                     <div class="col-md-6">
-                        <div class="card bg-light">
+                        <div class="card modern-card stat-card">
                             <div class="card-body py-2">
-                                <small class="text-muted d-block">Название</small>
-                                <strong>@Model.Title</strong>
+                                <small class="text-muted-modern d-block">Название</small>
+                                <strong class="text-dark-modern">@Model.Title</strong>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="card bg-light">
+                        <div class="card modern-card stat-card">
                             <div class="card-body py-2">
-                                <small class="text-muted d-block">Тип</small>
-                                <span class="badge bg-secondary">@GetMaterialTypeDisplayName(Model.Type)</span>
+                                <small class="text-muted-modern d-block">Тип</small>
+                                <span class="badge badge-modern-secondary">@GetMaterialTypeDisplayName(Model.Type)</span>
                             </div>
                         </div>
                     </div>
@@ -55,65 +55,65 @@
                 @if (!string.IsNullOrEmpty(Model.Description))
                 {
                     <div class="mb-3">
-                        <h6><i class="fas fa-align-left"></i> Описание</h6>
-                        <p>@Model.Description</p>
+                        <h6 class="text-dark-modern"><i class="fas fa-align-left"></i> Описание</h6>
+                        <p class="text-muted-modern">@Model.Description</p>
                     </div>
                 }
 
-                <div class="row mb-3">
+                <div class="row mb-3 g-3">
                     <div class="col-md-4">
-                        <div class="card bg-light">
+                        <div class="card modern-card stat-card">
                             <div class="card-body py-2">
-                                <small class="text-muted d-block">Файл</small>
-                                <strong>@Model.FileName</strong>
+                                <small class="text-muted-modern d-block">Файл</small>
+                                <strong class="text-dark-modern">@Model.FileName</strong>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card bg-light">
+                        <div class="card modern-card stat-card">
                             <div class="card-body py-2">
-                                <small class="text-muted d-block">Размер</small>
-                                <strong>@FormatFileSize(Model.FileSize)</strong>
+                                <small class="text-muted-modern d-block">Размер</small>
+                                <strong class="text-dark-modern">@FormatFileSize(Model.FileSize)</strong>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card bg-light">
+                        <div class="card modern-card stat-card">
                             <div class="card-body py-2">
-                                <small class="text-muted d-block">Дата загрузки</small>
-                                <strong>@Model.UploadedAt.ToString("dd.MM.yyyy HH:mm")</strong>
+                                <small class="text-muted-modern d-block">Дата загрузки</small>
+                                <strong class="text-dark-modern">@Model.UploadedAt.ToString("dd.MM.yyyy HH:mm")</strong>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row mb-3">
+                <div class="row mb-3 g-3">
                     <div class="col-md-6">
-                        <div class="card bg-light">
+                        <div class="card modern-card stat-card">
                             <div class="card-body py-2">
-                                <small class="text-muted d-block">Класс</small>
+                                <small class="text-muted-modern d-block">Класс</small>
                                 @if (Model.ClassId.HasValue)
                                 {
-                                    <span class="badge bg-info">Класс #@Model.ClassId</span>
+                                    <span class="badge badge-modern-info">Класс #@Model.ClassId</span>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">Не назначен</span>
+                                    <span class="text-muted-modern">Не назначен</span>
                                 }
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="card bg-light">
+                        <div class="card modern-card stat-card">
                             <div class="card-body py-2">
-                                <small class="text-muted d-block">Задание</small>
+                                <small class="text-muted-modern d-block">Задание</small>
                                 @if (Model.AssignmentId.HasValue)
                                 {
-                                    <span class="badge bg-primary">Задание #@Model.AssignmentId</span>
+                                    <span class="badge badge-modern-primary">Задание #@Model.AssignmentId</span>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">Не назначено</span>
+                                    <span class="text-muted-modern">Не назначено</span>
                                 }
                             </div>
                         </div>
@@ -121,29 +121,29 @@
                 </div>
 
                 <div class="mb-3">
-                    <div class="card bg-light">
+                    <div class="card modern-card stat-card">
                         <div class="card-body py-2">
-                            <small class="text-muted d-block">Статус</small>
+                            <small class="text-muted-modern d-block">Статус</small>
                             @if (Model.IsActive)
                             {
-                                <span class="badge bg-success">Активен</span>
+                                <span class="badge badge-modern-success">Активен</span>
                             }
                             else
                             {
-                                <span class="badge bg-secondary">Неактивен</span>
+                                <span class="badge badge-modern-secondary">Неактивен</span>
                             }
                         </div>
                     </div>
                 </div>
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <a asp-action="Download" asp-route-id="@Model.Id" class="btn btn-success">
+                    <a asp-action="Download" asp-route-id="@Model.Id" class="btn btn-modern-success">
                         <i class="fas fa-download"></i> Скачать
                     </a>
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-modern-warning">
                         <i class="fas fa-edit"></i> Редактировать
                     </a>
-                    <a asp-action="Index" class="btn btn-secondary">
+                    <a asp-action="Index" class="btn btn-modern-outline-secondary">
                         <i class="fas fa-arrow-left"></i> Назад к списку
                     </a>
                 </div>

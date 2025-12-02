@@ -5,18 +5,19 @@
     ViewData["Title"] = $"Ученик: {studentName}";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 page-header">
     <div>
-        <h2>
-            <i class="fas fa-user-graduate text-primary"></i> @(user != null ? user.FullName : "Ученик")
-        </h2>
+        <h4 class="mb-0 d-flex align-items-center gap-2 page-header-title">
+            <i class="fas fa-user-graduate gradient-icon-pink"></i>
+            <span>@(user != null ? user.FullName : "Ученик")</span>
+        </h4>
         @if (!string.IsNullOrEmpty(Model.StudentNumber))
         {
-            <p class="text-muted mb-0">Номер ученика: @Model.StudentNumber</p>
+            <p class="text-muted-modern mb-0 small">Номер ученика: @Model.StudentNumber</p>
         }
     </div>
     <div>
-        <a asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-action="Index" class="btn btn-modern-outline-secondary">
             <i class="fas fa-arrow-left"></i> Назад к списку
         </a>
     </div>
@@ -24,36 +25,36 @@
 
 <div class="row mb-4">
     <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
+        <div class="card border-0 shadow-sm modern-card">
+            <div class="card-header modern-card-header">
+                <h5 class="modern-card-title">
                     <i class="fas fa-user"></i> Личная информация
                 </h5>
             </div>
-            <div class="card-body">
+            <div class="card-body modern-card-body">
                 @if (user != null)
                 {
                     <dl class="row mb-0">
-                        <dt class="col-sm-4">Имя:</dt>
-                        <dd class="col-sm-8">@user.FirstName</dd>
+                        <dt class="col-sm-4 text-dark-modern">Имя:</dt>
+                        <dd class="col-sm-8 text-muted-modern">@user.FirstName</dd>
 
-                        <dt class="col-sm-4">Фамилия:</dt>
-                        <dd class="col-sm-8">@user.LastName</dd>
+                        <dt class="col-sm-4 text-dark-modern">Фамилия:</dt>
+                        <dd class="col-sm-8 text-muted-modern">@user.LastName</dd>
 
-                        <dt class="col-sm-4">Email:</dt>
-                        <dd class="col-sm-8">@user.Email</dd>
+                        <dt class="col-sm-4 text-dark-modern">Email:</dt>
+                        <dd class="col-sm-8 text-muted-modern">@user.Email</dd>
 
                         @if (!string.IsNullOrEmpty(user.PhoneNumber))
                         {
-                            <dt class="col-sm-4">Телефон:</dt>
-                            <dd class="col-sm-8">@user.PhoneNumber</dd>
+                            <dt class="col-sm-4 text-dark-modern">Телефон:</dt>
+                            <dd class="col-sm-8 text-muted-modern">@user.PhoneNumber</dd>
                         }
 
-                        <dt class="col-sm-4">Дата рождения:</dt>
-                        <dd class="col-sm-8">@user.DateOfBirth.ToString("dd.MM.yyyy")</dd>
+                        <dt class="col-sm-4 text-dark-modern">Дата рождения:</dt>
+                        <dd class="col-sm-8 text-muted-modern">@user.DateOfBirth.ToString("dd.MM.yyyy")</dd>
 
-                        <dt class="col-sm-4">Возраст:</dt>
-                        <dd class="col-sm-8">
+                        <dt class="col-sm-4 text-dark-modern">Возраст:</dt>
+                        <dd class="col-sm-8 text-muted-modern">
                             @{
                                 var age = DateTime.Now.Year - user.DateOfBirth.Year;
                                 if (DateTime.Now.DayOfYear < user.DateOfBirth.DayOfYear) age--;
@@ -66,40 +67,40 @@
         </div>
     </div>
     <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
+        <div class="card border-0 shadow-sm modern-card">
+            <div class="card-header modern-card-header">
+                <h5 class="modern-card-title">
                     <i class="fas fa-school"></i> Учебная информация
                 </h5>
             </div>
-            <div class="card-body">
+            <div class="card-body modern-card-body">
                 <dl class="row mb-0">
                     @if (!string.IsNullOrEmpty(Model.School))
                     {
-                        <dt class="col-sm-4">Школа:</dt>
-                        <dd class="col-sm-8">@Model.School</dd>
+                        <dt class="col-sm-4 text-dark-modern">Школа:</dt>
+                        <dd class="col-sm-8 text-muted-modern">@Model.School</dd>
                     }
 
                     @if (Model.Grade.HasValue)
                     {
-                        <dt class="col-sm-4">Класс:</dt>
-                        <dd class="col-sm-8">@Model.Grade класс</dd>
+                        <dt class="col-sm-4 text-dark-modern">Класс:</dt>
+                        <dd class="col-sm-8 text-muted-modern">@Model.Grade класс</dd>
                     }
 
-                    <dt class="col-sm-4">Онлайн-класс:</dt>
+                    <dt class="col-sm-4 text-dark-modern">Онлайн-класс:</dt>
                     <dd class="col-sm-8">
                         @if (Model.ClassId.HasValue)
                         {
-                            <span class="badge bg-primary">Класс #@Model.ClassId</span>
+                            <span class="badge badge-modern-primary">Класс #@Model.ClassId</span>
                         }
                         else
                         {
-                            <span class="text-muted">Не назначен</span>
+                            <span class="text-muted-modern">Не назначен</span>
                         }
                     </dd>
 
-                    <dt class="col-sm-4">Дата добавления:</dt>
-                    <dd class="col-sm-8">@Model.CreatedAt.ToString("dd.MM.yyyy")</dd>
+                    <dt class="col-sm-4 text-dark-modern">Дата добавления:</dt>
+                    <dd class="col-sm-8 text-muted-modern">@Model.CreatedAt.ToString("dd.MM.yyyy")</dd>
                 </dl>
             </div>
         </div>
@@ -107,10 +108,10 @@
 </div>
 
 <div class="mt-3">
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-modern-primary">
         <i class="fas fa-edit"></i> Редактировать
     </a>
-    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-modern-outline-danger">
         <i class="fas fa-trash"></i> Удалить
     </a>
 </div>

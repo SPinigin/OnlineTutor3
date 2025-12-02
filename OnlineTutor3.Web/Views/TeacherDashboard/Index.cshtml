@@ -4,57 +4,65 @@
 }
 
 <div class="container-fluid px-3">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 page-header">
         <div>
-            <h2 class="mb-1">
-                <i class="fas fa-tachometer-alt text-primary me-2"></i>
-                Панель мониторинга
-            </h2>
-            <p class="text-muted mb-0">Активность студентов в реальном времени</p>
+            <h4 class="mb-0 d-flex align-items-center gap-2 page-header-title">
+                <i class="fas fa-tachometer-alt gradient-icon-green"></i>
+                <span>Панель мониторинга</span>
+            </h4>
+            <p class="text-muted-modern mb-0 small">Активность студентов в реальном времени</p>
         </div>
         <div class="d-flex align-items-center gap-2">
             <div id="signalr-status" class="signalr-status" style="display: none;">
-                <i class="fas fa-circle text-secondary me-1"></i>
-                <span>Подключение...</span>
+                <i class="fas fa-circle text-muted-modern me-1"></i>
+                <span class="text-muted-modern">Подключение...</span>
             </div>
             <div id="signalr-activity-indicator"></div>
         </div>
     </div>
 
-    <div class="row g-2 g-md-3 mb-4">
+    <div class="row g-1 g-md-2 mb-3">
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm stat-card-compact">
-                <div class="card-body text-center p-2 p-md-3">
-                    <i class="fas fa-clipboard-list text-primary stat-icon mb-1 mb-md-2"></i>
-                    <h3 class="stat-number mb-0">@Model.TotalActiveTests</h3>
-                    <small class="text-muted stat-label">Активных тестов</small>
+            <div class="card modern-card stat-card">
+                <div class="card-body text-center py-2 px-2">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="stat-card-value">@Model.TotalActiveTests</div>
+                    <small class="stat-card-label">Активных тестов</small>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm stat-card-compact">
-                <div class="card-body text-center p-2 p-md-3">
-                    <i class="fas fa-clock text-warning stat-icon mb-1 mb-md-2"></i>
-                    <h3 class="stat-number mb-0" id="stats-in-progress">@Model.TotalStudentsInProgress</h3>
-                    <small class="text-muted stat-label">Проходят сейчас</small>
+            <div class="card modern-card stat-card">
+                <div class="card-body text-center py-2 px-2">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-card-value" id="stats-in-progress">@Model.TotalStudentsInProgress</div>
+                    <small class="stat-card-label">Проходят сейчас</small>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm stat-card-compact">
-                <div class="card-body text-center p-2 p-md-3">
-                    <i class="fas fa-check-circle text-success stat-icon mb-1 mb-md-2"></i>
-                    <h3 class="stat-number mb-0" id="stats-completed-today">@Model.TotalCompletedToday</h3>
-                    <small class="text-muted stat-label">Завершено сегодня</small>
+            <div class="card modern-card stat-card">
+                <div class="card-body text-center py-2 px-2">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-card-value" id="stats-completed-today">@Model.TotalCompletedToday</div>
+                    <small class="stat-card-label">Завершено сегодня</small>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm stat-card-compact">
-                <div class="card-body text-center p-2 p-md-3">
-                    <i class="fas fa-bell text-info stat-icon mb-1 mb-md-2"></i>
-                    <h3 class="stat-number mb-0" id="stats-notifications">0</h3>
-                    <small class="text-muted stat-label">Уведомлений сегодня</small>
+            <div class="card modern-card stat-card">
+                <div class="card-body text-center py-2 px-2">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="stat-card-value" id="stats-notifications">0</div>
+                    <small class="stat-card-label">Уведомлений сегодня</small>
                 </div>
             </div>
         </div>
@@ -62,38 +70,38 @@
 
     <ul class="nav nav-tabs mb-3" id="dashboardTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab">
-                <i class="fas fa-stream"></i> Активность
+            <button class="nav-link nav-link-modern active" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab">
+                <i class="fas fa-stream nav-link-icon"></i> Активность
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tests-tab" data-bs-toggle="tab" data-bs-target="#tests" type="button" role="tab">
-                <i class="fas fa-list"></i> Тесты
+            <button class="nav-link nav-link-modern" id="tests-tab" data-bs-toggle="tab" data-bs-target="#tests" type="button" role="tab">
+                <i class="fas fa-list nav-link-icon"></i> Тесты
             </button>
         </li>
     </ul>
 
     <div class="tab-content" id="dashboardTabsContent">
         <div class="tab-pane fade show active" id="activity" role="tabpanel">
-            <div class="card mb-3 border-0 shadow-sm">
+            <div class="card shadow-sm border-0 mb-3 search-filter-card">
                 <div class="card-body py-2 px-3">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div class="d-flex align-items-center gap-2">
-                            <i class="fas fa-search text-primary"></i>
-                            <strong class="small">Поиск:</strong>
+                            <i class="fas fa-search nav-link-icon"></i>
+                            <strong class="small text-dark-modern">Поиск:</strong>
                         </div>
             
                         <div class="flex-grow-1" style="max-width: 400px;">
                             <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-white">
+                                <span class="input-group-text bg-white border-end-0">
                                     <i class="fas fa-search text-muted"></i>
                                 </span>
                                 <input type="text" 
-                                       class="form-control" 
+                                       class="form-control form-control-sm border-start-0 form-control-modern" 
                                        id="activitySearchInput" 
                                        placeholder="Поиск по имени студента или названию теста..."
                                        onkeyup="filterActivities()">
-                                <button class="btn btn-outline-secondary" 
+                                <button class="btn btn-sm btn-modern-outline-secondary" 
                                         type="button" 
                                         id="clearActivitySearch"
                                         onclick="clearActivitySearch()"
@@ -104,11 +112,11 @@
                         </div>
             
                         <div class="d-flex align-items-center gap-2">
-                            <button class="btn btn-sm btn-outline-primary" onclick="refreshActivity()">
+                            <button class="btn btn-sm btn-modern-outline-primary" onclick="refreshActivity()">
                                 <i class="fas fa-sync"></i>
                                 <span class="d-none d-sm-inline ms-1">Обновить</span>
                             </button>
-                            <span class="badge bg-secondary" id="activityCount">
+                            <span class="badge badge-modern-secondary" id="activityCount">
                                 Показано: 0
                             </span>
                         </div>
@@ -116,11 +124,11 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm">
+            <div class="card modern-card">
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover table-compact mb-0" id="activityTable">
-                            <thead class="table-light">
+                        <table class="table modern-table mb-0" id="activityTable">
+                            <thead>
                                 <tr>
                                     <th>Уведомление</th>
                                     <th class="text-center d-none d-md-table-cell">Процент</th>
@@ -135,18 +143,18 @@
                                         <div class="spinner-border text-primary" role="status">
                                             <span class="visually-hidden">Загрузка...</span>
                                         </div>
-                                        <p class="text-muted mt-2 mb-0 small">Загрузка активности...</p>
+                                        <p class="text-muted-modern mt-2 mb-0 small">Загрузка активности...</p>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <div id="noActivityResults" class="text-center py-5" style="display: none;">
-                        <i class="fas fa-search text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
-                        <h5 class="text-muted mb-2">Ничего не найдено</h5>
-                        <p class="text-muted mb-3">Попробуйте изменить поисковый запрос</p>
-                        <button class="btn btn-outline-primary btn-sm" onclick="clearActivitySearch()">
+                    <div id="noActivityResults" class="empty-state-large" style="display: none;">
+                        <i class="fas fa-search empty-state-icon"></i>
+                        <h5 class="empty-state-title">Ничего не найдено</h5>
+                        <p class="empty-state-text">Попробуйте изменить поисковый запрос</p>
+                        <button class="btn btn-modern-outline-primary btn-sm" onclick="clearActivitySearch()">
                             <i class="fas fa-redo"></i> Сбросить поиск
                         </button>
                     </div>
@@ -155,25 +163,25 @@
         </div>
 
         <div class="tab-pane fade" id="tests" role="tabpanel">
-            <div class="card mb-3 border-0 shadow-sm">
+            <div class="card shadow-sm border-0 mb-3 search-filter-card">
                 <div class="card-body py-2 px-3">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div class="d-flex align-items-center gap-2">
-                            <i class="fas fa-search text-primary"></i>
-                            <strong class="small">Поиск:</strong>
+                            <i class="fas fa-search nav-link-icon"></i>
+                            <strong class="small text-dark-modern">Поиск:</strong>
                         </div>
 
                         <div class="flex-grow-1" style="max-width: 400px;">
                             <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-white">
+                                <span class="input-group-text bg-white border-end-0">
                                     <i class="fas fa-search text-muted"></i>
                                 </span>
                                 <input type="text"
-                                       class="form-control"
+                                       class="form-control form-control-sm border-start-0 form-control-modern"
                                        id="testsSearchInput"
                                        placeholder="Поиск по названию теста..."
                                        onkeyup="filterTests()">
-                                <button class="btn btn-outline-secondary"
+                                <button class="btn btn-sm btn-modern-outline-secondary"
                                         type="button"
                                         id="clearTestsSearch"
                                         onclick="clearTestsSearch()"
@@ -186,33 +194,33 @@
                         <div class="d-flex align-items-center gap-2">
                             <div class="btn-group btn-group-sm" role="group">
                                 <input type="radio" class="btn-check" name="testTypeFilter" id="filterAll" value="all" checked onchange="filterTests()">
-                                <label class="btn btn-outline-secondary" for="filterAll">
+                                <label class="btn btn-modern-outline-secondary" for="filterAll">
                                     <i class="fas fa-list me-1"></i>
                                     <span class="d-none d-sm-inline">Все</span>
                                 </label>
 
                                 <input type="radio" class="btn-check" name="testTypeFilter" id="filterSpelling" value="spelling" onchange="filterTests()">
-                                <label class="btn btn-outline-primary" for="filterSpelling">
+                                <label class="btn btn-modern-outline-primary" for="filterSpelling">
                                     <i class="fas fa-spell-check"></i>
                                 </label>
 
                                 <input type="radio" class="btn-check" name="testTypeFilter" id="filterPunctuation" value="punctuation" onchange="filterTests()">
-                                <label class="btn btn-outline-info" for="filterPunctuation">
+                                <label class="btn btn-modern-outline-info" for="filterPunctuation">
                                     <i class="fas fa-quote-right"></i>
                                 </label>
 
                                 <input type="radio" class="btn-check" name="testTypeFilter" id="filterOrthoeopy" value="orthoeopy" onchange="filterTests()">
-                                <label class="btn btn-outline-success" for="filterOrthoeopy">
+                                <label class="btn btn-modern-outline-success" for="filterOrthoeopy">
                                     <i class="fas fa-volume-up"></i>
                                 </label>
 
                                 <input type="radio" class="btn-check" name="testTypeFilter" id="filterRegular" value="regular" onchange="filterTests()">
-                                <label class="btn btn-outline-secondary" for="filterRegular">
+                                <label class="btn btn-modern-outline-secondary" for="filterRegular">
                                     <i class="fas fa-clipboard-check"></i>
                                 </label>
                             </div>
 
-                            <span class="badge bg-secondary" id="testsCount">
+                            <span class="badge badge-modern-secondary" id="testsCount">
                                 Показано: 0
                             </span>
                         </div>
@@ -220,11 +228,11 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm">
+            <div class="card modern-card">
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover table-compact mb-0" id="testsTable">
-                            <thead class="table-light">
+                        <table class="table modern-table mb-0" id="testsTable">
+                            <thead>
                                 <tr>
                                     <th>Название теста</th>
                                     <th class="d-none d-lg-table-cell">Тип</th>
@@ -243,12 +251,12 @@
                                         data-search-text="@test.Title.ToLower()">
                                         <td>
                                             <div class="d-flex align-items-start gap-2">
-                                                <span class="badge bg-primary test-type-badge d-lg-none mt-1">
+                                                <span class="badge badge-modern-primary test-type-badge d-lg-none mt-1">
                                                     <i class="fas fa-spell-check"></i>
                                                 </span>
                                                 <div class="flex-grow-1 min-w-0">
-                                                    <strong class="d-block">@test.Title</strong>
-                                                    <small class="text-muted">
+                                                    <strong class="d-block text-dark-modern">@test.Title</strong>
+                                                    <small class="text-muted-modern">
                                                         <i class="fas fa-calendar me-1"></i>
                                                         @test.CreatedAt.ToString("dd.MM.yyyy")
                                                     </small>
@@ -256,19 +264,19 @@
                                             </div>
                                         </td>
                                         <td class="d-none d-lg-table-cell">
-                                            <span class="badge bg-primary test-type-badge">
+                                            <span class="badge badge-modern-primary test-type-badge">
                                                 <i class="fas fa-spell-check me-1"></i>
                                                 Орфография
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-success test-count-completed" data-test-id="@test.Id" data-test-type="spelling">0</span>
+                                            <span class="badge badge-modern-success test-count-completed" data-test-id="@test.Id" data-test-type="spelling">0</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-warning test-count-progress" data-test-id="@test.Id" data-test-type="spelling">0</span>
+                                            <span class="badge badge-modern-warning test-count-progress" data-test-id="@test.Id" data-test-type="spelling">0</span>
                                         </td>
                                         <td class="text-center">
-                                            <a asp-controller="SpellingTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary">
+                                            <a asp-controller="SpellingTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary">
                                                 <i class="fas fa-eye"></i>
                                                 <span class="d-none d-md-inline ms-1">Детали</span>
                                             </a>
@@ -285,12 +293,12 @@
                                         data-search-text="@test.Title.ToLower()">
                                         <td>
                                             <div class="d-flex align-items-start gap-2">
-                                                <span class="badge bg-info test-type-badge d-lg-none mt-1">
+                                                <span class="badge badge-modern-info test-type-badge d-lg-none mt-1">
                                                     <i class="fas fa-quote-right"></i>
                                                 </span>
                                                 <div class="flex-grow-1 min-w-0">
-                                                    <strong class="d-block">@test.Title</strong>
-                                                    <small class="text-muted">
+                                                    <strong class="d-block text-dark-modern">@test.Title</strong>
+                                                    <small class="text-muted-modern">
                                                         <i class="fas fa-calendar me-1"></i>
                                                         @test.CreatedAt.ToString("dd.MM.yyyy")
                                                     </small>
@@ -298,19 +306,19 @@
                                             </div>
                                         </td>
                                         <td class="d-none d-lg-table-cell">
-                                            <span class="badge bg-info test-type-badge">
+                                            <span class="badge badge-modern-info test-type-badge">
                                                 <i class="fas fa-quote-right me-1"></i>
                                                 Пунктуация
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-success test-count-completed" data-test-id="@test.Id" data-test-type="punctuation">0</span>
+                                            <span class="badge badge-modern-success test-count-completed" data-test-id="@test.Id" data-test-type="punctuation">0</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-warning test-count-progress" data-test-id="@test.Id" data-test-type="punctuation">0</span>
+                                            <span class="badge badge-modern-warning test-count-progress" data-test-id="@test.Id" data-test-type="punctuation">0</span>
                                         </td>
                                         <td class="text-center">
-                                            <a asp-controller="PunctuationTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary">
+                                            <a asp-controller="PunctuationTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary">
                                                 <i class="fas fa-eye"></i>
                                                 <span class="d-none d-md-inline ms-1">Детали</span>
                                             </a>
@@ -327,12 +335,12 @@
                                         data-search-text="@test.Title.ToLower()">
                                         <td>
                                             <div class="d-flex align-items-start gap-2">
-                                                <span class="badge bg-success test-type-badge d-lg-none mt-1">
+                                                <span class="badge badge-modern-success test-type-badge d-lg-none mt-1">
                                                     <i class="fas fa-volume-up"></i>
                                                 </span>
                                                 <div class="flex-grow-1 min-w-0">
-                                                    <strong class="d-block">@test.Title</strong>
-                                                    <small class="text-muted">
+                                                    <strong class="d-block text-dark-modern">@test.Title</strong>
+                                                    <small class="text-muted-modern">
                                                         <i class="fas fa-calendar me-1"></i>
                                                         @test.CreatedAt.ToString("dd.MM.yyyy")
                                                     </small>
@@ -340,19 +348,19 @@
                                             </div>
                                         </td>
                                         <td class="d-none d-lg-table-cell">
-                                            <span class="badge bg-success test-type-badge">
+                                            <span class="badge badge-modern-success test-type-badge">
                                                 <i class="fas fa-volume-up me-1"></i>
                                                 Орфоэпия
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-success test-count-completed" data-test-id="@test.Id" data-test-type="orthoeopy">0</span>
+                                            <span class="badge badge-modern-success test-count-completed" data-test-id="@test.Id" data-test-type="orthoeopy">0</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-warning test-count-progress" data-test-id="@test.Id" data-test-type="orthoeopy">0</span>
+                                            <span class="badge badge-modern-warning test-count-progress" data-test-id="@test.Id" data-test-type="orthoeopy">0</span>
                                         </td>
                                         <td class="text-center">
-                                            <a asp-controller="OrthoeopyTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary">
+                                            <a asp-controller="OrthoeopyTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary">
                                                 <i class="fas fa-eye"></i>
                                                 <span class="d-none d-md-inline ms-1">Детали</span>
                                             </a>
@@ -369,12 +377,12 @@
                                         data-search-text="@test.Title.ToLower()">
                                         <td>
                                             <div class="d-flex align-items-start gap-2">
-                                                <span class="badge bg-secondary test-type-badge d-lg-none mt-1">
+                                                <span class="badge badge-modern-secondary test-type-badge d-lg-none mt-1">
                                                     <i class="fas fa-clipboard-check"></i>
                                                 </span>
                                                 <div class="flex-grow-1 min-w-0">
-                                                    <strong class="d-block">@test.Title</strong>
-                                                    <small class="text-muted">
+                                                    <strong class="d-block text-dark-modern">@test.Title</strong>
+                                                    <small class="text-muted-modern">
                                                         <i class="fas fa-calendar me-1"></i>
                                                         @test.CreatedAt.ToString("dd.MM.yyyy")
                                                     </small>
@@ -382,19 +390,19 @@
                                             </div>
                                         </td>
                                         <td class="d-none d-lg-table-cell">
-                                            <span class="badge bg-secondary test-type-badge">
+                                            <span class="badge badge-modern-secondary test-type-badge">
                                                 <i class="fas fa-clipboard-check me-1"></i>
                                                 Классический
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-success test-count-completed" data-test-id="@test.Id" data-test-type="regular">0</span>
+                                            <span class="badge badge-modern-success test-count-completed" data-test-id="@test.Id" data-test-type="regular">0</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-warning test-count-progress" data-test-id="@test.Id" data-test-type="regular">0</span>
+                                            <span class="badge badge-modern-warning test-count-progress" data-test-id="@test.Id" data-test-type="regular">0</span>
                                         </td>
                                         <td class="text-center">
-                                            <a asp-controller="RegularTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary">
+                                            <a asp-controller="RegularTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary">
                                                 <i class="fas fa-eye"></i>
                                                 <span class="d-none d-md-inline ms-1">Детали</span>
                                             </a>
@@ -407,9 +415,11 @@
                                 {
                                     <tr>
                                         <td colspan="5" class="text-center py-5">
-                                            <i class="fas fa-clipboard-list text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
-                                            <h5 class="text-muted mb-2">Нет активных тестов</h5>
-                                            <p class="text-muted mb-0">Создайте тесты, чтобы отслеживать активность студентов</p>
+                                            <div class="empty-state-large">
+                                                <i class="fas fa-clipboard-list empty-state-icon"></i>
+                                                <h5 class="empty-state-title">Нет активных тестов</h5>
+                                                <p class="empty-state-text">Создайте тесты, чтобы отслеживать активность студентов</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 }
@@ -423,12 +433,12 @@
 
     <div class="modal fade" id="testResultModal" tabindex="-1" aria-labelledby="testResultModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="testResultModalTitle">Результат теста</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-content modern-modal-content">
+                <div class="modal-header modern-modal-header">
+                    <h5 class="modal-title modern-modal-title" id="testResultModalTitle">Результат теста</h5>
+                    <button type="button" class="btn-close modern-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="testResultModalBody">
+                <div class="modal-body modern-modal-body" id="testResultModalBody">
                 </div>
             </div>
         </div>
@@ -477,7 +487,7 @@
                 .catch(error => {
                     console.error('Ошибка загрузки активности:', error);
                     document.getElementById('activity-feed').innerHTML = 
-                        '<tr><td colspan="5" class="text-center py-5 text-danger">Ошибка загрузки активности</td></tr>';
+                        '<tr><td colspan="5" class="text-center py-5"><div class="empty-state-small"><small class="empty-state-text text-danger">Ошибка загрузки активности</small></div></td></tr>';
                 });
         }
 
@@ -486,30 +496,30 @@
             if (!tbody) return;
 
             if (activities.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">Нет активности</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><div class="empty-state-small"><small class="empty-state-text">Нет активности</small></div></td></tr>';
                 return;
             }
 
             tbody.innerHTML = activities.map(function(activity) {
                 var statusBadge = activity.status === 'completed' 
-                    ? '<span class="badge bg-success">Завершен</span>'
+                    ? '<span class="badge badge-modern-success">Завершен</span>'
                     : activity.status === 'started'
-                    ? '<span class="badge bg-info">Начат</span>'
-                    : '<span class="badge bg-warning">В процессе</span>';
+                    ? '<span class="badge badge-modern-info">Начат</span>'
+                    : '<span class="badge badge-modern-warning">В процессе</span>';
                 
                 var percentageBadge = activity.percentage >= 80 
-                    ? '<span class="badge bg-success">' + activity.percentage.toFixed(1) + '%</span>'
+                    ? '<span class="badge badge-modern-success">' + activity.percentage.toFixed(1) + '%</span>'
                     : activity.percentage >= 60
-                    ? '<span class="badge bg-warning">' + activity.percentage.toFixed(1) + '%</span>'
-                    : '<span class="badge bg-danger">' + activity.percentage.toFixed(1) + '%</span>';
+                    ? '<span class="badge badge-modern-warning">' + activity.percentage.toFixed(1) + '%</span>'
+                    : '<span class="badge badge-modern-danger">' + activity.percentage.toFixed(1) + '%</span>';
 
                 var gradeBadge = activity.percentage >= 91 
-                    ? '<span class="badge bg-success">5</span>'
+                    ? '<span class="badge badge-modern-success">5</span>'
                     : activity.percentage >= 80
-                    ? '<span class="badge bg-info">4</span>'
+                    ? '<span class="badge badge-modern-info">4</span>'
                     : activity.percentage >= 60
-                    ? '<span class="badge bg-warning">3</span>'
-                    : '<span class="badge bg-danger">2</span>';
+                    ? '<span class="badge badge-modern-warning">3</span>'
+                    : '<span class="badge badge-modern-danger">2</span>';
 
                 var testTypeIcon = {
                     'spelling': 'fa-spell-check',
@@ -518,12 +528,12 @@
                     'regular': 'fa-clipboard-check'
                 }[activity.testType] || 'fa-clipboard-list';
 
-                var testTypeColor = {
-                    'spelling': 'primary',
-                    'punctuation': 'info',
-                    'orthoeopy': 'success',
-                    'regular': 'secondary'
-                }[activity.testType] || 'secondary';
+                var testTypeIconClass = {
+                    'spelling': 'nav-link-icon',
+                    'punctuation': 'nav-link-icon-blue',
+                    'orthoeopy': 'nav-link-icon-green',
+                    'regular': 'nav-link-icon'
+                }[activity.testType] || 'nav-link-icon';
 
                 var lastActivity = new Date(activity.lastActivityAt);
                 var timeStr = lastActivity.toLocaleString('ru-RU', { 
@@ -543,7 +553,7 @@
                 }
 
                 var actionButton = activity.status === 'completed' && activity.testResultId
-                    ? '<button class="btn btn-sm btn-outline-info" onclick="showTestResult(\'' + activity.testType + '\', ' + activity.testResultId + ', \'' + activity.studentName + '\')">' +
+                    ? '<button class="btn btn-sm btn-modern-outline-info" onclick="showTestResult(\'' + activity.testType + '\', ' + activity.testResultId + ', \'' + activity.studentName + '\')">' +
                       '<i class="fas fa-eye"></i> <span class="d-none d-md-inline">Подробно</span></button>'
                     : '';
 
@@ -551,16 +561,16 @@
                     (activity.studentName + ' ' + activity.testTitle).toLowerCase() + '">' +
                     '<td>' +
                     '<div class="d-flex align-items-center gap-2">' +
-                    '<i class="fas ' + testTypeIcon + ' text-' + testTypeColor + '"></i>' +
+                    '<i class="fas ' + testTypeIcon + ' ' + testTypeIconClass + '"></i>' +
                     '<div>' +
-                    '<strong>' + activity.studentName + '</strong> - ' + activity.testTitle +
-                    '<br><small class="text-muted">' + statusBadge + '</small>' +
+                    '<strong class="text-dark-modern">' + activity.studentName + '</strong> - <span class="text-dark-modern">' + activity.testTitle + '</span>' +
+                    '<br><small class="text-muted-modern">' + statusBadge + '</small>' +
                     '</div>' +
                     '</div>' +
                     '</td>' +
                     '<td class="text-center d-none d-md-table-cell">' + percentageBadge + '</td>' +
-                    '<td class="text-center">' + (activity.status === 'completed' ? gradeBadge : '-') + '</td>' +
-                    '<td class="text-center d-none d-md-table-cell"><small>' + timeStr + '</small></td>' +
+                    '<td class="text-center">' + (activity.status === 'completed' ? gradeBadge : '<span class="text-muted-modern">-</span>') + '</td>' +
+                    '<td class="text-center d-none d-md-table-cell"><small class="text-muted-modern">' + timeStr + '</small></td>' +
                     '<td class="text-center">' + actionButton + '</td>' +
                     '</tr>';
             }).join('');

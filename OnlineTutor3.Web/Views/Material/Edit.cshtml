@@ -5,13 +5,13 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
+        <div class="card shadow modern-card">
+            <div class="card-header auth-card-header">
                 <h4 class="mb-0">
                     <i class="fas fa-edit"></i> Редактирование материала
                 </h4>
             </div>
-            <div class="card-body">
+            <div class="card-body auth-card-body">
                 <form asp-action="Edit" method="post" enctype="multipart/form-data">
                     <input asp-for="Id" type="hidden" />
                     <div asp-validation-summary="All" class="text-danger mb-3"></div>
@@ -22,18 +22,18 @@
                         </legend>
 
                         <div class="mb-3">
-                            <label asp-for="Title" class="form-label">
+                            <label asp-for="Title" class="form-label form-label-modern">
                                 <i class="fas fa-heading"></i> Название материала <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="Title" class="form-control" />
+                            <input asp-for="Title" class="form-control form-control-modern" />
                             <span asp-validation-for="Title" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Description" class="form-label">
+                            <label asp-for="Description" class="form-label form-label-modern">
                                 <i class="fas fa-align-left"></i> Описание
                             </label>
-                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <textarea asp-for="Description" class="form-control form-control-modern" rows="4"></textarea>
                             <span asp-validation-for="Description" class="text-danger"></span>
                         </div>
                     </fieldset>
@@ -45,22 +45,22 @@
 
                         <div class="alert alert-light">
                             <div class="d-flex align-items-center">
-                                <i class="fas fa-file fa-2x text-muted me-3"></i>
+                                <i class="fas fa-file fa-2x text-muted-modern me-3"></i>
                                 <div>
-                                    <div class="fw-bold">@Model.CurrentFileName</div>
-                                    <small class="text-muted">Текущий файл материала</small>
+                                    <div class="fw-bold text-dark-modern">@Model.CurrentFileName</div>
+                                    <small class="text-muted-modern">Текущий файл материала</small>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="NewFile" class="form-label">
+                            <label asp-for="NewFile" class="form-label form-label-modern">
                                 <i class="fas fa-upload"></i> Заменить файл (необязательно)
                             </label>
-                            <input asp-for="NewFile" class="form-control" type="file"
+                            <input asp-for="NewFile" class="form-control form-control-modern" type="file"
                                    accept=".pdf,.doc,.docx,.txt,.rtf,.ppt,.pptx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.gif,.bmp,.mp3,.wav,.m4a,.mp4,.avi,.mov,.wmv" />
                             <span asp-validation-for="NewFile" class="text-danger"></span>
-                            <div class="form-text">
+                            <div class="form-text text-muted-modern">
                                 <i class="fas fa-info-circle"></i> Оставьте пустым, если не хотите менять файл
                             </div>
                         </div>
@@ -72,24 +72,24 @@
                         </legend>
 
                         <div class="mb-3">
-                            <label asp-for="ClassId" class="form-label">
+                            <label asp-for="ClassId" class="form-label form-label-modern">
                                 <i class="fas fa-graduation-cap"></i> Класс
                             </label>
-                            <select asp-for="ClassId" asp-items="@ViewBag.Classes" class="form-select">
+                            <select asp-for="ClassId" asp-items="@ViewBag.Classes" class="form-select form-control-modern">
                                 <option value="">Не выбран</option>
                             </select>
                             <span asp-validation-for="ClassId" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="AssignmentId" class="form-label">
+                            <label asp-for="AssignmentId" class="form-label form-label-modern">
                                 <i class="fas fa-tasks"></i> Задание
                             </label>
-                            <select asp-for="AssignmentId" asp-items="@ViewBag.Assignments" class="form-select">
+                            <select asp-for="AssignmentId" asp-items="@ViewBag.Assignments" class="form-select form-control-modern">
                                 <option value="">Не выбрано</option>
                             </select>
                             <span asp-validation-for="AssignmentId" class="text-danger"></span>
-                            <div class="form-text">
+                            <div class="form-text text-muted-modern">
                                 <i class="fas fa-lightbulb"></i> Выберите класс или задание (или оба) для привязки материала
                             </div>
                         </div>
@@ -97,7 +97,7 @@
                         <div class="mb-3">
                             <div class="form-check form-switch">
                                 <input asp-for="IsActive" class="form-check-input" />
-                                <label asp-for="IsActive" class="form-check-label">
+                                <label asp-for="IsActive" class="form-check-label text-dark-modern">
                                     <i class="fas fa-toggle-on"></i> Материал активен
                                 </label>
                             </div>
@@ -105,13 +105,13 @@
                     </fieldset>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info">
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-modern-outline-info">
                             <i class="fas fa-eye"></i> Просмотр
                         </a>
-                        <a asp-action="Index" class="btn btn-outline-secondary">
+                        <a asp-action="Index" class="btn btn-modern-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Отмена
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-modern-primary">
                             <i class="fas fa-save"></i> Сохранить изменения
                         </button>
                     </div>

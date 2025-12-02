@@ -5,13 +5,13 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
+        <div class="card shadow modern-card">
+            <div class="card-header auth-card-header">
                 <h4 class="mb-0">
                     <i class="fas fa-edit"></i> Редактировать занятие
                 </h4>
             </div>
-            <div class="card-body">
+            <div class="card-body auth-card-body">
                 <form asp-action="Edit" method="post">
                     <input asp-for="Id" type="hidden" />
                     <div asp-validation-summary="All" class="text-danger mb-3"></div>
@@ -22,18 +22,18 @@
                         </legend>
 
                         <div class="mb-3">
-                            <label asp-for="Title" class="form-label">
+                            <label asp-for="Title" class="form-label form-label-modern">
                                 <i class="fas fa-heading"></i> Название занятия <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="Title" class="form-control" />
+                            <input asp-for="Title" class="form-control form-control-modern" />
                             <span asp-validation-for="Title" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Description" class="form-label">
+                            <label asp-for="Description" class="form-label form-label-modern">
                                 <i class="fas fa-align-left"></i> Описание
                             </label>
-                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <textarea asp-for="Description" class="form-control form-control-modern" rows="3"></textarea>
                             <span asp-validation-for="Description" class="text-danger"></span>
                         </div>
                     </fieldset>
@@ -45,18 +45,18 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label asp-for="StartDateTime" class="form-label">
+                                <label asp-for="StartDateTime" class="form-label form-label-modern">
                                     <i class="fas fa-play-circle"></i> Начало <span class="text-danger">*</span>
                                 </label>
-                                <input asp-for="StartDateTime" class="form-control" type="datetime-local"
+                                <input asp-for="StartDateTime" class="form-control form-control-modern" type="datetime-local"
                                        step="60" value="@Model.StartDateTime.ToString("yyyy-MM-ddTHH:mm")" />
                                 <span asp-validation-for="StartDateTime" class="text-danger"></span>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label asp-for="EndDateTime" class="form-label">
+                                <label asp-for="EndDateTime" class="form-label form-label-modern">
                                     <i class="fas fa-stop-circle"></i> Окончание <span class="text-danger">*</span>
                                 </label>
-                                <input asp-for="EndDateTime" class="form-control" type="datetime-local"
+                                <input asp-for="EndDateTime" class="form-control form-control-modern" type="datetime-local"
                                        step="60" value="@Model.EndDateTime.ToString("yyyy-MM-ddTHH:mm")" />
                                 <span asp-validation-for="EndDateTime" class="text-danger"></span>
                             </div>
@@ -69,20 +69,20 @@
                         </legend>
 
                         <div class="mb-3">
-                            <label asp-for="ClassId" class="form-label">
+                            <label asp-for="ClassId" class="form-label form-label-modern">
                                 <i class="fas fa-users"></i> Класс
                             </label>
-                            <select asp-for="ClassId" asp-items="@ViewBag.Classes" class="form-select" id="classSelect">
+                            <select asp-for="ClassId" asp-items="@ViewBag.Classes" class="form-select form-control-modern" id="classSelect">
                                 <option value="">Не выбран</option>
                             </select>
                             <span asp-validation-for="ClassId" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="StudentId" class="form-label">
+                            <label asp-for="StudentId" class="form-label form-label-modern">
                                 <i class="fas fa-user-graduate"></i> Ученик
                             </label>
-                            <select asp-for="StudentId" asp-items="@ViewBag.Students" class="form-select" id="studentSelect">
+                            <select asp-for="StudentId" asp-items="@ViewBag.Students" class="form-select form-control-modern" id="studentSelect">
                                 <option value="">Не выбран</option>
                             </select>
                             <span asp-validation-for="StudentId" class="text-danger"></span>
@@ -95,10 +95,10 @@
                         </legend>
 
                         <div class="mb-3">
-                            <label asp-for="Location" class="form-label">
+                            <label asp-for="Location" class="form-label form-label-modern">
                                 <i class="fas fa-map-marker-alt"></i> Место проведения
                             </label>
-                            <input asp-for="Location" class="form-control" />
+                            <input asp-for="Location" class="form-control form-control-modern" />
                             <span asp-validation-for="Location" class="text-danger"></span>
                         </div>
 
@@ -130,10 +130,10 @@
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Notes" class="form-label">
+                            <label asp-for="Notes" class="form-label form-label-modern">
                                 <i class="fas fa-sticky-note"></i> Заметки
                             </label>
-                            <textarea asp-for="Notes" class="form-control" rows="3"
+                            <textarea asp-for="Notes" class="form-control form-control-modern" rows="3"
                                       placeholder="Заметки о проведенном занятии"></textarea>
                             <span asp-validation-for="Notes" class="text-danger"></span>
                         </div>
@@ -141,17 +141,17 @@
                         <div class="mb-3">
                             <div class="form-check form-switch">
                                 <input asp-for="IsRecurring" class="form-check-input" id="isRecurring" />
-                                <label asp-for="IsRecurring" class="form-check-label">
+                                <label asp-for="IsRecurring" class="form-check-label text-dark-modern">
                                     <i class="fas fa-repeat"></i> Повторяющееся занятие
                                 </label>
                             </div>
                         </div>
 
                         <div class="mb-3" id="recurrenceGroup" style="@(Model.IsRecurring ? "display: block;" : "display: none;")">
-                            <label asp-for="RecurrencePattern" class="form-label">
+                            <label asp-for="RecurrencePattern" class="form-label form-label-modern">
                                 <i class="fas fa-calendar-week"></i> Повторять
                             </label>
-                            <select asp-for="RecurrencePattern" asp-items="@ViewBag.RecurrencePatterns" class="form-select">
+                            <select asp-for="RecurrencePattern" asp-items="@ViewBag.RecurrencePatterns" class="form-select form-control-modern">
                                 <option value="">Выберите...</option>
                             </select>
                             <span asp-validation-for="RecurrencePattern" class="text-danger"></span>
@@ -159,13 +159,13 @@
                     </fieldset>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info">
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-modern-outline-info">
                             <i class="fas fa-eye"></i> Просмотр
                         </a>
-                        <a asp-action="Index" class="btn btn-outline-secondary">
+                        <a asp-action="Index" class="btn btn-modern-outline-secondary">
                             <i class="fas fa-times"></i> Отмена
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-modern-primary">
                             <i class="fas fa-save"></i> Сохранить изменения
                         </button>
                     </div>

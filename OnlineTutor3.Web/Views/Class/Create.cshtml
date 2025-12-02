@@ -5,44 +5,44 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
+        <div class="card shadow modern-card">
+            <div class="card-header auth-card-header" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
                 <h4 class="mb-0">
                     <i class="fas fa-plus"></i> Создание нового класса
                 </h4>
             </div>
-            <div class="card-body">
+            <div class="card-body auth-card-body">
                 <form asp-action="Create" method="post">
                     <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                     <div class="mb-3">
-                        <label asp-for="Name" class="form-label">
+                        <label asp-for="Name" class="form-label form-label-modern">
                             <i class="fas fa-graduation-cap"></i> Название класса <span class="text-danger">*</span>
                         </label>
-                        <input asp-for="Name" class="form-control" placeholder="Например: 11А Математика" />
+                        <input asp-for="Name" class="form-control form-control-modern" placeholder="Например: 11А Математика" />
                         <span asp-validation-for="Name" class="text-danger"></span>
-                        <div class="form-text">
+                        <div class="form-text text-muted-modern">
                             <i class="fas fa-info-circle"></i> Укажите понятное название для вашего класса
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Description" class="form-label">
+                        <label asp-for="Description" class="form-label form-label-modern">
                             <i class="fas fa-align-left"></i> Описание
                         </label>
-                        <textarea asp-for="Description" class="form-control" rows="4"
+                        <textarea asp-for="Description" class="form-control form-control-modern" rows="4"
                                   placeholder="Краткое описание класса, цели обучения, особенности..."></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
-                        <div class="form-text">
+                        <div class="form-text text-muted-modern">
                             <i class="fas fa-lightbulb"></i> Опишите цели и задачи этого класса
                         </div>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a asp-action="Index" class="btn btn-outline-secondary">
+                        <a asp-action="Index" class="btn btn-modern-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Отмена
                         </a>
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-modern-success">
                             <i class="fas fa-save"></i> Создать класс
                         </button>
                     </div>

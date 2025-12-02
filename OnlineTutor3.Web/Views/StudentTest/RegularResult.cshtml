@@ -23,17 +23,17 @@
 }
 
 <div class="test-container">
-    <div class="card shadow-sm mb-2">
-        <div class="card-header bg-@Model.TestColor text-white py-1">
+    <div class="card modern-card mb-2">
+        <div class="card-header modern-card-header" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
             <div class="d-flex justify-content-between align-items-center gap-2">
                 <div class="flex-grow-1 min-w-0">
-                    <h6 class="mb-0 d-flex align-items-center" style="font-size: 0.9rem;">
+                    <h6 class="mb-0 d-flex align-items-center" style="font-size: 0.9rem; color: white;">
                         <i class="fas @Model.TestIcon me-2 flex-shrink-0"></i>
                         <span class="text-truncate">@Model.TestTitle</span>
                     </h6>
                 </div>
                 <div class="flex-shrink-0">
-                    <span class="badge bg-@gradeColor" style="font-size: 0.75rem;">
+                    <span class="badge @(gradeColor == "success" ? "badge-modern-success" : gradeColor == "warning" ? "badge-modern-warning" : gradeColor == "info" ? "badge-modern-info" : "badge-modern-danger")" style="font-size: 0.75rem; background: rgba(255, 255, 255, 0.2); color: white; border: 1px solid rgba(255, 255, 255, 0.3);">
                         Оценка: @Model.Grade
                     </span>
                 </div>
@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    <div class="card shadow-sm mb-2">
+    <div class="card modern-card mb-2">
         <div class="card-body p-2">
             <div class="text-center mb-2">
                 <div class="result-circle mx-auto" style="width: 80px; height: 80px;">
@@ -66,26 +66,26 @@
 
             <div class="row text-center g-1">
                 <div class="col-4">
-                    <div class="py-1 px-2 bg-light rounded">
-                        <i class="fas fa-user-graduate text-muted" style="font-size: 0.75rem;"></i>
+                    <div class="py-1 px-2 stat-card" style="background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%); border-left: 4px solid #4facfe;">
+                        <i class="fas fa-user-graduate nav-link-icon" style="font-size: 0.75rem;"></i>
                         <div class="mt-0">
-                            <small class="fw-bold d-block text-truncate" style="font-size: 0.7rem;">@Model.StudentName</small>
+                            <small class="fw-bold d-block text-truncate text-dark-modern" style="font-size: 0.7rem;">@Model.StudentName</small>
                         </div>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="py-1 px-2 bg-light rounded">
-                        <i class="fas fa-calendar text-muted" style="font-size: 0.75rem;"></i>
+                    <div class="py-1 px-2 stat-card" style="background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%); border-left: 4px solid #4facfe;">
+                        <i class="fas fa-calendar nav-link-icon" style="font-size: 0.75rem;"></i>
                         <div class="mt-0">
-                            <small class="fw-bold d-block" style="font-size: 0.7rem;">@Model.CompletedAt?.ToString("dd.MM.yyyy HH:mm")</small>
+                            <small class="fw-bold d-block text-dark-modern" style="font-size: 0.7rem;">@Model.CompletedAt?.ToString("dd.MM.yyyy HH:mm")</small>
                         </div>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="py-1 px-2 bg-light rounded">
-                        <i class="fas fa-stopwatch text-muted" style="font-size: 0.75rem;"></i>
+                    <div class="py-1 px-2 stat-card" style="background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%); border-left: 4px solid #4facfe;">
+                        <i class="fas fa-stopwatch nav-link-icon" style="font-size: 0.75rem;"></i>
                         <div class="mt-0">
-                            <small class="fw-bold d-block" style="font-size: 0.7rem;">@($"{Model.Duration.Minutes:D2}:{Model.Duration.Seconds:D2}")</small>
+                            <small class="fw-bold d-block text-dark-modern" style="font-size: 0.7rem;">@($"{Model.Duration.Minutes:D2}:{Model.Duration.Seconds:D2}")</small>
                         </div>
                     </div>
                 </div>
@@ -95,16 +95,16 @@
 
     @if (Model.ShowCorrectAnswers)
     {
-        <div class="card shadow-sm mb-2">
-            <div class="card-header bg-light py-1">
+        <div class="card modern-card mb-2">
+            <div class="card-header modern-card-header py-1">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <h6 class="mb-0" style="font-size: 0.85rem;">
-                        <i class="fas fa-list-alt"></i> Детальные результаты
+                    <h6 class="mb-0 modern-card-title" style="font-size: 0.85rem;">
+                        <i class="fas fa-list-alt nav-link-icon"></i> Детальные результаты
                     </h6>
                     
                     <div class="form-check form-switch mb-0">
                         <input class="form-check-input" type="checkbox" id="showErrorsOnly" checked style="font-size: 0.8rem;">
-                        <label class="form-check-label" for="showErrorsOnly" style="font-size: 0.75rem;">
+                        <label class="form-check-label text-dark-modern" for="showErrorsOnly" style="font-size: 0.75rem;">
                             Только ошибки
                         </label>
                     </div>
@@ -146,8 +146,8 @@
                                             data-bs-toggle="collapse" data-bs-target="#collapse@i" style="font-size: 0.8rem;">
                                         <div class="w-100 d-flex justify-content-between align-items-center gap-1">
                                             <div class="d-flex align-items-center gap-1 flex-grow-1 min-w-0">
-                                                <span class="badge bg-@(isAnswered ? (isCorrect ? "success" : "danger") : "secondary")" style="font-size: 0.7rem;">@(i + 1)</span>
-                                                <span class="badge bg-@(question.Type == QuestionType.SingleChoice ? "primary" : question.Type == QuestionType.MultipleChoice ? "success" : "warning")" style="font-size: 0.65rem;">
+                                                <span class="badge @(isAnswered ? (isCorrect ? "badge-modern-success" : "badge-modern-danger") : "badge-modern-secondary")" style="font-size: 0.7rem;">@(i + 1)</span>
+                                                <span class="badge @(question.Type == QuestionType.SingleChoice ? "badge-modern-primary" : question.Type == QuestionType.MultipleChoice ? "badge-modern-success" : "badge-modern-warning")" style="font-size: 0.65rem;">
                                                     @if (question.Type == QuestionType.SingleChoice)
                                                     {
                                                         <i class="fas fa-dot-circle"></i> <text>Одиночный</text>
@@ -168,20 +168,20 @@
                                                 {
                                                     @if (isCorrect)
                                                     {
-                                                        <span class="badge bg-success" style="font-size: 0.65rem;">
+                                                        <span class="badge badge-modern-success" style="font-size: 0.65rem;">
                                                             <i class="fas fa-check"></i> +@(answer?.Points ?? 0)
                                                         </span>
                                                     }
                                                     else
                                                     {
-                                                        <span class="badge bg-danger" style="font-size: 0.65rem;">
+                                                        <span class="badge badge-modern-danger" style="font-size: 0.65rem;">
                                                             <i class="fas fa-times"></i> 0
                                                         </span>
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge bg-secondary" style="font-size: 0.65rem;">—</span>
+                                                    <span class="badge badge-modern-secondary" style="font-size: 0.65rem;">—</span>
                                                 }
                                             </div>
                                         </div>
@@ -231,7 +231,7 @@
                                                                         }
                                                                         else
                                                                         {
-                                                                            <i class="far fa-square text-muted me-1"></i>
+                                                                            <i class="far fa-square text-muted-modern me-1"></i>
                                                                         }
                                                                     }
                                                                     else
@@ -242,7 +242,7 @@
                                                                         }
                                                                         else
                                                                         {
-                                                                            <i class="far fa-circle text-muted me-1"></i>
+                                                                            <i class="far fa-circle text-muted-modern me-1"></i>
                                                                         }
                                                                     }
                                                                     @option.Text
@@ -251,13 +251,13 @@
                                                             <div class="flex-shrink-0">
                                                                 @if (option.IsCorrect)
                                                                 {
-                                                                    <span class="badge bg-success" style="font-size: 0.65rem;">
+                                                                    <span class="badge badge-modern-success" style="font-size: 0.65rem;">
                                                                         <i class="fas fa-check"></i>
                                                                     </span>
                                                                 }
                                                                 @if (isSelected && !option.IsCorrect)
                                                                 {
-                                                                    <span class="badge bg-danger" style="font-size: 0.65rem;">
+                                                                    <span class="badge badge-modern-danger" style="font-size: 0.65rem;">
                                                                         <i class="fas fa-times"></i>
                                                                     </span>
                                                                 }
@@ -289,10 +289,10 @@
     }
     else
     {
-        <div class="card shadow-sm mb-2">
+        <div class="card modern-card mb-2">
             <div class="card-body p-2 text-center">
-                <p class="text-muted mb-0" style="font-size: 0.85rem;">
-                    <i class="fas fa-info-circle"></i>
+                <p class="text-muted-modern mb-0" style="font-size: 0.85rem;">
+                    <i class="fas fa-info-circle nav-link-icon"></i>
                     Детальные результаты недоступны. Учитель отключил показ правильных ответов.
                 </p>
             </div>

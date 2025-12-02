@@ -5,13 +5,13 @@
     var inactiveClasses = Model.Count(c => !c.IsActive);
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <h4 class="mb-0 d-flex align-items-center gap-2">
-        <i class="fas fa-graduation-cap text-primary"></i>
+<div class="page-header">
+    <h4 class="page-header-title">
+        <i class="fas fa-graduation-cap page-header-icon"></i>
         <span>Управление классами</span>
     </h4>
     <div>
-        <a asp-action="Create" class="btn btn-success">
+        <a asp-action="Create" class="btn btn-modern-success">
             <i class="fas fa-plus"></i> Создать класс
         </a>
     </div>
@@ -19,11 +19,13 @@
 
 @if (!Model.Any())
 {
-    <div class="text-center py-5">
-        <i class="fas fa-users text-muted" style="font-size: 4rem;"></i>
-        <h4 class="mt-3 text-muted">У вас пока нет классов</h4>
-        <p class="text-muted">Создайте свой первый класс для начала работы с учениками</p>
-        <a asp-action="Create" class="btn btn-primary">
+    <div class="empty-state-large">
+        <div class="empty-state-large-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <h4 class="empty-state-large-title">У вас пока нет классов</h4>
+        <p class="empty-state-large-text">Создайте свой первый класс для начала работы с учениками</p>
+        <a asp-action="Create" class="btn btn-modern-primary">
             <i class="fas fa-plus"></i> Создать первый класс
         </a>
     </div>
@@ -64,22 +66,24 @@ else
         </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-hover table-striped align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th style="width: 5%;" class="text-center">
-                        <i class="fas fa-check-circle"></i>
-                    </th>
-                    <th style="width: 30%;">Название</th>
-                    <th style="width: 30%;">Описание</th>
-                    <th style="width: 10%;" class="text-center">
-                        Ученики
-                    </th>
-                    <th style="width: 10%;">Создан</th>
-                    <th style="width: 15%;" class="text-center">Действия</th>
-                </tr>
-            </thead>
+    <div class="card border-0 shadow-sm modern-card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle modern-table mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;" class="text-center">
+                                <i class="fas fa-check-circle"></i>
+                            </th>
+                            <th style="width: 30%;">Название</th>
+                            <th style="width: 30%;">Описание</th>
+                            <th style="width: 10%;" class="text-center">
+                                Ученики
+                            </th>
+                            <th style="width: 10%;">Создан</th>
+                            <th style="width: 15%;" class="text-center">Действия</th>
+                        </tr>
+                    </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
@@ -94,20 +98,20 @@ else
                         </td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <i class="fas fa-graduation-cap text-primary me-2"></i>
+                                <i class="fas fa-graduation-cap me-2" style="color: #667eea;"></i>
                                 <div>
-                                    <strong>@item.Name</strong>
+                                    <strong class="text-dark-modern">@item.Name</strong>
                                 </div>
                             </div>
                         </td>
                         <td>
                             @if (!string.IsNullOrEmpty(item.Description))
                             {
-                                <small class="text-muted">@item.Description</small>
+                                <small class="text-muted-modern">@item.Description</small>
                             }
                             else
                             {
-                                <span class="text-muted fst-italic">Описание не указано</span>
+                                <span class="text-muted-modern fst-italic">Описание не указано</span>
                             }
                         </td>
                         <td class="text-center">
@@ -115,28 +119,28 @@ else
                                 var studentsCountDict = ViewBag.StudentsCountDict as Dictionary<int, int> ?? new Dictionary<int, int>();
                                 var studentsCount = studentsCountDict.ContainsKey(item.Id) ? studentsCountDict[item.Id] : 0;
                             }
-                            <span class="badge bg-primary rounded-pill">@studentsCount</span>
+                            <span class="badge badge-modern-primary rounded-pill">@studentsCount</span>
                         </td>
                         <td>
-                            <small>
-                                <i class="fas fa-calendar text-muted"></i>
+                            <small class="text-muted-modern">
+                                <i class="fas fa-calendar"></i>
                                 @item.CreatedAt.ToString("dd.MM.yyyy")
                             </small>
                         </td>
                         <td class="text-center" onclick="event.stopPropagation();">
                             <div class="d-flex gap-1 justify-content-center">
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Детали">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-modern-outline-info" title="Детали">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <form asp-action="ToggleActive" asp-route-id="@item.Id" method="post" class="d-inline" style="margin: 0;">
-                                    <button type="submit" class="btn btn-sm btn-outline-@(item.IsActive ? "warning" : "success")" title="@(item.IsActive ? "Деактивировать" : "Активировать")">
+                                    <button type="submit" class="btn btn-sm btn-modern-outline-@(item.IsActive ? "warning" : "success")" title="@(item.IsActive ? "Деактивировать" : "Активировать")">
                                         <i class="fas fa-@(item.IsActive ? "toggle-on" : "toggle-off")"></i>
                                     </button>
                                 </form>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </div>
@@ -145,6 +149,8 @@ else
                 }
             </tbody>
         </table>
+            </div>
+        </div>
     </div>
 }
 

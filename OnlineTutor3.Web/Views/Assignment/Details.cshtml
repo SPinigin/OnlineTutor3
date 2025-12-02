@@ -15,21 +15,22 @@
     var isRussianLanguage = subject?.Name?.Equals("Русский язык", StringComparison.OrdinalIgnoreCase) == true;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 page-header">
     <div>
-        <h4 class="mb-1">
-            <i class="fas fa-tasks text-primary"></i> @Model.Title
-            <span class="badge bg-@(Model.IsActive ? "success" : "secondary") ms-2 badge-sm">
+        <h4 class="mb-0 d-flex align-items-center gap-2 page-header-title">
+            <i class="fas fa-tasks gradient-icon-blue"></i>
+            <span>@Model.Title</span>
+            <span class="badge badge-modern-@(Model.IsActive ? "success" : "secondary") ms-2 badge-sm">
                 @(Model.IsActive ? "Активно" : "Неактивно")
             </span>
         </h4>
         @if (!string.IsNullOrEmpty(Model.Description))
         {
-            <p class="text-muted mb-0 small">@Model.Description</p>
+            <p class="text-muted-modern mb-0 small">@Model.Description</p>
         }
     </div>
     <div>
-        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+        <a asp-action="Index" class="btn btn-sm btn-modern-outline-secondary">
             <i class="fas fa-arrow-left"></i> Назад к списку
         </a>
     </div>
@@ -37,58 +38,66 @@
 
 <div class="row mb-3 g-1 g-md-2">
     <div class="col-6 col-md-3">
-        <div class="card text-center border-primary">
-            <div class="card-body py-2 px-2">
-                <i class="fas fa-book text-primary" style="font-size: 1.25rem;"></i>
-                <div class="mt-1 mb-0 small fw-bold">@(subject?.Name ?? "Неизвестно")</div>
-                <p class="text-muted mb-0" style="font-size: 0.75rem;">Предмет</p>
+        <div class="card modern-card stat-card">
+            <div class="card-body text-center py-2 px-2">
+                <div class="stat-card-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stat-card-value" style="font-size: 0.9rem; line-height: 1.2;">@(subject?.Name ?? "Неизвестно")</div>
+                <small class="stat-card-label">Предмет</small>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card text-center border-info">
-            <div class="card-body py-2 px-2">
-                <i class="fas fa-graduation-cap text-info" style="font-size: 1.25rem;"></i>
-                <div class="mt-1 mb-0 small fw-bold">@classes.Count</div>
-                <p class="text-muted mb-0" style="font-size: 0.75rem;">Классов</p>
+        <div class="card modern-card stat-card">
+            <div class="card-body text-center py-2 px-2">
+                <div class="stat-card-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="stat-card-value">@classes.Count</div>
+                <small class="stat-card-label">Классов</small>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card text-center border-success">
-            <div class="card-body py-2 px-2">
-                <i class="fas fa-calendar-plus text-success" style="font-size: 1.25rem;"></i>
-                <div class="mt-1 mb-0 small fw-bold">@Model.CreatedAt.ToString("dd.MM.yyyy")</div>
-                <p class="text-muted mb-0" style="font-size: 0.75rem;">Создано</p>
+        <div class="card modern-card stat-card">
+            <div class="card-body text-center py-2 px-2">
+                <div class="stat-card-icon">
+                    <i class="fas fa-calendar-plus"></i>
+                </div>
+                <div class="stat-card-value" style="font-size: 0.9rem;">@Model.CreatedAt.ToString("dd.MM.yyyy")</div>
+                <small class="stat-card-label">Создано</small>
             </div>
         </div>
     </div>
     @if (Model.DueDate.HasValue)
     {
         <div class="col-6 col-md-3">
-            <div class="card text-center border-@(Model.DueDate.Value < DateTime.Now ? "danger" : "warning")">
-                <div class="card-body py-2 px-2">
-                    <i class="fas fa-calendar-alt text-@(Model.DueDate.Value < DateTime.Now ? "danger" : "warning")" style="font-size: 1.25rem;"></i>
-                    <div class="mt-1 mb-0 small fw-bold">@Model.DueDate.Value.ToString("dd.MM.yyyy")</div>
-                    <p class="text-muted mb-0" style="font-size: 0.75rem;">Срок выполнения</p>
+            <div class="card modern-card stat-card">
+                <div class="card-body text-center py-2 px-2">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="stat-card-value" style="font-size: 0.9rem;">@Model.DueDate.Value.ToString("dd.MM.yyyy")</div>
+                    <small class="stat-card-label">Срок выполнения</small>
                 </div>
             </div>
         </div>
     }
 </div>
 
-<div class="card mb-3">
-    <div class="card-header py-2">
-        <h6 class="mb-0">
-            <i class="fas fa-graduation-cap"></i> Назначено классам (@classes.Count)
+<div class="card modern-card mb-3">
+    <div class="card-header modern-card-header">
+        <h6 class="mb-0 modern-card-title">
+            <i class="fas fa-graduation-cap gradient-icon-purple"></i> Назначено классам (@classes.Count)
         </h6>
     </div>
-    <div class="card-body p-2">
+    <div class="card-body modern-card-body p-2">
         @if (classes.Any())
         {
             <div class="table-responsive">
-                <table class="table table-sm table-hover mb-0">
-                    <thead class="table-light">
+                <table class="table modern-table table-sm mb-0">
+                    <thead>
                         <tr>
                             <th style="width: 40%;">Название</th>
                             <th style="width: 40%;">Описание</th>
@@ -100,15 +109,15 @@
                         @foreach (var classItem in classes)
                         {
                             <tr>
-                                <td><small><strong>@classItem.Name</strong></small></td>
-                                <td><small class="text-muted">@(string.IsNullOrEmpty(classItem.Description) ? "-" : (classItem.Description.Length > 50 ? classItem.Description.Substring(0, 50) + "..." : classItem.Description))</small></td>
+                                <td><small><strong class="text-dark-modern">@classItem.Name</strong></small></td>
+                                <td><small class="text-muted-modern">@(string.IsNullOrEmpty(classItem.Description) ? "-" : (classItem.Description.Length > 50 ? classItem.Description.Substring(0, 50) + "..." : classItem.Description))</small></td>
                                 <td>
-                                    <span class="badge bg-@(classItem.IsActive ? "success" : "secondary") badge-sm">
+                                    <span class="badge badge-modern-@(classItem.IsActive ? "success" : "secondary") badge-sm">
                                         @(classItem.IsActive ? "Активен" : "Неактивен")
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    <a asp-controller="Class" asp-action="Details" asp-route-id="@classItem.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                    <a asp-controller="Class" asp-action="Details" asp-route-id="@classItem.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>
@@ -120,42 +129,42 @@
         }
         else
         {
-            <div class="text-center py-3">
-                <small class="text-muted">Задание пока не назначено ни одному классу</small>
+            <div class="empty-state-small">
+                <small class="empty-state-text">Задание пока не назначено ни одному классу</small>
             </div>
         }
     </div>
 </div>
 
-<div class="card mb-3">
-    <div class="card-header py-2 d-flex justify-content-between align-items-center">
-        <h6 class="mb-0">
-            <i class="fas fa-clipboard-list"></i> Тесты в задании (@totalTests)
+<div class="card modern-card mb-3">
+    <div class="card-header modern-card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0 modern-card-title">
+            <i class="fas fa-clipboard-list gradient-icon-blue"></i> Тесты в задании (@totalTests)
         </h6>
         <div class="d-flex gap-1">
             @if (isRussianLanguage)
             {
-                <a asp-controller="SpellingTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-outline-success" title="Орфография">
+                <a asp-controller="SpellingTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-modern-outline-success" title="Орфография">
                     <i class="fas fa-plus"></i> <i class="fas fa-spell-check"></i>
                 </a>
-                <a asp-controller="PunctuationTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-outline-info" title="Пунктуация">
+                <a asp-controller="PunctuationTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-modern-outline-info" title="Пунктуация">
                     <i class="fas fa-plus"></i> <i class="fas fa-quote-right"></i>
                 </a>
-                <a asp-controller="OrthoeopyTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-outline-warning" title="Орфоэпия">
+                <a asp-controller="OrthoeopyTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-modern-outline-warning" title="Орфоэпия">
                     <i class="fas fa-plus"></i> <i class="fas fa-volume-up"></i>
                 </a>
             }
-            <a asp-controller="RegularTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-outline-primary" title="Классический">
+            <a asp-controller="RegularTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-modern-outline-primary" title="Классический">
                 <i class="fas fa-plus"></i> <i class="fas fa-clipboard-check"></i>
             </a>
         </div>
     </div>
-    <div class="card-body p-2">
+    <div class="card-body modern-card-body p-2">
         @if (totalTests > 0)
         {
             <div class="table-responsive">
-                <table class="table table-sm table-hover mb-0">
-                    <thead class="table-light">
+                <table class="table modern-table table-sm mb-0">
+                    <thead>
                         <tr>
                             <th style="width: 5%;">Тип</th>
                             <th style="width: 35%;">Название</th>
@@ -171,36 +180,36 @@
                         {
                             <tr>
                                 <td>
-                                    <span class="badge bg-success">
+                                    <span class="badge badge-modern-success">
                                         <i class="fas fa-spell-check"></i>
                                     </span>
                                 </td>
                                 <td>
-                                    <small><strong>@test.Title</strong></small>
+                                    <small><strong class="text-dark-modern">@test.Title</strong></small>
                                     @if (!string.IsNullOrEmpty(test.Description))
                                     {
                                         <br>
-                                        <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                        <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                     }
                                 </td>
                                 <td class="text-center">
-                                    <small>@(spellingQuestionCounts.ContainsKey(test.Id) ? spellingQuestionCounts[test.Id] : 0)</small>
+                                    <small class="text-muted-modern">@(spellingQuestionCounts.ContainsKey(test.Id) ? spellingQuestionCounts[test.Id] : 0)</small>
                                 </td>
-                                <td class="text-center"><small>@test.TimeLimit мин</small></td>
+                                <td class="text-center"><small class="text-muted-modern">@test.TimeLimit мин</small></td>
                                 <td class="text-center">
-                                    <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                    <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm">
                                         @(test.IsActive ? "Активен" : "Неактивен")
                                     </span>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex gap-1 justify-content-center">
-                                        <a asp-controller="SpellingTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                        <a asp-controller="SpellingTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a asp-controller="SpellingTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                        <a asp-controller="SpellingTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a asp-controller="SpellingTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                        <a asp-controller="SpellingTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -213,36 +222,36 @@
                         {
                             <tr>
                                 <td>
-                                    <span class="badge bg-info">
+                                    <span class="badge badge-modern-info">
                                         <i class="fas fa-quote-right"></i>
                                     </span>
                                 </td>
                                 <td>
-                                    <small><strong>@test.Title</strong></small>
+                                    <small><strong class="text-dark-modern">@test.Title</strong></small>
                                     @if (!string.IsNullOrEmpty(test.Description))
                                     {
                                         <br>
-                                        <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                        <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                     }
                                 </td>
                                 <td class="text-center">
-                                    <small>@(punctuationQuestionCounts.ContainsKey(test.Id) ? punctuationQuestionCounts[test.Id] : 0)</small>
+                                    <small class="text-muted-modern">@(punctuationQuestionCounts.ContainsKey(test.Id) ? punctuationQuestionCounts[test.Id] : 0)</small>
                                 </td>
-                                <td class="text-center"><small>@test.TimeLimit мин</small></td>
+                                <td class="text-center"><small class="text-muted-modern">@test.TimeLimit мин</small></td>
                                 <td class="text-center">
-                                    <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                    <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm">
                                         @(test.IsActive ? "Активен" : "Неактивен")
                                     </span>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex gap-1 justify-content-center">
-                                        <a asp-controller="PunctuationTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                        <a asp-controller="PunctuationTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a asp-controller="PunctuationTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                        <a asp-controller="PunctuationTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a asp-controller="PunctuationTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                        <a asp-controller="PunctuationTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -255,36 +264,36 @@
                         {
                             <tr>
                                 <td>
-                                    <span class="badge bg-warning">
+                                    <span class="badge badge-modern-warning">
                                         <i class="fas fa-volume-up"></i>
                                     </span>
                                 </td>
                                 <td>
-                                    <small><strong>@test.Title</strong></small>
+                                    <small><strong class="text-dark-modern">@test.Title</strong></small>
                                     @if (!string.IsNullOrEmpty(test.Description))
                                     {
                                         <br>
-                                        <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                        <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                     }
                                 </td>
                                 <td class="text-center">
-                                    <small>@(orthoeopyQuestionCounts.ContainsKey(test.Id) ? orthoeopyQuestionCounts[test.Id] : 0)</small>
+                                    <small class="text-muted-modern">@(orthoeopyQuestionCounts.ContainsKey(test.Id) ? orthoeopyQuestionCounts[test.Id] : 0)</small>
                                 </td>
-                                <td class="text-center"><small>@test.TimeLimit мин</small></td>
+                                <td class="text-center"><small class="text-muted-modern">@test.TimeLimit мин</small></td>
                                 <td class="text-center">
-                                    <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                    <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm">
                                         @(test.IsActive ? "Активен" : "Неактивен")
                                     </span>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex gap-1 justify-content-center">
-                                        <a asp-controller="OrthoeopyTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                        <a asp-controller="OrthoeopyTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a asp-controller="OrthoeopyTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                        <a asp-controller="OrthoeopyTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a asp-controller="OrthoeopyTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                        <a asp-controller="OrthoeopyTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -297,36 +306,36 @@
                         {
                             <tr>
                                 <td>
-                                    <span class="badge bg-primary">
+                                    <span class="badge badge-modern-primary">
                                         <i class="fas fa-clipboard-check"></i>
                                     </span>
                                 </td>
                                 <td>
-                                    <small><strong>@test.Title</strong></small>
+                                    <small><strong class="text-dark-modern">@test.Title</strong></small>
                                     @if (!string.IsNullOrEmpty(test.Description))
                                     {
                                         <br>
-                                        <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                        <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                     }
                                 </td>
                                 <td class="text-center">
-                                    <small>@(regularQuestionCounts.ContainsKey(test.Id) ? regularQuestionCounts[test.Id] : 0)</small>
+                                    <small class="text-muted-modern">@(regularQuestionCounts.ContainsKey(test.Id) ? regularQuestionCounts[test.Id] : 0)</small>
                                 </td>
-                                <td class="text-center"><small>@test.TimeLimit мин</small></td>
+                                <td class="text-center"><small class="text-muted-modern">@test.TimeLimit мин</small></td>
                                 <td class="text-center">
-                                    <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                    <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm">
                                         @(test.IsActive ? "Активен" : "Неактивен")
                                     </span>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex gap-1 justify-content-center">
-                                        <a asp-controller="RegularTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                        <a asp-controller="RegularTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a asp-controller="RegularTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                        <a asp-controller="RegularTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a asp-controller="RegularTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                        <a asp-controller="RegularTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -339,8 +348,8 @@
         }
         else
         {
-            <div class="text-center py-3">
-                <small class="text-muted">В этом задании пока нет тестов</small>
+            <div class="empty-state-small">
+                <small class="empty-state-text">В этом задании пока нет тестов</small>
             </div>
         }
     </div>

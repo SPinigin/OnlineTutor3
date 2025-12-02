@@ -2,6 +2,18 @@
     ViewData["Title"] = "Ошибка";
 }
 
-<h1 class="text-danger">Ошибка.</h1>
-<h2 class="text-danger">Произошла ошибка при обработке вашего запроса.</h2>
+<div class="text-center py-5">
+    <div class="empty-state-large">
+        <div class="empty-state-large-icon" style="color: #dc3545;">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h1 class="empty-state-large-title" style="color: #dc3545;">Ошибка</h1>
+        <h2 class="empty-state-large-text" style="color: #6c757d;">Произошла ошибка при обработке вашего запроса.</h2>
+        <div class="mt-4">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-modern-primary">
+                <i class="fas fa-home"></i> Вернуться на главную
+            </a>
+        </div>
+    </div>
+</div>
 

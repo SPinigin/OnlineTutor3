@@ -3,13 +3,13 @@
     ViewData["Title"] = "Доступные тесты";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <h4 class="mb-0 d-flex align-items-center gap-2">
-        <i class="fas fa-tasks text-primary"></i>
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 page-header">
+    <h4 class="mb-0 d-flex align-items-center gap-2 page-header-title">
+        <i class="fas fa-tasks gradient-icon-blue"></i>
         <span>Доступные тесты</span>
     </h4>
     <div>
-        <a asp-action="History" class="btn btn-outline-info">
+        <a asp-action="History" class="btn btn-modern-outline-info">
             <i class="fas fa-history"></i> 
             <span class="d-none d-md-inline">История прохождения</span>
             <span class="d-md-none">История</span>
@@ -20,58 +20,65 @@
 @if (Model.Class != null)
 {
     <div class="mb-3">
-        <small class="text-muted">
-            <i class="fas fa-users"></i> Класс: <strong>@Model.Class.Name</strong>
+        <small class="text-muted-modern">
+            <i class="fas fa-users nav-link-icon"></i> Класс: <strong class="text-dark-modern">@Model.Class.Name</strong>
         </small>
     </div>
 }
 
 @if (!Model.AssignmentsWithTests.Any())
 {
-    <div class="text-center py-5">
-        <i class="fas fa-tasks text-muted" style="font-size: 4rem;"></i>
-        <h4 class="mt-3 text-muted">Нет доступных тестов</h4>
-        <p class="text-muted">В данный момент нет тестов, доступных для прохождения</p>
+    <div class="empty-state-large">
+        <div class="empty-state-large-icon">
+            <i class="fas fa-tasks"></i>
+        </div>
+        <h4 class="empty-state-large-title">Нет доступных тестов</h4>
+        <p class="empty-state-large-text">В данный момент нет тестов, доступных для прохождения</p>
     </div>
 }
 else
 {
-    <div class="row mb-2 align-items-center">
-        <div class="col-12 col-md-4 mb-2 mb-md-0">
-            <small class="text-muted">
-                <i class="fas fa-tasks"></i> Всего заданий: @Model.AssignmentsWithTests.Count
-            </small>
-        </div>
-        <div class="col-12 col-md-4 mb-2 mb-md-0">
-            <div class="input-group input-group-sm">
-                <span class="input-group-text bg-white">
-                    <i class="fas fa-search text-muted"></i>
-                </span>
-                <input type="text" 
-                       id="searchInput" 
-                       class="form-control form-control-sm" 
-                       placeholder="Поиск по названию..."
-                       value="@Model.SearchQuery"
-                       autocomplete="off">
-            </div>
-        </div>
-        <div class="col-12 col-md-4">
-            <div class="input-group input-group-sm">
-                <span class="input-group-text bg-white">
-                    <i class="fas fa-filter text-muted"></i>
-                </span>
-                <select id="subjectFilter" class="form-select form-select-sm">
-                    <option value="">Все предметы</option>
-                    @foreach (var subject in Model.SubjectsDict)
-                    {
-                        <option value="@subject.Key">@subject.Value</option>
-                    }
-                </select>
+    <div class="card shadow-sm border-0 mb-3 search-filter-card">
+        <div class="card-body py-2 px-3">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-4 mb-2 mb-md-0">
+                    <h6 class="mb-0 text-dark-modern">
+                        <i class="fas fa-tasks text-muted-modern me-1"></i>
+                        <span>Всего заданий: @Model.AssignmentsWithTests.Count</span>
+                    </h6>
+                </div>
+                <div class="col-12 col-md-4 mb-2 mb-md-0">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" 
+                               id="searchInput" 
+                               class="form-control form-control-sm border-start-0 form-control-modern" 
+                               placeholder="Поиск по названию..."
+                               value="@Model.SearchQuery"
+                               autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-filter text-muted"></i>
+                        </span>
+                        <select id="subjectFilter" class="form-select form-select-sm border-start-0 form-control-modern">
+                            <option value="">Все предметы</option>
+                            @foreach (var subject in Model.SubjectsDict)
+                            {
+                                <option value="@subject.Key">@subject.Value</option>
+                            }
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="accordion" id="assignmentsAccordion">
+    <div class="accordion accordion-modern" id="assignmentsAccordion">
         @foreach (var kvp in Model.AssignmentsWithTests.OrderBy(a => a.Value.Assignment.Title))
         {
             var assignmentInfo = kvp.Value;
@@ -97,14 +104,14 @@ else
                                 <div class="me-2">
                                     <strong class="small">@assignment.Title</strong>
                                 </div>
-                                <span class="badge bg-info badge-sm">@subjectName</span>
-                                <span class="badge bg-primary badge-sm">
+                                <span class="badge badge-modern-info badge-sm">@subjectName</span>
+                                <span class="badge badge-modern-primary badge-sm">
                                     <i class="fas fa-clipboard-list"></i> @totalTests
                                 </span>
                                 @if (assignment.DueDate.HasValue)
                                 {
                                     var isOverdue = assignment.DueDate.Value < DateTime.Now;
-                                    <span class="badge bg-@(isOverdue ? "danger" : "warning") badge-sm">
+                                    <span class="badge @(isOverdue ? "badge-modern-danger" : "badge-modern-warning") badge-sm">
                                         <i class="fas fa-calendar"></i> До: @assignment.DueDate.Value.ToString("dd.MM.yyyy")
                                     </span>
                                 }
@@ -119,12 +126,12 @@ else
                     <div class="accordion-body p-2">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div>
-                                <small class="text-muted">
-                                    <i class="fas fa-book"></i> @subjectName
+                                <small class="text-muted-modern">
+                                    <i class="fas fa-book nav-link-icon"></i> @subjectName
                                     @if (assignment.DueDate.HasValue)
                                     {
                                         <span class="ms-2">
-                                            <i class="fas fa-calendar"></i> До: @assignment.DueDate.Value.ToString("dd.MM.yyyy HH:mm")
+                                            <i class="fas fa-calendar nav-link-icon"></i> До: @assignment.DueDate.Value.ToString("dd.MM.yyyy HH:mm")
                                         </span>
                                     }
                                 </small>
@@ -132,22 +139,22 @@ else
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <small class="text-muted">
-                                <i class="fas fa-clipboard-list"></i> Тесты (@totalTests)
+                            <small class="text-muted-modern">
+                                <i class="fas fa-clipboard-list nav-link-icon"></i> Тесты (@totalTests)
                             </small>
                         </div>
 
                         @if (totalTests == 0)
                         {
-                            <div class="text-center py-3 bg-light rounded">
-                                <small class="text-muted">В этом задании пока нет тестов</small>
+                            <div class="empty-state-small">
+                                <small class="empty-state-text">В этом задании пока нет тестов</small>
                             </div>
                         }
                         else
                         {
                             <div class="table-responsive">
-                                <table class="table table-sm table-hover mb-0">
-                                    <thead class="table-light">
+                                <table class="table modern-table table-sm mb-0">
+                                    <thead>
                                         <tr>
                                             <th style="width: 5%;">Тип</th>
                                             <th style="width: 30%;">Название</th>
@@ -166,39 +173,39 @@ else
                                             {
                                                 <tr class="test-row" data-test-title="@test.Title.ToLower()">
                                                     <td>
-                                                        <span class="badge bg-success">
+                                                        <span class="badge badge-modern-success">
                                                             <i class="fas fa-spell-check"></i>
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <small><strong>@test.Title</strong></small>
+                                                        <small class="text-dark-modern"><strong>@test.Title</strong></small>
                                                         @if (!string.IsNullOrEmpty(test.Description))
                                                         {
                                                             <br>
-                                                            <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                                            <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                                         }
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@test.QuestionsCount</small>
+                                                        <small class="text-muted-modern">@test.QuestionsCount</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-@(test.AttemptsUsed >= test.MaxAttempts ? "danger" : "warning") badge-sm">
+                                                        <span class="badge @(test.AttemptsUsed >= test.MaxAttempts ? "badge-modern-danger" : "badge-modern-warning") badge-sm">
                                                             @test.AttemptsUsed/@test.MaxAttempts
                                                         </span>
                                                     </td>
                                                     <td class="text-center">
                                                         @if (test.BestPercentage.HasValue)
                                                         {
-                                                            <span class="badge bg-@(test.BestPercentage >= 80 ? "success" : test.BestPercentage >= 60 ? "warning" : "danger") badge-sm">
+                                                            <span class="badge @(test.BestPercentage >= 80 ? "badge-modern-success" : test.BestPercentage >= 60 ? "badge-modern-warning" : "badge-modern-danger") badge-sm">
                                                                 @test.BestPercentage.Value.ToString("F1")%
                                                             </span>
                                                         }
                                                         else
                                                         {
-                                                            <small class="text-muted">—</small>
+                                                            <small class="text-muted-modern">—</small>
                                                         }
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();">
@@ -206,14 +213,14 @@ else
                                                             @if (test.Status == TestStatus.Ongoing && test.OngoingTestResultId.HasValue)
                                                             {
                                                                 <a asp-action="TakeSpelling" asp-route-id="@test.OngoingTestResultId.Value" 
-                                                                   class="btn btn-sm btn-warning" title="Продолжить">
+                                                                   class="btn btn-sm btn-modern-outline-warning" title="Продолжить">
                                                                     <i class="fas fa-play"></i>
                                                                     <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                                                 </a>
                                                             }
                                                             else if (test.Status == TestStatus.CanStart)
                                                             {
-                                                                <button type="button" class="btn btn-sm btn-success"
+                                                                <button type="button" class="btn btn-sm btn-modern-success"
                                                                         onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, 'spelling')" title="Начать">
                                                                     <i class="fas fa-play"></i>
                                                                     <span class="d-none d-lg-inline ms-1">Начать</span>
@@ -221,7 +228,7 @@ else
                                                             }
                                                             else if (test.Status == TestStatus.Exhausted)
                                                             {
-                                                                <button type="button" class="btn btn-sm btn-secondary" disabled title="Исчерпано">
+                                                                <button type="button" class="btn btn-sm btn-modern-outline-secondary" disabled title="Исчерпано">
                                                                     <i class="fas fa-ban"></i>
                                                                 </button>
                                                             }
@@ -238,39 +245,39 @@ else
                                             {
                                                 <tr class="test-row" data-test-title="@test.Title.ToLower()">
                                                     <td>
-                                                        <span class="badge bg-info">
+                                                        <span class="badge badge-modern-info">
                                                             <i class="fas fa-quote-right"></i>
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <small><strong>@test.Title</strong></small>
+                                                        <small class="text-dark-modern"><strong>@test.Title</strong></small>
                                                         @if (!string.IsNullOrEmpty(test.Description))
                                                         {
                                                             <br>
-                                                            <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                                            <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                                         }
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@test.QuestionsCount</small>
+                                                        <small class="text-muted-modern">@test.QuestionsCount</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-@(test.AttemptsUsed >= test.MaxAttempts ? "danger" : "warning") badge-sm">
+                                                        <span class="badge @(test.AttemptsUsed >= test.MaxAttempts ? "badge-modern-danger" : "badge-modern-warning") badge-sm">
                                                             @test.AttemptsUsed/@test.MaxAttempts
                                                         </span>
                                                     </td>
                                                     <td class="text-center">
                                                         @if (test.BestPercentage.HasValue)
                                                         {
-                                                            <span class="badge bg-@(test.BestPercentage >= 80 ? "success" : test.BestPercentage >= 60 ? "warning" : "danger") badge-sm">
+                                                            <span class="badge @(test.BestPercentage >= 80 ? "badge-modern-success" : test.BestPercentage >= 60 ? "badge-modern-warning" : "badge-modern-danger") badge-sm">
                                                                 @test.BestPercentage.Value.ToString("F1")%
                                                             </span>
                                                         }
                                                         else
                                                         {
-                                                            <small class="text-muted">—</small>
+                                                            <small class="text-muted-modern">—</small>
                                                         }
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();">
@@ -278,14 +285,14 @@ else
                                                             @if (test.Status == TestStatus.Ongoing && test.OngoingTestResultId.HasValue)
                                                             {
                                                                 <a asp-action="TakePunctuation" asp-route-id="@test.OngoingTestResultId.Value" 
-                                                                   class="btn btn-sm btn-warning" title="Продолжить">
+                                                                   class="btn btn-sm btn-modern-outline-warning" title="Продолжить">
                                                                     <i class="fas fa-play"></i>
                                                                     <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                                                 </a>
                                                             }
                                                             else if (test.Status == TestStatus.CanStart)
                                                             {
-                                                                <button type="button" class="btn btn-sm btn-success"
+                                                                <button type="button" class="btn btn-sm btn-modern-success"
                                                                         onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, 'punctuation')" title="Начать">
                                                                     <i class="fas fa-play"></i>
                                                                     <span class="d-none d-lg-inline ms-1">Начать</span>
@@ -293,7 +300,7 @@ else
                                                             }
                                                             else if (test.Status == TestStatus.Exhausted)
                                                             {
-                                                                <button type="button" class="btn btn-sm btn-secondary" disabled title="Исчерпано">
+                                                                <button type="button" class="btn btn-sm btn-modern-outline-secondary" disabled title="Исчерпано">
                                                                     <i class="fas fa-ban"></i>
                                                                 </button>
                                                             }
@@ -310,39 +317,39 @@ else
                                             {
                                                 <tr class="test-row" data-test-title="@test.Title.ToLower()">
                                                     <td>
-                                                        <span class="badge bg-warning text-dark">
+                                                        <span class="badge badge-modern-warning">
                                                             <i class="fas fa-volume-up"></i>
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <small><strong>@test.Title</strong></small>
+                                                        <small class="text-dark-modern"><strong>@test.Title</strong></small>
                                                         @if (!string.IsNullOrEmpty(test.Description))
                                                         {
                                                             <br>
-                                                            <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                                            <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                                         }
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@test.QuestionsCount</small>
+                                                        <small class="text-muted-modern">@test.QuestionsCount</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-@(test.AttemptsUsed >= test.MaxAttempts ? "danger" : "warning") badge-sm">
+                                                        <span class="badge @(test.AttemptsUsed >= test.MaxAttempts ? "badge-modern-danger" : "badge-modern-warning") badge-sm">
                                                             @test.AttemptsUsed/@test.MaxAttempts
                                                         </span>
                                                     </td>
                                                     <td class="text-center">
                                                         @if (test.BestPercentage.HasValue)
                                                         {
-                                                            <span class="badge bg-@(test.BestPercentage >= 80 ? "success" : test.BestPercentage >= 60 ? "warning" : "danger") badge-sm">
+                                                            <span class="badge @(test.BestPercentage >= 80 ? "badge-modern-success" : test.BestPercentage >= 60 ? "badge-modern-warning" : "badge-modern-danger") badge-sm">
                                                                 @test.BestPercentage.Value.ToString("F1")%
                                                             </span>
                                                         }
                                                         else
                                                         {
-                                                            <small class="text-muted">—</small>
+                                                            <small class="text-muted-modern">—</small>
                                                         }
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();">
@@ -350,14 +357,14 @@ else
                                                             @if (test.Status == TestStatus.Ongoing && test.OngoingTestResultId.HasValue)
                                                             {
                                                                 <a asp-action="TakeOrthoeopy" asp-route-id="@test.OngoingTestResultId.Value" 
-                                                                   class="btn btn-sm btn-warning" title="Продолжить">
+                                                                   class="btn btn-sm btn-modern-outline-warning" title="Продолжить">
                                                                     <i class="fas fa-play"></i>
                                                                     <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                                                 </a>
                                                             }
                                                             else if (test.Status == TestStatus.CanStart)
                                                             {
-                                                                <button type="button" class="btn btn-sm btn-success"
+                                                                <button type="button" class="btn btn-sm btn-modern-success"
                                                                         onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, 'orthoepy')" title="Начать">
                                                                     <i class="fas fa-play"></i>
                                                                     <span class="d-none d-lg-inline ms-1">Начать</span>
@@ -365,7 +372,7 @@ else
                                                             }
                                                             else if (test.Status == TestStatus.Exhausted)
                                                             {
-                                                                <button type="button" class="btn btn-sm btn-secondary" disabled title="Исчерпано">
+                                                                <button type="button" class="btn btn-sm btn-modern-outline-secondary" disabled title="Исчерпано">
                                                                     <i class="fas fa-ban"></i>
                                                                 </button>
                                                             }
@@ -382,39 +389,39 @@ else
                                             {
                                                 <tr class="test-row" data-test-title="@test.Title.ToLower()">
                                                     <td>
-                                                        <span class="badge bg-primary">
+                                                        <span class="badge badge-modern-primary">
                                                             <i class="fas fa-clipboard-check"></i>
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <small><strong>@test.Title</strong></small>
+                                                        <small class="text-dark-modern"><strong>@test.Title</strong></small>
                                                         @if (!string.IsNullOrEmpty(test.Description))
                                                         {
                                                             <br>
-                                                            <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                                            <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                                         }
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@test.QuestionsCount</small>
+                                                        <small class="text-muted-modern">@test.QuestionsCount</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-@(test.AttemptsUsed >= test.MaxAttempts ? "danger" : "warning") badge-sm">
+                                                        <span class="badge @(test.AttemptsUsed >= test.MaxAttempts ? "badge-modern-danger" : "badge-modern-warning") badge-sm">
                                                             @test.AttemptsUsed/@test.MaxAttempts
                                                         </span>
                                                     </td>
                                                     <td class="text-center">
                                                         @if (test.BestPercentage.HasValue)
                                                         {
-                                                            <span class="badge bg-@(test.BestPercentage >= 80 ? "success" : test.BestPercentage >= 60 ? "warning" : "danger") badge-sm">
+                                                            <span class="badge @(test.BestPercentage >= 80 ? "badge-modern-success" : test.BestPercentage >= 60 ? "badge-modern-warning" : "badge-modern-danger") badge-sm">
                                                                 @test.BestPercentage.Value.ToString("F1")%
                                                             </span>
                                                         }
                                                         else
                                                         {
-                                                            <small class="text-muted">—</small>
+                                                            <small class="text-muted-modern">—</small>
                                                         }
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();">
@@ -422,14 +429,14 @@ else
                                                             @if (test.Status == TestStatus.Ongoing && test.OngoingTestResultId.HasValue)
                                                             {
                                                                 <a asp-action="TakeRegular" asp-route-id="@test.OngoingTestResultId.Value" 
-                                                                   class="btn btn-sm btn-warning" title="Продолжить">
+                                                                   class="btn btn-sm btn-modern-outline-warning" title="Продолжить">
                                                                     <i class="fas fa-play"></i>
                                                                     <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                                                 </a>
                                                             }
                                                             else if (test.Status == TestStatus.CanStart)
                                                             {
-                                                                <button type="button" class="btn btn-sm btn-success"
+                                                                <button type="button" class="btn btn-sm btn-modern-success"
                                                                         onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, 'regular')" title="Начать">
                                                                     <i class="fas fa-play"></i>
                                                                     <span class="d-none d-lg-inline ms-1">Начать</span>
@@ -437,7 +444,7 @@ else
                                                             }
                                                             else if (test.Status == TestStatus.Exhausted)
                                                             {
-                                                                <button type="button" class="btn btn-sm btn-secondary" disabled title="Исчерпано">
+                                                                <button type="button" class="btn btn-sm btn-modern-outline-secondary" disabled title="Исчерпано">
                                                                     <i class="fas fa-ban"></i>
                                                                 </button>
                                                             }
@@ -461,23 +468,23 @@ else
 <div class="modal fade" id="confirmStartModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-play text-success"></i> Начать тест
+            <div class="modal-header modern-card-header">
+                <h5 class="modal-title modern-card-title">
+                    <i class="fas fa-play nav-link-icon-green"></i> Начать тест
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Внимание!</strong> После начала теста у вас будет ограниченное время на выполнение.
+                <div class="alert modern-alert-info">
+                    <i class="fas fa-info-circle nav-link-icon-blue"></i>
+                    <strong class="text-dark-modern">Внимание!</strong> <span class="text-dark-modern">После начала теста у вас будет ограниченное время на выполнение.</span>
                 </div>
-                <p>Тест: <strong id="testTitle"></strong></p>
-                <p>Время на выполнение: <strong id="testTime"></strong> минут</p>
+                <p class="text-dark-modern">Тест: <strong id="testTitle"></strong></p>
+                <p class="text-dark-modern">Время на выполнение: <strong id="testTime"></strong> минут</p>
                 
-                <div id="punctuationInfo" class="alert alert-warning" style="display: none;">
-                    <h6><i class="fas fa-exclamation-triangle"></i> Особенности теста по пунктуации:</h6>
-                    <ul class="mb-0">
+                <div id="punctuationInfo" class="alert modern-alert-info" style="display: none; background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%); border-left: 4px solid #ff9800;">
+                    <h6 class="text-dark-modern"><i class="fas fa-exclamation-triangle nav-link-icon-yellow"></i> Особенности теста по пунктуации:</h6>
+                    <ul class="mb-0 text-dark-modern">
                         <li>В предложениях вместо запятых стоят номера позиций</li>
                         <li>Укажите номера без пробелов и знаков препинания, где должны быть запятые</li>
                         <li>Если запятые не нужны, оставьте поле пустым</li>
@@ -485,9 +492,9 @@ else
                     </ul>
                 </div>
                 
-                <div id="orthoeopyInfo" class="alert alert-success" style="display: none;">
-                    <h6><i class="fas fa-info-circle"></i> Особенности теста по орфоэпии:</h6>
-                    <ul class="mb-0">
+                <div id="orthoeopyInfo" class="alert modern-alert-info" style="display: none; background: linear-gradient(135deg, rgba(67, 233, 123, 0.1) 0%, rgba(56, 249, 215, 0.1) 100%); border-left: 4px solid #43e97b;">
+                    <h6 class="text-dark-modern"><i class="fas fa-info-circle nav-link-icon-green"></i> Особенности теста по орфоэпии:</h6>
+                    <ul class="mb-0 text-dark-modern">
                         <li>В каждом вопросе нужно выбрать правильное ударение в слове</li>
                         <li>Будут предложены варианты с ударением на разных слогах</li>
                         <li>Выберите один правильный вариант</li>
@@ -495,16 +502,16 @@ else
                     </ul>
                 </div>
                 
-                <p class="text-warning mb-0">
-                    <i class="fas fa-exclamation-triangle"></i>
+                <p class="text-dark-modern mb-0">
+                    <i class="fas fa-exclamation-triangle nav-link-icon-yellow"></i>
                     Убедитесь, что у вас есть стабильное интернет-соединение и достаточно времени.
                 </p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-modern-outline-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times"></i> Отмена
                 </button>
-                <a id="startTestButton" href="#" class="btn btn-success">
+                <a id="startTestButton" href="#" class="btn btn-modern-success">
                     <i class="fas fa-play"></i> Начать тест
                 </a>
             </div>

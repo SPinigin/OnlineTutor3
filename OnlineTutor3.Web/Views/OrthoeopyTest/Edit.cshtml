@@ -7,13 +7,13 @@
 
 <div class="row justify-content-center">
     <div class="col-md-10 col-lg-8">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
+        <div class="card shadow modern-card">
+            <div class="card-header auth-card-header">
                 <h4 class="mb-0">
                     <i class="fas fa-edit"></i> Редактирование теста по орфоэпии
                 </h4>
             </div>
-            <div class="card-body">
+            <div class="card-body auth-card-body">
                 @if (assignment != null)
                 {
                     <div class="alert alert-info">
@@ -28,53 +28,53 @@
                     <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                     <div class="mb-3">
-                        <label asp-for="Title" class="form-label">
+                        <label asp-for="Title" class="form-label form-label-modern">
                             <i class="fas fa-heading"></i> Название теста <span class="text-danger">*</span>
                         </label>
-                        <input asp-for="Title" class="form-control" />
+                        <input asp-for="Title" class="form-control form-control-modern" />
                         <span asp-validation-for="Title" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Description" class="form-label">
+                        <label asp-for="Description" class="form-label form-label-modern">
                             <i class="fas fa-align-left"></i> Описание
                         </label>
-                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        <textarea asp-for="Description" class="form-control form-control-modern" rows="3"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="TimeLimit" class="form-label">
+                            <label asp-for="TimeLimit" class="form-label form-label-modern">
                                 <i class="fas fa-clock"></i> Время на выполнение (минут)
                             </label>
-                            <input asp-for="TimeLimit" type="number" class="form-control" min="5" max="300" />
+                            <input asp-for="TimeLimit" type="number" class="form-control form-control-modern" min="5" max="300" />
                             <span asp-validation-for="TimeLimit" class="text-danger"></span>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label asp-for="MaxAttempts" class="form-label">
+                            <label asp-for="MaxAttempts" class="form-label form-label-modern">
                                 <i class="fas fa-redo"></i> Количество попыток
                             </label>
-                            <input asp-for="MaxAttempts" type="number" class="form-control" min="1" max="100" />
+                            <input asp-for="MaxAttempts" type="number" class="form-control form-control-modern" min="1" max="100" />
                             <span asp-validation-for="MaxAttempts" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="StartDate" class="form-label">
+                            <label asp-for="StartDate" class="form-label form-label-modern">
                                 <i class="fas fa-calendar-alt"></i> Дата начала
                             </label>
-                            <input asp-for="StartDate" type="datetime-local" class="form-control" />
+                            <input asp-for="StartDate" type="datetime-local" class="form-control form-control-modern" />
                             <span asp-validation-for="StartDate" class="text-danger"></span>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label asp-for="EndDate" class="form-label">
+                            <label asp-for="EndDate" class="form-label form-label-modern">
                                 <i class="fas fa-calendar-times"></i> Дата окончания
                             </label>
-                            <input asp-for="EndDate" type="datetime-local" class="form-control" />
+                            <input asp-for="EndDate" type="datetime-local" class="form-control form-control-modern" />
                             <span asp-validation-for="EndDate" class="text-danger"></span>
                         </div>
                     </div>
@@ -82,7 +82,7 @@
                     <div class="mb-3">
                         <div class="form-check form-switch">
                             <input asp-for="ShowHints" class="form-check-input" />
-                            <label asp-for="ShowHints" class="form-check-label">
+                            <label asp-for="ShowHints" class="form-check-label text-dark-modern">
                                 <i class="fas fa-question-circle"></i> Показывать подсказки
                             </label>
                         </div>
@@ -91,7 +91,7 @@
                     <div class="mb-3">
                         <div class="form-check form-switch">
                             <input asp-for="ShowCorrectAnswers" class="form-check-input" />
-                            <label asp-for="ShowCorrectAnswers" class="form-check-label">
+                            <label asp-for="ShowCorrectAnswers" class="form-check-label text-dark-modern">
                                 <i class="fas fa-check-circle"></i> Показывать правильные ответы
                             </label>
                         </div>
@@ -100,17 +100,17 @@
                     <div class="mb-3">
                         <div class="form-check form-switch">
                             <input asp-for="IsActive" class="form-check-input" />
-                            <label asp-for="IsActive" class="form-check-label">
+                            <label asp-for="IsActive" class="form-check-label text-dark-modern">
                                 <i class="fas fa-toggle-on"></i> Тест активен
                             </label>
                         </div>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a asp-action="Details" asp-route-id="@testId" class="btn btn-outline-secondary">
+                        <a asp-action="Details" asp-route-id="@testId" class="btn btn-modern-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Отмена
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-modern-primary">
                             <i class="fas fa-save"></i> Сохранить изменения
                         </button>
                     </div>

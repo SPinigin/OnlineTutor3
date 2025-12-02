@@ -5,48 +5,48 @@
 
 <div class="row justify-content-center">
     <div class="col-md-10 col-lg-8">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
+        <div class="card shadow modern-card">
+            <div class="card-header auth-card-header">
                 <h4 class="mb-0">
                     <i class="fas fa-edit"></i> Редактирование задания
                 </h4>
             </div>
-            <div class="card-body">
+            <div class="card-body auth-card-body">
                 <form asp-action="Edit" method="post">
                     <input asp-for="Id" type="hidden" />
                     <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                     <div class="mb-3">
-                        <label asp-for="Title" class="form-label">
+                        <label asp-for="Title" class="form-label form-label-modern">
                             <i class="fas fa-heading"></i> Название задания <span class="text-danger">*</span>
                         </label>
-                        <input asp-for="Title" class="form-control" />
+                        <input asp-for="Title" class="form-control form-control-modern" />
                         <span asp-validation-for="Title" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Description" class="form-label">
+                        <label asp-for="Description" class="form-label form-label-modern">
                             <i class="fas fa-align-left"></i> Описание
                         </label>
-                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                        <textarea asp-for="Description" class="form-control form-control-modern" rows="4"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="SubjectId" class="form-label">
+                        <label asp-for="SubjectId" class="form-label form-label-modern">
                             <i class="fas fa-book"></i> Предмет <span class="text-danger">*</span>
                         </label>
-                        <select asp-for="SubjectId" asp-items="ViewBag.Subjects" class="form-select">
+                        <select asp-for="SubjectId" asp-items="ViewBag.Subjects" class="form-select form-control-modern">
                             <option value="">-- Выберите предмет --</option>
                         </select>
                         <span asp-validation-for="SubjectId" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="DueDate" class="form-label">
+                        <label asp-for="DueDate" class="form-label form-label-modern">
                             <i class="fas fa-calendar-alt"></i> Срок выполнения
                         </label>
-                        <input asp-for="DueDate" type="datetime-local" class="form-control" 
+                        <input asp-for="DueDate" type="datetime-local" class="form-control form-control-modern" 
                                value="@(Model.DueDate?.ToString("yyyy-MM-ddTHH:mm"))" />
                         <span asp-validation-for="DueDate" class="text-danger"></span>
                     </div>
@@ -54,20 +54,20 @@
                     <div class="mb-3">
                         <div class="form-check form-switch">
                             <input asp-for="IsActive" class="form-check-input" />
-                            <label asp-for="IsActive" class="form-check-label">
+                            <label asp-for="IsActive" class="form-check-label text-dark-modern">
                                 <i class="fas fa-toggle-on"></i> Задание активно
                             </label>
                         </div>
-                        <div class="form-text">
+                        <div class="form-text text-muted-modern">
                             <i class="fas fa-info-circle"></i> Неактивные задания скрыты от учеников
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">
+                        <label class="form-label form-label-modern">
                             <i class="fas fa-graduation-cap"></i> Назначить классам
                         </label>
-                        <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                        <div class="border rounded p-3 form-control-modern" style="max-height: 200px; overflow-y: auto;">
                             @if (ViewBag.Classes != null && ((List<OnlineTutor3.Domain.Entities.Class>)ViewBag.Classes).Any())
                             {
                                 @foreach (var classItem in (List<OnlineTutor3.Domain.Entities.Class>)ViewBag.Classes)
@@ -78,11 +78,11 @@
                                                value="@classItem.Id" 
                                                id="class_@classItem.Id"
                                                @(Model.SelectedClassIds.Contains(classItem.Id) ? "checked" : "") />
-                                        <label class="form-check-label" for="class_@classItem.Id">
+                                        <label class="form-check-label text-dark-modern" for="class_@classItem.Id">
                                             @classItem.Name
                                             @if (!string.IsNullOrEmpty(classItem.Description))
                                             {
-                                                <small class="text-muted"> - @classItem.Description</small>
+                                                <small class="text-muted-modern"> - @classItem.Description</small>
                                             }
                                         </label>
                                     </div>
@@ -90,7 +90,7 @@
                             }
                             else
                             {
-                                <p class="text-muted mb-0">
+                                <p class="text-muted-modern mb-0">
                                     <i class="fas fa-info-circle"></i> У вас пока нет активных классов.
                                 </p>
                             }
@@ -98,10 +98,10 @@
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a asp-action="Index" class="btn btn-outline-secondary">
+                        <a asp-action="Index" class="btn btn-modern-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Отмена
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-modern-primary">
                             <i class="fas fa-save"></i> Сохранить изменения
                         </button>
                     </div>

@@ -15,17 +15,17 @@
 </div>
 
 <div class="test-container">
-    <div class="card shadow-sm mb-3">
-        <div class="card-header bg-primary text-white py-2">
+    <div class="card modern-card mb-3">
+        <div class="card-header modern-card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
             <div class="d-flex justify-content-between align-items-center gap-2">
                 <div class="flex-grow-1 min-w-0">
-                    <h6 class="mb-0 d-flex align-items-center">
+                    <h6 class="mb-0 d-flex align-items-center" style="color: white;">
                         <i class="fas fa-spell-check me-2 flex-shrink-0"></i>
                         <span class="text-truncate">@Model.Test.Title</span>
                     </h6>
                 </div>
                 <div class="flex-shrink-0">
-                    <div id="timer" class="d-flex align-items-center">
+                    <div id="timer" class="d-flex align-items-center" style="color: white;">
                         <i class="fas fa-clock me-2"></i>
                         <span id="timeRemaining" class="h6 mb-0 font-monospace">
                             @($"{Model.TimeRemaining.Minutes:D2}:{Model.TimeRemaining.Seconds:D2}")
@@ -37,21 +37,21 @@
         
         <div class="card-body p-2 p-md-3">
             <div class="progress mb-2" style="height: 8px;">
-                <div class="progress-bar bg-success" role="progressbar" style="width: 0%" id="progressBar"></div>
+                <div class="progress-bar" role="progressbar" style="width: 0%; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);" id="progressBar"></div>
             </div>
             
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <small class="text-muted mb-0">
+                <small class="text-muted-modern mb-0">
                     <i class="fas fa-redo-alt"></i>
                     Попытка @Model.TestResult.AttemptNumber из @Model.Test.MaxAttempts
                 </small>
-                <small class="text-muted mb-0">
+                <small class="text-muted-modern mb-0">
                     <i class="fas fa-question-circle"></i>
-                    Вопрос <span id="currentQuestion" class="fw-bold">1</span> из @Model.Questions.Count
+                    Вопрос <span id="currentQuestion" class="fw-bold text-dark-modern">1</span> из @Model.Questions.Count
                 </small>
-                <small class="text-muted mb-0" id="answeredInfo">
-                    <i class="fas fa-check-circle text-success"></i>
-                    Отвечено: <span id="answeredCount">0</span>
+                <small class="text-muted-modern mb-0" id="answeredInfo">
+                    <i class="fas fa-check-circle nav-link-icon-green"></i>
+                    Отвечено: <span id="answeredCount" class="text-dark-modern">0</span>
                 </small>
             </div>
         </div>
@@ -64,22 +64,22 @@
             var existingAnswer = Model.Answers.FirstOrDefault(a => a.SpellingQuestionId == question.Id);
 
             <div class="question-card @(i == 0 ? "active" : "d-none")" data-question-index="@i" data-question-id="@question.Id">
-                <div class="card shadow-sm">
+                <div class="card modern-card">
                     <div class="card-body p-3 p-md-4">
                         <div class="question-header mb-3">
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                <h6 class="text-primary mb-0">
-                                    <i class="fas fa-question-circle"></i>
+                                <h6 class="text-dark-modern mb-0">
+                                    <i class="fas fa-question-circle nav-link-icon"></i>
                                     Вопрос @(i + 1)
                                 </h6>
-                                <span class="badge bg-info badge-sm">
+                                <span class="badge badge-modern-info badge-sm">
                                     <i class="fas fa-star"></i> Балл: @question.Points
                                 </span>
                             </div>
                         </div>
 
                         <div class="question-content mb-3">
-                            <p class="mb-3 text-muted">
+                            <p class="mb-3 text-muted-modern">
                                 <i class="fas fa-pencil-alt"></i>
                                 Вставьте пропущенную букву в слове:
                             </p>
@@ -96,17 +96,17 @@
                                 <i class="fas fa-keyboard"></i> Ваш ответ:
                             </label>
                             <div class="input-group">
-                                <input type="text" class="form-control answer-input"
+                                <input type="text" class="form-control form-control-modern answer-input"
                                        maxlength="10"
                                        placeholder="Введите ответ"
                                        value="@(existingAnswer?.StudentAnswer ?? "")"
                                        data-question-id="@question.Id" />
-                                <button class="btn btn-outline-secondary" type="button" onclick="clearAnswer(@question.Id)"
+                                <button class="btn btn-modern-outline-secondary" type="button" onclick="clearAnswer(@question.Id)"
                                         title="Очистить ответ">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
-                            <small class="form-text text-muted d-block mt-1">
+                            <small class="form-text text-muted-modern d-block mt-1">
                                 <i class="fas fa-info-circle"></i>
                                 @{
                                     var gapCount = question.WordWithGap.Count(c => c == '…' || c == '_');
@@ -125,19 +125,19 @@
                         @if (Model.Test.ShowHints && !string.IsNullOrEmpty(question.Hint))
                         {
                             <div class="mb-3">
-                                <button type="button" class="btn btn-outline-info btn-sm" onclick="toggleHint(@i)">
+                                <button type="button" class="btn btn-modern-outline-info btn-sm" onclick="toggleHint(@i)">
                                     <i class="fas fa-lightbulb"></i>
                                     <span class="hint-button-text">Показать подсказку</span>
                                 </button>
                             </div>
                             
                             <div class="hint-container" style="display: none;">
-                                <div class="alert alert-info alert-sm py-2 mb-0">
+                                <div class="alert modern-alert-info alert-sm py-2 mb-0">
                                     <div class="d-flex align-items-start">
                                         <i class="fas fa-lightbulb mt-1 me-2"></i>
                                         <div>
-                                            <strong class="small">Подсказка:</strong>
-                                            <p class="mb-0 small">@question.Hint</p>
+                                            <strong class="small text-dark-modern">Подсказка:</strong>
+                                            <p class="mb-0 small text-dark-modern">@question.Hint</p>
                                         </div>
                                     </div>
                                 </div>
@@ -149,11 +149,11 @@
         }
     </div>
 
-    <div class="card shadow-sm mt-3 navigation-card">
+    <div class="card modern-card mt-3 navigation-card">
         <div class="card-body p-2 p-md-3">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <button type="button" 
-                        class="btn btn-outline-secondary btn-sm" 
+                        class="btn btn-modern-outline-secondary btn-sm" 
                         id="prevButton" 
                         onclick="previousQuestion()" 
                         disabled>
@@ -163,14 +163,14 @@
                 
                 <div class="d-flex gap-2">
                     <button type="button" 
-                            class="btn btn-primary btn-sm" 
+                            class="btn btn-modern-primary btn-sm" 
                             id="nextButton" 
                             onclick="nextQuestion()">
                         <span class="d-none d-sm-inline me-1">Следующий</span>
                         <i class="fas fa-arrow-right"></i>
                     </button>
                     <button type="button" 
-                            class="btn btn-success btn-sm" 
+                            class="btn btn-modern-success btn-sm" 
                             id="finishButton" 
                             onclick="showFinishModal()">
                         <i class="fas fa-check"></i>
@@ -192,41 +192,41 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-3">
-                <div class="alert alert-warning alert-sm py-2 mb-3">
+                <div class="alert modern-alert-info alert-sm py-2 mb-3" style="background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%); border-left: 4px solid #ff9800;">
                     <div class="d-flex align-items-start">
-                        <i class="fas fa-exclamation-triangle mt-1 me-2"></i>
+                        <i class="fas fa-exclamation-triangle mt-1 me-2" style="color: #ff9800;"></i>
                         <div>
-                            <strong class="small">Внимание!</strong>
-                            <p class="mb-0 small">После завершения теста вы не сможете изменить ответы.</p>
+                            <strong class="small text-dark-modern">Внимание!</strong>
+                            <p class="mb-0 small text-dark-modern">После завершения теста вы не сможете изменить ответы.</p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="mb-2">
-                    <p class="mb-2 small">
-                        <i class="fas fa-clipboard-check text-primary"></i>
+                    <p class="mb-2 small text-dark-modern">
+                        <i class="fas fa-clipboard-check nav-link-icon"></i>
                         Вы ответили на <strong><span id="answeredCountModal">0</span></strong> 
                         из <strong>@Model.Questions.Count</strong> вопросов.
                     </p>
                     @if (Model.Questions.Count > 1)
                     {
-                        <p class="mb-2 small text-warning">
-                            <i class="fas fa-exclamation-circle"></i>
+                        <p class="mb-2 small text-dark-modern">
+                            <i class="fas fa-exclamation-circle nav-link-icon-yellow"></i>
                             Вы находитесь на вопросе <strong><span id="currentQuestionModal">1</span></strong> из <strong>@Model.Questions.Count</strong>.
                             <span>Неотвеченные вопросы будут засчитаны как неправильные.</span>
                         </p>
                     }
-                    <p class="mb-0 small text-muted">Вы уверены, что хотите завершить тест?</p>
+                    <p class="mb-0 small text-muted-modern">Вы уверены, что хотите завершить тест?</p>
                 </div>
             </div>
             <div class="modal-footer py-2">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-modern-outline-secondary btn-sm" data-bs-dismiss="modal">
                     <i class="fas fa-times"></i> Продолжить
                 </button>
                 <form asp-action="CompleteSpellingTest" method="post" class="d-inline">
                     <input type="hidden" name="id" value="@Model.TestResult.Id" />
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-success btn-sm">
+                    <button type="submit" class="btn btn-modern-success btn-sm">
                         <i class="fas fa-check"></i> Завершить
                     </button>
                 </form>

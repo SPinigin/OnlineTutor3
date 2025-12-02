@@ -11,69 +11,69 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white text-center">
+        <div class="card shadow auth-card">
+            <div class="card-header auth-card-header">
                 <h4><i class="fas fa-user-plus"></i> Регистрация в системе</h4>
             </div>
-            <div class="card-body">
+            <div class="card-body auth-card-body">
                 <form asp-action="Register" method="post" id="registrationForm">
                     <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="FirstName" class="form-label">
+                            <label asp-for="FirstName" class="form-label form-label-modern">
                                 <i class="fas fa-user"></i> Имя <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="FirstName" class="form-control" placeholder="Имя" />
+                            <input asp-for="FirstName" class="form-control form-control-modern" placeholder="Имя" />
                             <span asp-validation-for="FirstName" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="LastName" class="form-label">
+                            <label asp-for="LastName" class="form-label form-label-modern">
                                 <i class="fas fa-user"></i> Фамилия <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="LastName" class="form-control" placeholder="Фамилия" />
+                            <input asp-for="LastName" class="form-control form-control-modern" placeholder="Фамилия" />
                             <span asp-validation-for="LastName" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="Email" class="form-label">
+                            <label asp-for="Email" class="form-label form-label-modern">
                                 <i class="fas fa-envelope"></i> Email <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="Email" class="form-control" placeholder="example@email.com" type="email" id="Email" />
+                            <input asp-for="Email" class="form-control form-control-modern" placeholder="example@email.com" type="email" id="Email" />
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="PhoneNumber" class="form-label">
+                            <label asp-for="PhoneNumber" class="form-label form-label-modern">
                                 <i class="fas fa-phone"></i> Телефон <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="PhoneNumber" class="form-control" placeholder="+7 (999) 999-99-99" type="tel" id="PhoneNumber" />
+                            <input asp-for="PhoneNumber" class="form-control form-control-modern" placeholder="+7 (999) 999-99-99" type="tel" id="PhoneNumber" />
                             <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="DateOfBirth" class="form-label">
+                        <label asp-for="DateOfBirth" class="form-label form-label-modern">
                             <i class="fas fa-calendar"></i> Дата рождения <span class="text-danger">*</span>
                         </label>
-                        <input asp-for="DateOfBirth" class="form-control" type="date" />
+                        <input asp-for="DateOfBirth" class="form-control form-control-modern" type="date" />
                         <span asp-validation-for="DateOfBirth" class="text-danger"></span>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="Password" class="form-label">
+                            <label asp-for="Password" class="form-label form-label-modern">
                                 <i class="fas fa-lock"></i> Пароль <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="Password" type="password" class="form-control" placeholder="Минимум 6 символов" id="Password" />
+                            <input asp-for="Password" type="password" class="form-control form-control-modern" placeholder="Минимум 6 символов" id="Password" />
                             <span asp-validation-for="Password" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="ConfirmPassword" class="form-label">
+                            <label asp-for="ConfirmPassword" class="form-label form-label-modern">
                                 <i class="fas fa-lock"></i> Подтверждение пароля <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Повторите пароль" id="ConfirmPassword" />
+                            <input asp-for="ConfirmPassword" type="password" class="form-control form-control-modern" placeholder="Повторите пароль" id="ConfirmPassword" />
                             <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                         </div>
                     </div>
@@ -172,16 +172,16 @@
                     </div>
 
                     <div class="d-grid mt-3">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-modern-primary">
                             <i class="fas fa-user-plus"></i> Зарегистрироваться
                         </button>
                     </div>
                 </form>
             </div>
-            <div class="card-footer text-center">
-                <p class="mb-0">
+            <div class="card-footer auth-card-footer">
+                <p class="mb-0 text-muted-modern">
                     Уже есть аккаунт?
-                    <a asp-action="Login" class="text-decoration-none">
+                    <a asp-action="Login" class="text-decoration-none" style="color: #667eea; font-weight: 500;">
                         <i class="fas fa-sign-in-alt"></i> Войти
                     </a>
                 </p>
