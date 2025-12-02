@@ -1,0 +1,68 @@
+@model OnlineTutor3.Domain.Entities.Student
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    var classes = ViewBag.Classes as SelectList ?? new SelectList(new List<object>(), "Id", "Name");
+    var studentId = ViewBag.StudentId as int? ?? Model.Id;
+    var currentClassId = ViewBag.CurrentClassId as int?;
+}
+
+<form action="/StudentManagement/AssignToClass/@studentId" method="post" id="assignToClassForm">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@studentId" />
+    
+    <div class="mb-3">
+        <label for="classId" class="form-label form-label-modern">
+            <i class="fas fa-users"></i> Выберите класс
+        </label>
+        <select name="classId" id="classId" class="form-select form-control-modern">
+            <option value="">Не назначать (убрать из класса)</option>
+            @if (classes != null)
+            {
+                @foreach (var item in classes)
+                {
+                    <option value="@item.Value" selected="@(currentClassId?.ToString() == item.Value)">@item.Text</option>
+                }
+            }
+        </select>
+    </div>
+    
+    <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-modern-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="submit" class="btn btn-modern-primary">
+            <i class="fas fa-save"></i> Сохранить
+        </button>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function() {
+        $('#assignToClassForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            var form = $(this);
+            var formData = form.serialize();
+            
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    // Закрываем модальное окно
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('assignToClassModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                    
+                    // Перезагружаем страницу для обновления данных
+                    location.reload();
+                },
+                error: function(xhr, status, error) {
+                    alert('Произошла ошибка при сохранении. Попробуйте еще раз.');
+                    console.error('Error:', error);
+                }
+            });
+        });
+    });
+</script>
+
