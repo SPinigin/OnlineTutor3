@@ -5,13 +5,13 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
+        <div class="card shadow modern-card">
+            <div class="card-header auth-card-header" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
                 <h4 class="mb-0">
                     <i class="fas fa-plus"></i> Добавить занятие в календарь
                 </h4>
             </div>
-            <div class="card-body py-3">
+            <div class="card-body auth-card-body py-3">
                 <form asp-action="Create" method="post">
                     <div asp-validation-summary="All" class="text-danger mb-2"></div>
 
@@ -21,18 +21,18 @@
                         </legend>
 
                         <div class="mb-2">
-                            <label asp-for="Title" class="form-label small">
+                            <label asp-for="Title" class="form-label form-label-modern small">
                                 <i class="fas fa-heading"></i> Название занятия <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="Title" class="form-control form-control-sm" placeholder="Например: Урок русского языка" />
+                            <input asp-for="Title" class="form-control form-control-modern form-control-sm" placeholder="Например: Урок русского языка" />
                             <span asp-validation-for="Title" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-2">
-                            <label asp-for="Description" class="form-label small">
+                            <label asp-for="Description" class="form-label form-label-modern small">
                                 <i class="fas fa-align-left"></i> Описание
                             </label>
-                            <textarea asp-for="Description" class="form-control form-control-sm" rows="2"
+                            <textarea asp-for="Description" class="form-control form-control-modern form-control-sm" rows="2"
                                       placeholder="Краткое описание занятия, темы и т.д."></textarea>
                             <span asp-validation-for="Description" class="text-danger small"></span>
                         </div>
@@ -45,18 +45,18 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-2">
-                                <label asp-for="StartDateTime" class="form-label small">
+                                <label asp-for="StartDateTime" class="form-label form-label-modern small">
                                     <i class="fas fa-play-circle"></i> Начало <span class="text-danger">*</span>
                                 </label>
-                                <input asp-for="StartDateTime" class="form-control form-control-sm" type="datetime-local"
+                                <input asp-for="StartDateTime" class="form-control form-control-modern form-control-sm" type="datetime-local"
                                        step="60" value="@Model.StartDateTime.ToString("yyyy-MM-ddTHH:mm")" />
                                 <span asp-validation-for="StartDateTime" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6 mb-2">
-                                <label asp-for="EndDateTime" class="form-label small">
+                                <label asp-for="EndDateTime" class="form-label form-label-modern small">
                                     <i class="fas fa-stop-circle"></i> Окончание <span class="text-danger">*</span>
                                 </label>
-                                <input asp-for="EndDateTime" class="form-control form-control-sm" type="datetime-local"
+                                <input asp-for="EndDateTime" class="form-control form-control-modern form-control-sm" type="datetime-local"
                                        step="60" value="@Model.EndDateTime.ToString("yyyy-MM-ddTHH:mm")" />
                                 <span asp-validation-for="EndDateTime" class="text-danger small"></span>
                             </div>
@@ -74,20 +74,20 @@
                         </div>
 
                         <div class="mb-2">
-                            <label asp-for="ClassId" class="form-label small">
+                            <label asp-for="ClassId" class="form-label form-label-modern small">
                                 <i class="fas fa-users"></i> Класс
                             </label>
-                            <select asp-for="ClassId" asp-items="@ViewBag.Classes" class="form-select form-select-sm" id="classSelect">
+                            <select asp-for="ClassId" asp-items="@ViewBag.Classes" class="form-select form-control-modern form-select-sm" id="classSelect">
                                 <option value="">Не выбран</option>
                             </select>
                             <span asp-validation-for="ClassId" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-2">
-                            <label asp-for="StudentId" class="form-label small">
+                            <label asp-for="StudentId" class="form-label form-label-modern small">
                                 <i class="fas fa-user-graduate"></i> Ученик
                             </label>
-                            <select asp-for="StudentId" asp-items="@ViewBag.Students" class="form-select form-select-sm" id="studentSelect">
+                            <select asp-for="StudentId" asp-items="@ViewBag.Students" class="form-select form-control-modern form-select-sm" id="studentSelect">
                                 <option value="">Не выбран</option>
                             </select>
                             <span asp-validation-for="StudentId" class="text-danger small"></span>
@@ -100,10 +100,10 @@
                         </legend>
 
                         <div class="mb-2">
-                            <label asp-for="Location" class="form-label small">
+                            <label asp-for="Location" class="form-label form-label-modern small">
                                 <i class="fas fa-map-marker-alt"></i> Место проведения
                             </label>
-                            <input asp-for="Location" class="form-control form-control-sm" placeholder="Например: Онлайн, Кабинет 201" />
+                            <input asp-for="Location" class="form-control form-control-modern form-control-sm" placeholder="Например: Онлайн, Кабинет 201" />
                             <span asp-validation-for="Location" class="text-danger small"></span>
                         </div>
 
@@ -146,10 +146,10 @@
                     </fieldset>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                        <a asp-action="Index" class="btn btn-sm btn-modern-outline-secondary">
                             <i class="fas fa-times"></i> Отмена
                         </a>
-                        <button type="submit" class="btn btn-success btn-sm">
+                        <button type="submit" class="btn btn-modern-success btn-sm">
                             <i class="fas fa-save"></i> Добавить занятие
                         </button>
                     </div>
