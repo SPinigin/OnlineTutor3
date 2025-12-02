@@ -214,6 +214,10 @@ namespace OnlineTutor3.Web.Controllers
                 var assignment = await _assignmentService.GetByIdAsync(test.AssignmentId);
                 ViewBag.Assignment = assignment;
 
+                // Загружаем список доступных заданий учителя для выпадающего списка
+                var assignments = await _assignmentService.GetByTeacherIdAsync(currentUser.Id) ?? new List<Assignment>();
+                ViewBag.Assignments = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(assignments, "Id", "Title", test.AssignmentId);
+
                 var model = new CreateRegularTestViewModel
                 {
                     Title = test.Title,
@@ -274,20 +278,34 @@ namespace OnlineTutor3.Web.Controllers
                         return RedirectToAction("Index", "Assignment");
                     }
 
-                    test.Title = model.Title;
-                    test.Description = model.Description;
-                    test.TimeLimit = model.TimeLimit;
-                    test.MaxAttempts = model.MaxAttempts;
-                    test.StartDate = model.StartDate;
-                    test.EndDate = model.EndDate;
-                    test.ShowHints = model.ShowHints;
-                    test.ShowCorrectAnswers = model.ShowCorrectAnswers;
-                    test.IsActive = model.IsActive;
+                    // Проверяем доступ к новому заданию, если оно изменилось
+                    if (test.AssignmentId != model.AssignmentId)
+                    {
+                        var canAccessNewAssignment = await _assignmentService.TeacherCanAccessAssignmentAsync(currentUser.Id, model.AssignmentId);
+                        if (!canAccessNewAssignment)
+                        {
+                            ModelState.AddModelError("AssignmentId", "У вас нет доступа к выбранному заданию.");
+                        }
+                    }
 
-                    await _testService.UpdateAsync(test);
+                    if (ModelState.IsValid)
+                    {
+                        test.Title = model.Title;
+                        test.Description = model.Description;
+                        test.AssignmentId = model.AssignmentId;
+                        test.TimeLimit = model.TimeLimit;
+                        test.MaxAttempts = model.MaxAttempts;
+                        test.StartDate = model.StartDate;
+                        test.EndDate = model.EndDate;
+                        test.ShowHints = model.ShowHints;
+                        test.ShowCorrectAnswers = model.ShowCorrectAnswers;
+                        test.IsActive = model.IsActive;
 
-                    TempData["SuccessMessage"] = $"Тест \"{test.Title}\" успешно обновлен!";
-                    return RedirectToAction("Details", new { id = id });
+                        await _testService.UpdateAsync(test);
+
+                        TempData["SuccessMessage"] = $"Тест \"{test.Title}\" успешно обновлен!";
+                        return RedirectToAction("Details", new { id = id });
+                    }
                 }
 
                 var assignment = await _assignmentService.GetByIdAsync(model.AssignmentId);
@@ -295,6 +313,11 @@ namespace OnlineTutor3.Web.Controllers
                 {
                     ViewBag.Assignment = assignment;
                 }
+
+                // Загружаем список доступных заданий учителя для выпадающего списка
+                var assignments = await _assignmentService.GetByTeacherIdAsync(currentUser.Id) ?? new List<Assignment>();
+                ViewBag.Assignments = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(assignments, "Id", "Title", model.AssignmentId);
+
                 ViewBag.TestId = id;
 
                 return View(model);
@@ -304,11 +327,24 @@ namespace OnlineTutor3.Web.Controllers
                 _logger.LogError(ex, "Ошибка в RegularTest/Edit (POST) для ID: {TestId}", id);
                 TempData["ErrorMessage"] = "Произошла ошибка при обновлении теста.";
 
+                var currentUser = await _userManager.GetUserAsync(User);
                 var assignment = await _assignmentService.GetByIdAsync(model.AssignmentId);
                 if (assignment != null)
                 {
                     ViewBag.Assignment = assignment;
                 }
+
+                // Загружаем список доступных заданий учителя для выпадающего списка
+                if (currentUser != null)
+                {
+                    var assignments = await _assignmentService.GetByTeacherIdAsync(currentUser.Id) ?? new List<Assignment>();
+                    ViewBag.Assignments = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(assignments, "Id", "Title", model.AssignmentId);
+                }
+                else
+                {
+                    ViewBag.Assignments = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(new List<Assignment>(), "Id", "Title", model.AssignmentId);
+                }
+
                 ViewBag.TestId = id;
 
                 return View(model);

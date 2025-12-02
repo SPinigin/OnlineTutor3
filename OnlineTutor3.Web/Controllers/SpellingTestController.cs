@@ -244,6 +244,19 @@ namespace OnlineTutor3.Web.Controllers
                 var assignment = await _assignmentService.GetByIdAsync(test.AssignmentId);
                 ViewBag.Assignment = assignment;
 
+                // Загружаем список доступных заданий учителя для выпадающего списка (только для предмета "Русский язык")
+                var allAssignments = await _assignmentService.GetByTeacherIdAsync(currentUser.Id) ?? new List<Assignment>();
+                var russianLanguageAssignments = new List<Assignment>();
+                foreach (var ass in allAssignments)
+                {
+                    var subject = await _subjectService.GetByIdAsync(ass.SubjectId);
+                    if (subject != null && subject.Name.Equals("Русский язык", StringComparison.OrdinalIgnoreCase))
+                    {
+                        russianLanguageAssignments.Add(ass);
+                    }
+                }
+                ViewBag.Assignments = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(russianLanguageAssignments, "Id", "Title", test.AssignmentId);
+
                 var model = new CreateSpellingTestViewModel
                 {
                     Title = test.Title,
@@ -305,20 +318,47 @@ namespace OnlineTutor3.Web.Controllers
                         return RedirectToAction("Index", "Assignment");
                     }
 
-                    test.Title = model.Title;
-                    test.Description = model.Description;
-                    test.TimeLimit = model.TimeLimit;
-                    test.MaxAttempts = model.MaxAttempts;
-                    test.StartDate = model.StartDate;
-                    test.EndDate = model.EndDate;
-                    test.ShowHints = model.ShowHints;
-                    test.ShowCorrectAnswers = model.ShowCorrectAnswers;
-                    test.IsActive = model.IsActive;
+                    // Проверяем доступ к новому заданию, если оно изменилось
+                    if (test.AssignmentId != model.AssignmentId)
+                    {
+                        var canAccessNewAssignment = await _assignmentService.TeacherCanAccessAssignmentAsync(currentUser.Id, model.AssignmentId);
+                        if (!canAccessNewAssignment)
+                        {
+                            ModelState.AddModelError("AssignmentId", "У вас нет доступа к выбранному заданию.");
+                        }
+                        else
+                        {
+                            // Проверяем, что новое задание для предмета "Русский язык"
+                            var assignmentToCheck = await _assignmentService.GetByIdAsync(model.AssignmentId);
+                            if (assignmentToCheck != null)
+                            {
+                                var subject = await _subjectService.GetByIdAsync(assignmentToCheck.SubjectId);
+                                if (subject == null || !subject.Name.Equals("Русский язык", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    ModelState.AddModelError("AssignmentId", "Тесты по орфографии можно привязывать только к заданиям по предмету 'Русский язык'.");
+                                }
+                            }
+                        }
+                    }
 
-                    await _testService.UpdateAsync(test);
+                    if (ModelState.IsValid)
+                    {
+                        test.Title = model.Title;
+                        test.Description = model.Description;
+                        test.AssignmentId = model.AssignmentId;
+                        test.TimeLimit = model.TimeLimit;
+                        test.MaxAttempts = model.MaxAttempts;
+                        test.StartDate = model.StartDate;
+                        test.EndDate = model.EndDate;
+                        test.ShowHints = model.ShowHints;
+                        test.ShowCorrectAnswers = model.ShowCorrectAnswers;
+                        test.IsActive = model.IsActive;
 
-                    TempData["SuccessMessage"] = $"Тест \"{test.Title}\" успешно обновлен!";
-                    return RedirectToAction("Details", new { id = id });
+                        await _testService.UpdateAsync(test);
+
+                        TempData["SuccessMessage"] = $"Тест \"{test.Title}\" успешно обновлен!";
+                        return RedirectToAction("Details", new { id = id });
+                    }
                 }
 
                 // Если ошибка, загружаем данные для формы
@@ -327,6 +367,20 @@ namespace OnlineTutor3.Web.Controllers
                 {
                     ViewBag.Assignment = assignment;
                 }
+
+                // Загружаем список доступных заданий учителя для выпадающего списка (только для предмета "Русский язык")
+                var allAssignments = await _assignmentService.GetByTeacherIdAsync(currentUser.Id) ?? new List<Assignment>();
+                var russianLanguageAssignments = new List<Assignment>();
+                foreach (var ass in allAssignments)
+                {
+                    var subject = await _subjectService.GetByIdAsync(ass.SubjectId);
+                    if (subject != null && subject.Name.Equals("Русский язык", StringComparison.OrdinalIgnoreCase))
+                    {
+                        russianLanguageAssignments.Add(ass);
+                    }
+                }
+                ViewBag.Assignments = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(russianLanguageAssignments, "Id", "Title", model.AssignmentId);
+
                 ViewBag.TestId = id;
 
                 return View(model);

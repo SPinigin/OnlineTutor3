@@ -3,6 +3,7 @@
     ViewData["Title"] = "Редактирование классического теста";
     var assignment = ViewBag.Assignment as OnlineTutor3.Domain.Entities.Assignment;
     var testId = ViewBag.TestId as int?;
+    var assignments = ViewBag.Assignments as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
 }
 
 <div class="row justify-content-center">
@@ -24,8 +25,17 @@
 
                 <form asp-action="Edit" method="post">
                     <input type="hidden" name="id" value="@testId" />
-                    <input asp-for="AssignmentId" type="hidden" />
                     <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="AssignmentId" class="form-label form-label-modern">
+                            <i class="fas fa-tasks"></i> Задание <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="AssignmentId" asp-items="assignments" class="form-select form-control-modern">
+                            <option value="">-- Выберите задание --</option>
+                        </select>
+                        <span asp-validation-for="AssignmentId" class="text-danger"></span>
+                    </div>
 
                     <div class="mb-3">
                         <label asp-for="Title" class="form-label form-label-modern">
