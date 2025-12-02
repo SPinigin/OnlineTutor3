@@ -101,7 +101,6 @@
                     await saveFunction(questionId, answer);
                     showSaveIndicator(true);
                 } catch (error) {
-                    console.error('Ошибка сохранения:', error);
                     showSaveIndicator(false, 'Ошибка сохранения. Попробуйте еще раз.');
                 } finally {
                     isSaving = false;

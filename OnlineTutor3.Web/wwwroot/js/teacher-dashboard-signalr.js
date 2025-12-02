@@ -10,8 +10,6 @@ class TeacherDashboardSignalR {
         this.isConnected = false;
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
-        
-        console.log('🎯 Создан Dashboard SignalR для учителя:', teacherId);
     }
 
     /**
@@ -19,8 +17,6 @@ class TeacherDashboardSignalR {
      */
     async start() {
         try {
-            console.log('🔌 Подключение Dashboard SignalR...');
-            
             // Проверяем доступность библиотеки
             if (typeof signalR === 'undefined') {
                 throw new Error('SignalR библиотека не загружена!');
@@ -46,18 +42,16 @@ class TeacherDashboardSignalR {
             
             // Подключаемся
             await this.connection.start();
-            console.log('✅ SignalR подключен');
             
             // Присоединяемся к группе учителя
             await this.connection.invoke("JoinTeacherDashboard", this.teacherId);
-            console.log('✅ Присоединились к группе учителя:', this.teacherId);
             
             this.isConnected = true;
             this.reconnectAttempts = 0;
             this.showConnectionStatus('connected');
             
         } catch (err) {
-            console.error("❌ Ошибка подключения Dashboard SignalR:", err);
+            console.error("Ошибка подключения Dashboard SignalR:", err);
             this.showConnectionStatus('error');
             this.scheduleReconnect();
         }
@@ -67,51 +61,40 @@ class TeacherDashboardSignalR {
      * Настройка обработчиков событий
      */
     setupEventHandlers() {
-        console.log('📡 Настройка обработчиков событий Dashboard...');
-        
         // ✅ ГЛАВНОЕ СОБЫТИЕ: Активность студента по любому тесту
         this.connection.on("StudentTestActivity", (data) => {
-            console.log("📬 [DASHBOARD] Получена активность:", data);
             this.handleTestActivity(data);
         });
 
         // Обработчик переподключения
         this.connection.onreconnecting((error) => {
-            console.warn("⚠️ Dashboard SignalR переподключается...", error);
             this.isConnected = false;
             this.showConnectionStatus('reconnecting');
         });
 
         // Обработчик успешного переподключения
         this.connection.onreconnected((connectionId) => {
-            console.log("✅ Dashboard SignalR переподключен:", connectionId);
             this.isConnected = true;
             this.reconnectAttempts = 0;
             this.showConnectionStatus('connected');
             
             // Заново присоединяемся к группе учителя
             this.connection.invoke("JoinTeacherDashboard", this.teacherId)
-                .then(() => console.log('✅ Повторно присоединились к группе учителя'))
-                .catch(err => console.error("❌ Ошибка повторного присоединения:", err));
+                .catch(err => console.error("Ошибка повторного присоединения:", err));
         });
 
         // Обработчик закрытия соединения
         this.connection.onclose((error) => {
-            console.error("❌ Dashboard SignalR отключен:", error);
             this.isConnected = false;
             this.showConnectionStatus('disconnected');
             this.scheduleReconnect();
         });
-        
-        console.log('✅ Обработчики Dashboard настроены');
     }
 
     /**
      * Обработка активности студента
      */
     handleTestActivity(data) {
-        console.log('🎬 Обработка активности:', data.action, data);
-
         var message = '';
         var notificationType = 'info';
         var isTimeout = false;
@@ -149,8 +132,6 @@ class TeacherDashboardSignalR {
         // Показываем уведомление только если сообщение не пустое
         if (message) {
             this.showNotification(message, notificationType, data, isTimeout);
-        } else {
-            console.warn('⚠️ Пустое сообщение для уведомления, action:', data.action);
         }
 
         // Воспроизводим звук (опционально)
@@ -172,11 +153,8 @@ class TeacherDashboardSignalR {
      * Показать уведомление
      */
     showNotification(message, type, data, isTimeout = false) {
-        console.log('📣 Уведомление:', type, message, 'Data:', data);
-        
         // Проверяем, что message не пустой
         if (!message || message.trim() === '') {
-            console.warn('⚠️ Попытка показать уведомление с пустым сообщением');
             return;
         }
         
@@ -231,8 +209,6 @@ class TeacherDashboardSignalR {
      * Добавить активность в ленту
      */
     addToActivityFeed(data) {
-        console.log('➕ Добавление активности в ленту');
-
         var activity = {
             testId: data.testId,
             testResultId: data.testResultId || null,
@@ -250,8 +226,6 @@ class TeacherDashboardSignalR {
 
         if (typeof prependActivity === 'function') {
             prependActivity(activity);
-        } else {
-            console.warn('⚠️ Функция prependActivity не найдена');
         }
     }
 
@@ -259,8 +233,6 @@ class TeacherDashboardSignalR {
      * Обновить счетчики в таблице тестов
      */
     updateTestCard(data) {
-        console.log('📊 Обновление счетчиков теста:', data.testId, data.testType);
-
         var completedBadge = document.querySelector(
             '.test-count-completed[data-test-id="' + data.testId + '"][data-test-type="' + data.testType + '"]'
         );
@@ -284,8 +256,6 @@ class TeacherDashboardSignalR {
                     progressBadge.textContent = inProgress - 1;
                 }
                 
-                console.log('✅ Счетчики обновлены: завершено +1, в процессе -1');
-                
             } else if (data.action === 'started') {
                 // Увеличиваем в процессе
                 var inProgress = parseInt(progressBadge.textContent) || 0;
@@ -294,11 +264,7 @@ class TeacherDashboardSignalR {
                 setTimeout(function() {
                     progressBadge.classList.remove('badge-pulse');
                 }, 600);
-                
-                console.log('✅ Счетчики обновлены: в процессе +1');
             }
-        } else {
-            console.warn('⚠️ Бейджи счетчиков не найдены для теста:', data.testId, data.testType);
         }
     }
 
@@ -346,7 +312,6 @@ class TeacherDashboardSignalR {
     showConnectionStatus(status) {
         var statusElement = document.getElementById('signalr-status');
         if (!statusElement) {
-            console.warn('⚠️ Элемент signalr-status не найден');
             return;
         }
 
@@ -378,8 +343,6 @@ class TeacherDashboardSignalR {
         statusElement.innerHTML = 
             '<i class="fas ' + config.icon + ' me-1"></i>' +
             '<span>' + config.text + '</span>';
-        
-        console.log('📊 Статус Dashboard:', status);
     }
 
     /**
@@ -387,8 +350,6 @@ class TeacherDashboardSignalR {
      */
     scheduleReconnect() {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-            console.error("❌ Превышено максимальное количество попыток переподключения");
-            
             var statusElement = document.getElementById('signalr-status');
             if (statusElement) {
                 statusElement.innerHTML = 
@@ -404,9 +365,6 @@ class TeacherDashboardSignalR {
         this.reconnectAttempts++;
         var delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
         
-        console.log('🔄 Попытка переподключения Dashboard ' + this.reconnectAttempts + '/' + 
-            this.maxReconnectAttempts + ' через ' + delay + 'мс');
-        
         var self = this;
         setTimeout(function() {
             self.start();
@@ -419,12 +377,10 @@ class TeacherDashboardSignalR {
     async stop() {
         if (this.connection) {
             try {
-                console.log('🛑 Остановка Dashboard SignalR...');
                 await this.connection.invoke("LeaveTeacherDashboard", this.teacherId);
                 await this.connection.stop();
-                console.log("⏹️ Dashboard SignalR остановлен");
             } catch (err) {
-                console.error("❌ Ошибка остановки Dashboard SignalR:", err);
+                console.error("Ошибка остановки Dashboard SignalR:", err);
             }
         }
     }
@@ -436,12 +392,10 @@ class TeacherDashboardSignalR {
  * Открыть модальное окно с результатом теста
  */
 window.showTestResultModal = function(testType, testResultId, studentName) {
-    console.log('📄 Открытие модального окна результата:', { testType, testResultId, studentName });
-
     // Получаем или создаем модальное окно
     var modal = document.getElementById('testResultModal');
     if (!modal) {
-        console.error('❌ Модальное окно testResultModal не найдено!');
+        console.error('Модальное окно testResultModal не найдено');
         return;
     }
 
@@ -475,8 +429,6 @@ window.showTestResultModal = function(testType, testResultId, studentName) {
  * Загрузка результата теста
  */
 function loadTestResult(testType, testResultId) {
-    console.log('📡 Загрузка результата теста:', testType, testResultId);
-
     fetch('/TeacherDashboard/GetTestResult?testType=' + encodeURIComponent(testType) + '&testResultId=' + testResultId)
         .then(async response => {
             if (!response.ok) {
@@ -505,7 +457,6 @@ function loadTestResult(testType, testResultId) {
             return response.text();
         })
         .then(html => {
-            console.log('✅ Результат загружен');
             var modalBody = document.getElementById('testResultModalBody');
             if (modalBody) {
                 modalBody.innerHTML = html;
@@ -515,7 +466,7 @@ function loadTestResult(testType, testResultId) {
             }
         })
         .catch(error => {
-            console.error('❌ Ошибка загрузки результата:', error);
+            console.error('Ошибка загрузки результата:', error);
             var modalBody = document.getElementById('testResultModalBody');
             if (modalBody) {
                 modalBody.innerHTML = 
@@ -535,8 +486,6 @@ function loadTestResult(testType, testResultId) {
  * Инициализация скриптов внутри результата
  */
 function initializeResultScripts() {
-    console.log('🔧 Инициализация скриптов результата');
-
     // Анимация круговой диаграммы
     var circle = document.querySelector('#testResultModal .result-circle circle:nth-child(2)');
     if (circle) {
@@ -565,12 +514,6 @@ function initializeResultScripts() {
         if (filterCheckbox.checked) {
             applyFilter();
         }
-    }
-
-    // Инициализация аккордеонов (для классических тестов)
-    var accordions = document.querySelectorAll('#testResultModal .accordion-button');
-    if (accordions.length > 0) {
-        console.log('✅ Найдено аккордеонов:', accordions.length);
     }
 }
 
