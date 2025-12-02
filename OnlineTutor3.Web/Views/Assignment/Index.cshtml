@@ -4,13 +4,13 @@
     var assignmentsWithTests = ViewBag.AssignmentsWithTests as Dictionary<int, OnlineTutor3.Web.ViewModels.AssignmentTestsViewModel> ?? new Dictionary<int, OnlineTutor3.Web.ViewModels.AssignmentTestsViewModel>();
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <h4 class="mb-0 d-flex align-items-center gap-2">
-        <i class="fas fa-tasks text-primary"></i>
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 page-header">
+    <h4 class="mb-0 d-flex align-items-center gap-2 page-header-title">
+        <i class="fas fa-tasks gradient-icon-blue"></i>
         <span>Управление заданиями и тестами</span>
     </h4>
     <div>
-        <a asp-action="Create" class="btn btn-success">
+        <a asp-action="Create" class="btn btn-modern-success">
             <i class="fas fa-plus"></i> Создать задание
         </a>
     </div>
@@ -18,55 +18,59 @@
 
 @if (!Model.Any())
 {
-    <div class="text-center py-5">
-        <i class="fas fa-tasks text-muted" style="font-size: 4rem;"></i>
-        <h4 class="mt-3 text-muted">У вас пока нет заданий</h4>
-        <p class="text-muted">Создайте свое первое задание для начала работы с тестами</p>
-        <a asp-action="Create" class="btn btn-primary">
+    <div class="empty-state-large">
+        <i class="fas fa-tasks empty-state-icon"></i>
+        <h4 class="mt-3 empty-state-title">У вас пока нет заданий</h4>
+        <p class="empty-state-text">Создайте свое первое задание для начала работы с тестами</p>
+        <a asp-action="Create" class="btn btn-modern-primary">
             <i class="fas fa-plus"></i> Создать первое задание
         </a>
     </div>
 }
 else
 {
-    <div class="row mb-2 align-items-center">
-        <div class="col-12 col-md-4 mb-2 mb-md-0">
-            <small class="text-muted">
-                <i class="fas fa-tasks"></i> Всего заданий: @Model.Count()
-            </small>
-        </div>
-        <div class="col-12 col-md-4 mb-2 mb-md-0">
-            <div class="input-group input-group-sm">
-                <span class="input-group-text bg-white">
-                    <i class="fas fa-search text-muted"></i>
-                </span>
-                <input type="text" 
-                       id="searchInput" 
-                       class="form-control form-control-sm" 
-                       placeholder="Поиск по названию..."
-                       autocomplete="off">
-            </div>
-        </div>
-        <div class="col-12 col-md-4">
-            <div class="input-group input-group-sm">
-                <span class="input-group-text bg-white">
-                    <i class="fas fa-filter text-muted"></i>
-                </span>
-                <select id="subjectFilter" class="form-select form-select-sm">
-                    <option value="">Все предметы</option>
-                @if (ViewBag.Subjects != null)
-                {
-                    @foreach (var subject in (SelectList)ViewBag.Subjects)
-                    {
-                        <option value="@subject.Value">@subject.Text</option>
-                    }
-                }
-                </select>
+    <div class="card shadow-sm border-0 mb-3 search-filter-card">
+        <div class="card-body py-2 px-3">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-4 mb-2 mb-md-0">
+                    <small class="text-muted-modern">
+                        <i class="fas fa-tasks text-muted-modern me-1"></i> Всего заданий: @Model.Count()
+                    </small>
+                </div>
+                <div class="col-12 col-md-4 mb-2 mb-md-0">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted-modern"></i>
+                        </span>
+                        <input type="text" 
+                               id="searchInput" 
+                               class="form-control form-control-sm border-start-0 form-control-modern" 
+                               placeholder="Поиск по названию..."
+                               autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-filter text-muted-modern"></i>
+                        </span>
+                        <select id="subjectFilter" class="form-select form-select-sm border-start-0 form-control-modern">
+                            <option value="">Все предметы</option>
+                        @if (ViewBag.Subjects != null)
+                        {
+                            @foreach (var subject in (SelectList)ViewBag.Subjects)
+                            {
+                                <option value="@subject.Value">@subject.Text</option>
+                            }
+                        }
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="accordion" id="assignmentsAccordion">
+    <div class="accordion accordion-modern" id="assignmentsAccordion">
         @foreach (var assignment in Model)
         {
             var assignmentData = assignmentsWithTests.ContainsKey(assignment.Id) 
@@ -83,7 +87,7 @@ else
 
             <div class="accordion-item mb-1 assignment-item" data-assignment-id="@assignment.Id" data-subject-id="@assignment.SubjectId">
                 <h2 class="accordion-header" id="@headingId">
-                    <button class="accordion-button collapsed py-2" 
+                    <button class="accordion-button collapsed accordion-button-modern py-2" 
                             type="button" 
                             data-bs-toggle="collapse" 
                             data-bs-target="#@collapseId" 
@@ -92,13 +96,13 @@ else
                         <div class="d-flex justify-content-between align-items-center w-100 me-2">
                             <div class="d-flex align-items-center flex-grow-1">
                                 <div class="me-2">
-                                    <strong class="small">@assignment.Title</strong>
+                                    <strong class="small text-dark-modern">@assignment.Title</strong>
                                 </div>
-                                <span class="badge bg-info badge-sm me-1">@subjectName</span>
-                                <span class="badge bg-@(assignment.IsActive ? "success" : "secondary") badge-sm me-1">
+                                <span class="badge badge-modern-info badge-sm me-1">@subjectName</span>
+                                <span class="badge badge-modern-@(assignment.IsActive ? "success" : "secondary") badge-sm me-1">
                                     @(assignment.IsActive ? "Активно" : "Неактивно")
                                 </span>
-                                <span class="badge bg-primary badge-sm">
+                                <span class="badge badge-modern-primary badge-sm">
                                     <i class="fas fa-clipboard-list"></i> @totalTests
                                 </span>
                             </div>
@@ -109,35 +113,35 @@ else
                      class="accordion-collapse collapse" 
                      aria-labelledby="@headingId" 
                      data-bs-parent="#assignmentsAccordion">
-                    <div class="accordion-body p-2">
+                    <div class="accordion-body accordion-body-modern p-2">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div>
-                                <small class="text-muted">
-                                    <i class="fas fa-book"></i> @subjectName
+                                <small class="text-muted-modern">
+                                    <i class="fas fa-book text-muted-modern"></i> @subjectName
                                     @if (assignment.DueDate.HasValue)
                                     {
                                         <span class="ms-2">
-                                            <i class="fas fa-calendar"></i> До: @assignment.DueDate.Value.ToString("dd.MM.yyyy HH:mm")
+                                            <i class="fas fa-calendar text-muted-modern"></i> До: @assignment.DueDate.Value.ToString("dd.MM.yyyy HH:mm")
                                         </span>
                                     }
                                 </small>
                             </div>
                             <div class="d-flex gap-1">
-                                <a asp-action="Details" asp-route-id="@assignment.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                <a asp-action="Details" asp-route-id="@assignment.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a asp-action="Edit" asp-route-id="@assignment.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                <a asp-action="Edit" asp-route-id="@assignment.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a asp-action="Delete" asp-route-id="@assignment.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                <a asp-action="Delete" asp-route-id="@assignment.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <small class="text-muted">
-                                <i class="fas fa-clipboard-list"></i> Тесты (@totalTests)
+                            <small class="text-muted-modern">
+                                <i class="fas fa-clipboard-list text-muted-modern"></i> Тесты (@totalTests)
                             </small>
                             <div class="d-flex gap-1">
                                 @{
@@ -145,17 +149,17 @@ else
                                 }
                                 @if (isRussianLanguage)
                                 {
-                                    <a asp-controller="SpellingTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-outline-success" title="Орфография">
+                                    <a asp-controller="SpellingTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-modern-outline-success" title="Орфография">
                                         <i class="fas fa-plus"></i> <i class="fas fa-spell-check"></i>
                                     </a>
-                                    <a asp-controller="PunctuationTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-outline-info" title="Пунктуация">
+                                    <a asp-controller="PunctuationTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-modern-outline-info" title="Пунктуация">
                                         <i class="fas fa-plus"></i> <i class="fas fa-quote-right"></i>
                                     </a>
-                                    <a asp-controller="OrthoeopyTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-outline-warning" title="Орфоэпия">
+                                    <a asp-controller="OrthoeopyTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-modern-outline-warning" title="Орфоэпия">
                                         <i class="fas fa-plus"></i> <i class="fas fa-volume-up"></i>
                                     </a>
                                 }
-                                <a asp-controller="RegularTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-outline-primary" title="Классический">
+                                <a asp-controller="RegularTest" asp-action="Create" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-modern-outline-primary" title="Классический">
                                     <i class="fas fa-plus"></i> <i class="fas fa-clipboard-check"></i>
                                 </a>
                             </div>
@@ -163,15 +167,15 @@ else
 
                         @if (totalTests == 0)
                         {
-                            <div class="text-center py-3 bg-light rounded">
-                                <small class="text-muted">В этом задании пока нет тестов</small>
+                            <div class="empty-state-small">
+                                <small class="empty-state-text">В этом задании пока нет тестов</small>
                             </div>
                         }
                         else
                         {
                             <div class="table-responsive">
-                                <table class="table table-sm table-hover mb-0">
-                                    <thead class="table-light">
+                                <table class="table modern-table table-sm mb-0">
+                                    <thead>
                                         <tr>
                                             <th style="width: 5%;">Тип</th>
                                             <th style="width: 35%;">Название</th>
@@ -187,43 +191,43 @@ else
                                         {
                                             @foreach (var test in assignmentData.SpellingTests)
                                             {
-                                                <tr class="test-row" data-details-url="@Url.Action("Details", "SpellingTest", new { id = test.Id })" style="cursor: pointer;">
+                                                <tr class="test-row" data-details-url="@Url.Action("Details", "SpellingTest", new { id = test.Id })">
                                                     <td>
-                                                        <span class="badge bg-success">
+                                                        <span class="badge badge-modern-success">
                                                             <i class="fas fa-spell-check"></i>
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <small><strong>@test.Title</strong></small>
+                                                        <small><strong class="text-dark-modern">@test.Title</strong></small>
                                                         @if (!string.IsNullOrEmpty(test.Description))
                                                         {
                                                             <br>
-                                                            <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                                            <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                                         }
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@(assignmentData?.SpellingTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.SpellingTestQuestionCounts[test.Id] : 0)</small>
+                                                        <small class="text-muted-modern">@(assignmentData?.SpellingTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.SpellingTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                                        <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();">
                                                         <div class="d-flex gap-1 justify-content-center">
-                                                            <a asp-controller="TestAnalytics" asp-action="Spelling" asp-route-id="@test.Id" class="btn btn-sm btn-outline-warning" title="Аналитика">
+                                                            <a asp-controller="TestAnalytics" asp-action="Spelling" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-warning" title="Аналитика">
                                                                 <i class="fas fa-chart-bar"></i>
                                                             </a>
-                                                            <a asp-controller="SpellingTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                                            <a asp-controller="SpellingTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                                                 <i class="fas fa-eye"></i>
                                                             </a>
-                                                            <a asp-controller="SpellingTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                                            <a asp-controller="SpellingTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-                                                            <a asp-controller="SpellingTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                                            <a asp-controller="SpellingTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                                                 <i class="fas fa-trash"></i>
                                                             </a>
                                                         </div>
@@ -237,43 +241,43 @@ else
                                         {
                                             @foreach (var test in assignmentData.PunctuationTests)
                                             {
-                                                <tr class="test-row" data-details-url="@Url.Action("Details", "PunctuationTest", new { id = test.Id })" style="cursor: pointer;">
+                                                <tr class="test-row" data-details-url="@Url.Action("Details", "PunctuationTest", new { id = test.Id })" >
                                                     <td>
-                                                        <span class="badge bg-info">
+                                                        <span class="badge badge-modern-info">
                                                             <i class="fas fa-quote-right"></i>
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <small><strong>@test.Title</strong></small>
+                                                        <small><strong class="text-dark-modern">@test.Title</strong></small>
                                                         @if (!string.IsNullOrEmpty(test.Description))
                                                         {
                                                             <br>
-                                                            <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                                            <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                                         }
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@(assignmentData?.PunctuationTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.PunctuationTestQuestionCounts[test.Id] : 0)</small>
+                                                        <small class="text-muted-modern">@(assignmentData?.PunctuationTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.PunctuationTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                                        <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();">
                                                         <div class="d-flex gap-1 justify-content-center">
-                                                            <a asp-controller="TestAnalytics" asp-action="Punctuation" asp-route-id="@test.Id" class="btn btn-sm btn-outline-warning" title="Аналитика">
+                                                            <a asp-controller="TestAnalytics" asp-action="Punctuation" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-warning" title="Аналитика">
                                                                 <i class="fas fa-chart-bar"></i>
                                                             </a>
-                                                            <a asp-controller="PunctuationTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                                            <a asp-controller="PunctuationTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                                                 <i class="fas fa-eye"></i>
                                                             </a>
-                                                            <a asp-controller="PunctuationTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                                            <a asp-controller="PunctuationTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-                                                            <a asp-controller="PunctuationTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                                            <a asp-controller="PunctuationTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                                                 <i class="fas fa-trash"></i>
                                                             </a>
                                                         </div>
@@ -287,43 +291,43 @@ else
                                         {
                                             @foreach (var test in assignmentData.OrthoeopyTests)
                                             {
-                                                <tr class="test-row" data-details-url="@Url.Action("Details", "OrthoeopyTest", new { id = test.Id })" style="cursor: pointer;">
+                                                <tr class="test-row" data-details-url="@Url.Action("Details", "OrthoeopyTest", new { id = test.Id })" >
                                                     <td>
-                                                        <span class="badge bg-warning text-dark">
+                                                        <span class="badge badge-modern-warning text-dark">
                                                             <i class="fas fa-volume-up"></i>
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <small><strong>@test.Title</strong></small>
+                                                        <small><strong class="text-dark-modern">@test.Title</strong></small>
                                                         @if (!string.IsNullOrEmpty(test.Description))
                                                         {
                                                             <br>
-                                                            <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                                            <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                                         }
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@(assignmentData?.OrthoeopyTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.OrthoeopyTestQuestionCounts[test.Id] : 0)</small>
+                                                        <small class="text-muted-modern">@(assignmentData?.OrthoeopyTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.OrthoeopyTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                                        <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();">
                                                         <div class="d-flex gap-1 justify-content-center">
-                                                            <a asp-controller="TestAnalytics" asp-action="Orthoeopy" asp-route-id="@test.Id" class="btn btn-sm btn-outline-warning" title="Аналитика">
+                                                            <a asp-controller="TestAnalytics" asp-action="Orthoeopy" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-warning" title="Аналитика">
                                                                 <i class="fas fa-chart-bar"></i>
                                                             </a>
-                                                            <a asp-controller="OrthoeopyTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                                            <a asp-controller="OrthoeopyTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                                                 <i class="fas fa-eye"></i>
                                                             </a>
-                                                            <a asp-controller="OrthoeopyTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                                            <a asp-controller="OrthoeopyTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-                                                            <a asp-controller="OrthoeopyTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                                            <a asp-controller="OrthoeopyTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                                                 <i class="fas fa-trash"></i>
                                                             </a>
                                                         </div>
@@ -337,43 +341,43 @@ else
                                         {
                                             @foreach (var test in assignmentData.RegularTests)
                                             {
-                                                <tr class="test-row" data-details-url="@Url.Action("Details", "RegularTest", new { id = test.Id })" style="cursor: pointer;">
+                                                <tr class="test-row" data-details-url="@Url.Action("Details", "RegularTest", new { id = test.Id })" >
                                                     <td>
-                                                        <span class="badge bg-primary">
+                                                        <span class="badge badge-modern-primary">
                                                             <i class="fas fa-clipboard-check"></i>
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <small><strong>@test.Title</strong></small>
+                                                        <small><strong class="text-dark-modern">@test.Title</strong></small>
                                                         @if (!string.IsNullOrEmpty(test.Description))
                                                         {
                                                             <br>
-                                                            <small class="text-muted">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                                            <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
                                                         }
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@(assignmentData?.RegularTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.RegularTestQuestionCounts[test.Id] : 0)</small>
+                                                        <small class="text-muted-modern">@(assignmentData?.RegularTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.RegularTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <small>@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                                        <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();">
                                                         <div class="d-flex gap-1 justify-content-center">
-                                                            <a asp-controller="TestAnalytics" asp-action="Regular" asp-route-id="@test.Id" class="btn btn-sm btn-outline-warning" title="Аналитика">
+                                                            <a asp-controller="TestAnalytics" asp-action="Regular" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-warning" title="Аналитика">
                                                                 <i class="fas fa-chart-bar"></i>
                                                             </a>
-                                                            <a asp-controller="RegularTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-outline-info" title="Подробнее">
+                                                            <a asp-controller="RegularTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                                                 <i class="fas fa-eye"></i>
                                                             </a>
-                                                            <a asp-controller="RegularTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                                            <a asp-controller="RegularTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-                                                            <a asp-controller="RegularTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                                            <a asp-controller="RegularTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                                                 <i class="fas fa-trash"></i>
                                                             </a>
                                                         </div>
