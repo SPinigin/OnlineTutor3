@@ -506,7 +506,6 @@
             updateProgress();
             updateNavigation();
 
-            // Прокрутка вверх на мобильных
             if ($(window).width() < 768) {
                 $('html, body').animate({
                     scrollTop: $('.question-card.active').offset().top - 100
@@ -522,7 +521,6 @@
             $('#currentQuestion').text(currentQuestionIndex + 1);
             $('#answeredCount, #answeredCountModal').text(answeredCount);
 
-            // Обновляем индикаторы в навигаторе
             $('.question-nav-btn').each(function() {
                 const idx = $(this).data('question-index');
                 const questionId = $(`.question-card[data-question-index="${idx}"]`).data('question-id');
@@ -552,7 +550,6 @@
         }
 
         function showFinishModal() {
-            // Обновляем информацию в модальном окне
             $('#currentQuestionModal').text(currentQuestionIndex + 1);
             $('#answeredCountModal').text(Object.keys(answers).length);
             

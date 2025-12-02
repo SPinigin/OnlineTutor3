@@ -65,7 +65,6 @@ namespace OnlineTutor3.Application.Services
             var timeLimit = TimeSpan.FromMinutes(timeLimitMinutes);
             var buffer = TimeSpan.FromSeconds(bufferSeconds);
 
-            // Разрешаем небольшой буфер для задержек сети
             if (elapsed > timeLimit + buffer)
             {
                 _logger.LogWarning("Попытка продолжить тест после истечения времени. StartedAt: {StartedAt}, TimeLimit: {TimeLimit}, Elapsed: {Elapsed}",
@@ -83,7 +82,7 @@ namespace OnlineTutor3.Application.Services
         {
             if (string.IsNullOrWhiteSpace(answer))
             {
-                return true; // Пустой ответ допустим
+                return true;
             }
 
             if (answer.Length > maxLength)
@@ -93,7 +92,6 @@ namespace OnlineTutor3.Application.Services
                 return false;
             }
 
-            // Проверка на потенциально опасные символы (базовая защита)
             var dangerousPatterns = new[] { "<script", "javascript:", "onerror=", "onload=" };
             var answerLower = answer.ToLowerInvariant();
             

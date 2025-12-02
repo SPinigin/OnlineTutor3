@@ -17,7 +17,6 @@ namespace OnlineTutor3.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Если пользователь залогинен, перенаправляем его на соответствующую страницу
             if (User.Identity?.IsAuthenticated == true)
             {
                 var currentUser = await _userManager.GetUserAsync(User);
@@ -34,7 +33,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
             }
 
-            // Если пользователь не залогинен, показываем общую главную страницу
             return View();
         }
 

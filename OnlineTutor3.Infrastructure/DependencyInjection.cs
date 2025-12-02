@@ -14,15 +14,12 @@ namespace OnlineTutor3.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            // Регистрация DatabaseConnection
             services.AddScoped<IDatabaseConnection>(serviceProvider =>
             {
                 var config = serviceProvider.GetRequiredService<IConfiguration>();
                 var logger = LogManager.GetLogger(typeof(DatabaseConnection).FullName ?? nameof(DatabaseConnection));
                 return new DatabaseConnection(config, logger);
             });
-
-            // Регистрация репозиториев
             services.AddScoped<ISubjectRepository, SubjectRepository>();
             services.AddScoped<IClassRepository, ClassRepository>();
             services.AddScoped<IStudentRepository, StudentRepository>();
@@ -50,37 +47,30 @@ namespace OnlineTutor3.Infrastructure
             services.AddScoped<IOrthoeopyAnswerRepository, OrthoeopyAnswerRepository>();
             services.AddScoped<IRegularAnswerRepository, RegularAnswerRepository>();
 
-            // Настройка Identity
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
-                // Настройки пароля
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 6;
 
-                // Настройки пользователя
                 options.User.RequireUniqueEmail = true;
 
-                // Настройки подтверждения email
                 // Временно отключено для продакшн, так как БД создана через SQL-скрипт
                 options.SignIn.RequireConfirmedEmail = false;
-
-                // Настройки блокировки
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
                 options.Lockout.MaxFailedAccessAttempts = 10;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-            // ApplicationDbContext для Identity
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 var connectionString = configuration.GetConnectionString("DefaultConnection");
                 options.UseSqlServer(connectionString, sqlOptions =>
                 {
-                    sqlOptions.CommandTimeout(30); // Таймаут 30 секунд
+                    sqlOptions.CommandTimeout(30);
                     sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 3,
                         maxRetryDelay: TimeSpan.FromSeconds(5),
@@ -88,7 +78,6 @@ namespace OnlineTutor3.Infrastructure
                 });
             });
 
-            // Настройка cookie
             services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/Account/Login";

@@ -124,7 +124,6 @@
                     {
                         if (!string.IsNullOrEmpty(answer.StudentAnswer))
                         {
-                            // Для MultipleChoice
                             selectedIds = answer.StudentAnswer.Split(',', StringSplitOptions.RemoveEmptyEntries)
                                 .Select(id => int.TryParse(id.Trim(), out var parsed) ? parsed : 0)
                                 .Where(id => id > 0)
@@ -132,7 +131,6 @@
                         }
                         else if (answer.SelectedOptionId.HasValue)
                         {
-                            // Для SingleChoice и TrueFalse
                             selectedIds.Add(answer.SelectedOptionId.Value);
                         }
                     }

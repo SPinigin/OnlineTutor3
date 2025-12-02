@@ -186,7 +186,6 @@ else
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @* Тесты по орфографии *@
                                         @if (assignmentData?.SpellingTests != null && assignmentData.SpellingTests.Any())
                                         {
                                             @foreach (var test in assignmentData.SpellingTests)
@@ -237,7 +236,6 @@ else
                                             }
                                         }
 
-                                        @* Тесты по пунктуации *@
                                         @if (assignmentData?.PunctuationTests != null && assignmentData.PunctuationTests.Any())
                                         {
                                             @foreach (var test in assignmentData.PunctuationTests)
@@ -288,7 +286,6 @@ else
                                             }
                                         }
 
-                                        @* Тесты по орфоэпии *@
                                         @if (assignmentData?.OrthoeopyTests != null && assignmentData.OrthoeopyTests.Any())
                                         {
                                             @foreach (var test in assignmentData.OrthoeopyTests)
@@ -339,7 +336,6 @@ else
                                             }
                                         }
 
-                                        @* Классические тесты *@
                                         @if (assignmentData?.RegularTests != null && assignmentData.RegularTests.Any())
                                         {
                                             @foreach (var test in assignmentData.RegularTests)

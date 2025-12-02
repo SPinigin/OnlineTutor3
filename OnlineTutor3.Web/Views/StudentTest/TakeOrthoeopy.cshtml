@@ -435,7 +435,6 @@
             updateProgress();
             updateNavigation();
 
-            // Прокрутка вверх на мобильных
             if ($(window).width() < 768) {
                 $('html, body').animate({
                     scrollTop: $('.question-card.active').offset().top - 100
@@ -480,7 +479,6 @@
         }
 
         function showFinishModal() {
-            // Обновляем информацию в модальном окне
             $('#currentQuestionModal').text(currentQuestionIndex + 1);
             $('#answeredCountModal').text(Object.keys(answers).length);
             
@@ -560,7 +558,6 @@
             }
         }
 
-        // Создаем варианты с ударением на каждой гласной
         for (int syllable = 1; syllable <= vowelPositions.Count; syllable++)
         {
             var vowelIndex = vowelPositions[syllable - 1];

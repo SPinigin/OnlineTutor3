@@ -166,7 +166,6 @@ else
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @* Тесты по орфографии *@
                                         @if (assignmentInfo.SpellingTests.Any())
                                         {
                                             @foreach (var test in assignmentInfo.SpellingTests)
@@ -238,7 +237,6 @@ else
                                             }
                                         }
 
-                                        @* Тесты по пунктуации *@
                                         @if (assignmentInfo.PunctuationTests.Any())
                                         {
                                             @foreach (var test in assignmentInfo.PunctuationTests)
@@ -310,7 +308,6 @@ else
                                             }
                                         }
 
-                                        @* Тесты по орфоэпии *@
                                         @if (assignmentInfo.OrthoeopyTests.Any())
                                         {
                                             @foreach (var test in assignmentInfo.OrthoeopyTests)
@@ -382,7 +379,6 @@ else
                                             }
                                         }
 
-                                        @* Классические тесты *@
                                         @if (assignmentInfo.RegularTests.Any())
                                         {
                                             @foreach (var test in assignmentInfo.RegularTests)
@@ -464,7 +460,6 @@ else
     </div>
 }
 
-<!-- Модальное окно подтверждения начала теста -->
 <div class="modal fade" id="confirmStartModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -542,7 +537,6 @@ else
 
 @section Scripts {
     <script>
-        // Функция подтверждения начала теста
         function confirmStartTest(testId, testTitle, timeLimit, testType) {
             document.getElementById('testTitle').textContent = testTitle;
             document.getElementById('testTime').textContent = timeLimit;

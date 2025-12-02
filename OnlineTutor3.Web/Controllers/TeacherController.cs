@@ -60,7 +60,6 @@ namespace OnlineTutor3.Web.Controllers
             _logger = logger;
         }
 
-        // GET: Teacher
         public async Task<IActionResult> Index()
         {
             try
@@ -78,17 +77,13 @@ namespace OnlineTutor3.Web.Controllers
                     return RedirectToAction("Index", "Home");
                 }
 
-                // Получаем статистику
                 var classes = await _classService.GetActiveByTeacherIdAsync(currentUser.Id);
                 var students = await _studentService.GetByTeacherIdAsync(currentUser.Id);
                 var assignments = await _assignmentService.GetByTeacherSubjectsAsync(currentUser.Id);
                 var activeAssignments = assignments.Where(a => a.IsActive).ToList();
 
-                // Загружаем предметы для отображения
                 var allSubjects = await _subjectService.GetAllAsync();
                 var subjectsDict = allSubjects.ToDictionary(s => s.Id, s => s.Name);
-
-                // Получаем активные тесты
                 var spellingTests = await _spellingTestService.GetActiveByTeacherIdAsync(currentUser.Id);
                 var punctuationTests = await _punctuationTestService.GetActiveByTeacherIdAsync(currentUser.Id);
                 var orthoeopyTests = await _orthoeopyTestService.GetActiveByTeacherIdAsync(currentUser.Id);
@@ -96,7 +91,6 @@ namespace OnlineTutor3.Web.Controllers
                 var totalActiveTests = spellingTests.Count() + punctuationTests.Count() + 
                                       orthoeopyTests.Count() + regularTests.Count();
 
-                // Получаем последние 10 завершенных прохождений тестов (с обработкой ошибок)
                 List<RecentTestCompletionViewModel> recentCompletions = new List<RecentTestCompletionViewModel>();
                 try
                 {
@@ -104,7 +98,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // Продолжаем работу без recentCompletions
                 }
 
                 var viewModel = new TeacherIndexViewModel
@@ -140,25 +133,19 @@ namespace OnlineTutor3.Web.Controllers
 
             try
             {
-                // Получаем тесты учителя
                 var spellingTests = await _spellingTestService.GetByTeacherIdAsync(teacherId);
                 var punctuationTests = await _punctuationTestService.GetByTeacherIdAsync(teacherId);
                 var orthoeopyTests = await _orthoeopyTestService.GetByTeacherIdAsync(teacherId);
                 var regularTests = await _regularTestService.GetByTeacherIdAsync(teacherId);
 
-                // Получаем все задания для получения предметов
                 var allAssignments = await _assignmentService.GetByTeacherSubjectsAsync(teacherId);
                 var assignmentsDict = allAssignments.ToDictionary(a => a.Id);
 
-                // Получаем все студенты учителя заранее (оптимизация)
                 var allStudents = await _studentService.GetByTeacherIdAsync(teacherId);
                 var studentsDict = allStudents.ToDictionary(s => s.Id);
 
-                // Получаем все классы заранее (оптимизация)
                 var allClasses = await _classService.GetActiveByTeacherIdAsync(teacherId);
                 var classesDict = allClasses.ToDictionary(c => c.Id);
-
-                // Получаем результаты тестов по орфографии (только завершенные, ограничиваем количество)
                 foreach (var test in spellingTests.Take(20)) // Ограничиваем до 20 тестов
                 {
                     try
@@ -216,7 +203,6 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                // Получаем результаты тестов по пунктуации (только завершенные, ограничиваем количество)
                 foreach (var test in punctuationTests.Take(20)) // Ограничиваем до 20 тестов
                 {
                     try
@@ -274,7 +260,6 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                // Получаем результаты тестов по орфоэпии (только завершенные, ограничиваем количество)
                 foreach (var test in orthoeopyTests.Take(20)) // Ограничиваем до 20 тестов
                 {
                     try
@@ -332,7 +317,6 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                // Получаем результаты классических тестов (только завершенные, ограничиваем количество)
                 foreach (var test in regularTests.Take(20)) // Ограничиваем до 20 тестов
                 {
                     try
@@ -393,10 +377,7 @@ namespace OnlineTutor3.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Критическая ошибка в GetRecentTestCompletionsAsync");
-                // Возвращаем пустой список вместо исключения
             }
-
-            // Сортируем по дате завершения (от новых к старым) и берем последние 10
             return completions
                 .OrderByDescending(c => c.CompletedAt)
                 .Take(10)

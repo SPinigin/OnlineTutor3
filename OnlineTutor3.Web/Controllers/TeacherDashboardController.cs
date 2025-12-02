@@ -68,7 +68,6 @@ namespace OnlineTutor3.Web.Controllers
             _logger = logger;
         }
 
-        // GET: TeacherDashboard
         public async Task<IActionResult> Index()
         {
             try
@@ -79,13 +78,11 @@ namespace OnlineTutor3.Web.Controllers
                     return Unauthorized();
                 }
 
-                // Получаем активные тесты учителя
                 var spellingTests = await _spellingTestService.GetActiveByTeacherIdAsync(currentUser.Id);
                 var punctuationTests = await _punctuationTestService.GetActiveByTeacherIdAsync(currentUser.Id);
                 var orthoeopyTests = await _orthoeopyTestService.GetActiveByTeacherIdAsync(currentUser.Id);
                 var regularTests = await _regularTestService.GetActiveByTeacherIdAsync(currentUser.Id);
 
-                // Ограничиваем количество для отображения (последние 20)
                 var viewModel = new TeacherDashboardViewModel
                 {
                     Teacher = currentUser,
@@ -94,8 +91,6 @@ namespace OnlineTutor3.Web.Controllers
                     OrthoeopyTests = orthoeopyTests.Take(20).ToList(),
                     RegularTests = regularTests.Take(20).ToList()
                 };
-
-                // Подсчитываем статистику
                 await CalculateStatisticsAsync(viewModel, currentUser.Id);
 
                 return View(viewModel);
@@ -124,7 +119,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 var activities = new List<TestActivityViewModel>();
 
-                // Получаем тесты учителя
                 var spellingTests = await _spellingTestService.GetByTeacherIdAsync(currentUser.Id);
                 var punctuationTests = await _punctuationTestService.GetByTeacherIdAsync(currentUser.Id);
                 var orthoeopyTests = await _orthoeopyTestService.GetByTeacherIdAsync(currentUser.Id);
@@ -140,7 +134,6 @@ namespace OnlineTutor3.Web.Controllers
                 var orthoeopyTestsDict = orthoeopyTests.ToDictionary(t => t.Id);
                 var regularTestsDict = regularTests.ToDictionary(t => t.Id);
 
-                // Получаем результаты тестов по орфографии
                 foreach (var testId in spellingTestIds)
                 {
                     var testResults = await _spellingTestResultRepository.GetByTestIdAsync(testId);
@@ -173,7 +166,6 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                // Получаем результаты тестов по пунктуации
                 foreach (var testId in punctuationTestIds)
                 {
                     var testResults = await _punctuationTestResultRepository.GetByTestIdAsync(testId);
@@ -206,7 +198,6 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                // Получаем результаты тестов по орфоэпии
                 foreach (var testId in orthoeopyTestIds)
                 {
                     var testResults = await _orthoeopyTestResultRepository.GetByTestIdAsync(testId);
@@ -239,7 +230,6 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                // Получаем результаты классических тестов
                 foreach (var testId in regularTestIds)
                 {
                     var testResults = await _regularTestResultRepository.GetByTestIdAsync(testId);
@@ -272,7 +262,6 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                // Сортируем по дате последней активности и берем последние 50
                 var sortedActivities = activities
                     .OrderByDescending(a => a.LastActivityAt)
                     .Take(50)
@@ -306,7 +295,6 @@ namespace OnlineTutor3.Web.Controllers
                     return BadRequest("Тип теста не указан");
                 }
 
-                // Загружаем результат теста и проверяем права доступа
                 object? result = null;
                 string? studentName = null;
 
@@ -316,14 +304,11 @@ namespace OnlineTutor3.Web.Controllers
                         var spellingResult = await _spellingTestResultRepository.GetByIdAsync(testResultId);
                         if (spellingResult != null)
                         {
-                            // Проверяем, что тест принадлежит учителю
                             var spellingTest = await _spellingTestService.GetByIdAsync(spellingResult.SpellingTestId);
                             if (spellingTest == null || spellingTest.TeacherId != currentUser.Id)
                             {
                                 return Forbid();
                             }
-
-                            // Загружаем данные
                             var spellingQuestions = await _spellingQuestionRepository.GetByTestIdOrderedAsync(spellingResult.SpellingTestId);
                             var spellingAnswers = await _answerService.GetSpellingAnswersAsync(testResultId);
                             var student = await _studentService.GetByIdAsync(spellingResult.StudentId);
@@ -444,7 +429,6 @@ namespace OnlineTutor3.Web.Controllers
                             var regularQuestions = await _regularQuestionRepository.GetByTestIdOrderedAsync(regularResult.RegularTestId);
                             var regularAnswers = await _answerService.GetRegularAnswersAsync(testResultId);
                             
-                            // Загружаем опции для каждого вопроса
                             var allOptions = new List<RegularQuestionOption>();
                             foreach (var question in regularQuestions)
                             {
@@ -489,10 +473,7 @@ namespace OnlineTutor3.Web.Controllers
                     return NotFound();
                 }
 
-                // Возвращаем частичное представление для модального окна
                 ViewBag.IsModal = true;
-                
-                // Возвращаем соответствующее представление в зависимости от типа теста
                 return PartialView($"~/Views/StudentTest/{testType}Result.cshtml", result);
             }
             catch (Exception ex)
@@ -512,7 +493,6 @@ namespace OnlineTutor3.Web.Controllers
                 var today = DateTime.Today;
                 var allResults = new List<TestResult>();
 
-                // Получаем тесты учителя
                 var spellingTests = await _spellingTestService.GetByTeacherIdAsync(teacherId);
                 var punctuationTests = await _punctuationTestService.GetByTeacherIdAsync(teacherId);
                 var orthoeopyTests = await _orthoeopyTestService.GetByTeacherIdAsync(teacherId);
@@ -523,7 +503,6 @@ namespace OnlineTutor3.Web.Controllers
                 var orthoeopyTestIds = orthoeopyTests.Select(t => t.Id).ToList();
                 var regularTestIds = regularTests.Select(t => t.Id).ToList();
 
-                // Получаем результаты по каждому тесту
                 foreach (var testId in spellingTestIds)
                 {
                     var results = await _spellingTestResultRepository.GetByTestIdAsync(testId);
@@ -548,7 +527,6 @@ namespace OnlineTutor3.Web.Controllers
                     allResults.AddRange(results);
                 }
 
-                // Подсчитываем статистику
                 viewModel.TotalStudentsInProgress = allResults.Count(r => !r.IsCompleted);
                 viewModel.TotalCompletedToday = allResults.Count(r => 
                     r.IsCompleted && 
@@ -558,7 +536,6 @@ namespace OnlineTutor3.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при подсчете статистики");
-                // Устанавливаем значения по умолчанию
                 viewModel.TotalStudentsInProgress = 0;
                 viewModel.TotalCompletedToday = 0;
             }

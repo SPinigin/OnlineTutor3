@@ -12,17 +12,14 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    // Настройка логирования
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
-    // Настройка сервисов
-    builder.Services.AddMemoryCache(); // Добавляем кэширование в память
+    builder.Services.AddMemoryCache();
     builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddApplication();
     builder.Services.AddWeb();
 
-    // Настройка EPPlus лицензии
     try
     {
         OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
@@ -32,15 +29,13 @@ try
         logger.Error(ex, "EPPlus license configuration failed");
     }
 
-// Регистрация сервисов импорта вопросов
-builder.Services.AddScoped<OnlineTutor3.Web.Services.SpellingQuestionImportService>();
-builder.Services.AddScoped<OnlineTutor3.Web.Services.PunctuationQuestionImportService>();
-builder.Services.AddScoped<OnlineTutor3.Web.Services.OrthoeopyQuestionImportService>();
-builder.Services.AddScoped<OnlineTutor3.Web.Services.RegularQuestionImportService>();
+    builder.Services.AddScoped<OnlineTutor3.Web.Services.SpellingQuestionImportService>();
+    builder.Services.AddScoped<OnlineTutor3.Web.Services.PunctuationQuestionImportService>();
+    builder.Services.AddScoped<OnlineTutor3.Web.Services.OrthoeopyQuestionImportService>();
+    builder.Services.AddScoped<OnlineTutor3.Web.Services.RegularQuestionImportService>();
 
     var app = builder.Build();
 
-    // Инициализация базы данных
     // ВАЖНО: Не прерываем запуск приложения, если инициализация БД не удалась
     try
     {
@@ -52,10 +47,7 @@ builder.Services.AddScoped<OnlineTutor3.Web.Services.RegularQuestionImportServic
     catch (Exception dbInitEx)
     {
         logger.Error(dbInitEx, "Ошибка при инициализации базы данных. Приложение продолжит работу, но некоторые функции могут быть недоступны.");
-        // Не бросаем исключение, чтобы приложение могло запуститься
     }
-
-    // Настройка middleware
     app.UseWeb();
 
     app.Run();
