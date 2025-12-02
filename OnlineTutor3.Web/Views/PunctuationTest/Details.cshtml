@@ -85,11 +85,11 @@
             <i class="fas fa-question-circle"></i> Вопросы (@questions.Count)
         </h5>
         <div class="d-flex gap-1">
-            <a asp-controller="PunctuationQuestion" asp-action="Create" asp-route-testId="@Model.Id" class="btn btn-sm btn-modern-success">
-                <i class="fas fa-plus"></i> Добавить вопрос
+            <a asp-controller="PunctuationQuestion" asp-action="Create" asp-route-testId="@Model.Id" class="btn btn-sm btn-modern-success" title="Добавить вопрос">
+                <i class="fas fa-plus"></i> <span class="d-none d-md-inline">Добавить вопрос</span>
             </a>
-            <a asp-action="ImportQuestions" asp-route-id="@Model.Id" class="btn btn-sm btn-modern-outline-info">
-                <i class="fas fa-file-import"></i> Импорт из Excel
+            <a asp-action="ImportQuestions" asp-route-id="@Model.Id" class="btn btn-sm btn-modern-outline-info" title="Импорт из Excel">
+                <i class="fas fa-file-import"></i> <span class="d-none d-md-inline">Импорт из Excel</span>
             </a>
         </div>
     </div>

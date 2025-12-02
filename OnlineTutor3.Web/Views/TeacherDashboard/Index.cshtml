@@ -491,117 +491,306 @@
                 });
         }
 
-        function renderActivities(activities) {
-            var tbody = document.getElementById('activity-feed');
-            if (!tbody) return;
+        // ===== ОТОБРАЖЕНИЕ АКТИВНОСТИ С ГРУППИРОВКОЙ ПО ДНЯМ =====
 
-            if (activities.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><div class="empty-state-small"><small class="empty-state-text">Нет активности</small></div></td></tr>';
+        function renderActivities(activities) {
+            displayActivities(activities);
+        }
+
+        function displayActivities(activities) {
+            var feed = document.getElementById('activity-feed');
+            var noResults = document.getElementById('noActivityResults');
+            
+            if (!activities || activities.length === 0) {
+                feed.innerHTML = 
+                    '<tr><td colspan="5" class="text-center py-5">' +
+                    '<div class="empty-state-small">' +
+                    '<small class="empty-state-text">Нет активности</small>' +
+                    '</div>' +
+                    '</td></tr>';
+                
+                if (noResults) noResults.style.display = 'none';
+                updateActivityCount(0);
                 return;
             }
 
-            tbody.innerHTML = activities.map(function(activity) {
-                var statusBadge = activity.status === 'completed' 
-                    ? '<span class="badge badge-modern-success">Завершен</span>'
-                    : activity.status === 'started'
-                    ? '<span class="badge badge-modern-info">Начат</span>'
-                    : '<span class="badge badge-modern-warning">В процессе</span>';
+            // Группируем по дням
+            var groupedActivities = groupActivitiesByDate(activities);
+            
+            var html = '';
+            var totalCount = 0;
+            
+            Object.keys(groupedActivities).forEach(function(dateKey, index) {
+                var group = groupedActivities[dateKey];
+                var isToday = index === 0; // Первая группа - сегодня
+                var isExpanded = isToday; // По умолчанию раскрыта только сегодняшняя
                 
-                var percentageBadge = activity.percentage >= 80 
-                    ? '<span class="badge badge-modern-success">' + activity.percentage.toFixed(1) + '%</span>'
-                    : activity.percentage >= 60
-                    ? '<span class="badge badge-modern-warning">' + activity.percentage.toFixed(1) + '%</span>'
-                    : '<span class="badge badge-modern-danger">' + activity.percentage.toFixed(1) + '%</span>';
-
-                var gradeBadge = activity.percentage >= 91 
-                    ? '<span class="badge badge-modern-success">5</span>'
-                    : activity.percentage >= 80
-                    ? '<span class="badge badge-modern-info">4</span>'
-                    : activity.percentage >= 60
-                    ? '<span class="badge badge-modern-warning">3</span>'
-                    : '<span class="badge badge-modern-danger">2</span>';
-
-                var testTypeIcon = {
-                    'spelling': 'fa-spell-check',
-                    'punctuation': 'fa-quote-right',
-                    'orthoeopy': 'fa-volume-up',
-                    'regular': 'fa-clipboard-check'
-                }[activity.testType] || 'fa-clipboard-list';
-
-                var testTypeIconClass = {
-                    'spelling': 'nav-link-icon',
-                    'punctuation': 'nav-link-icon-blue',
-                    'orthoeopy': 'nav-link-icon-green',
-                    'regular': 'nav-link-icon'
-                }[activity.testType] || 'nav-link-icon';
-
-                var lastActivity = new Date(activity.lastActivityAt);
-                var timeStr = lastActivity.toLocaleString('ru-RU', { 
-                    day: '2-digit', 
-                    month: '2-digit', 
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
+                html += createDateGroupHeader(group.label, group.activities.length, dateKey, isExpanded);
+                
+                group.activities.forEach(function(activity) {
+                    html += createActivityRow(activity, dateKey, isExpanded);
+                    totalCount++;
                 });
+            });
+            
+            feed.innerHTML = html;
+            if (noResults) noResults.style.display = 'none';
+            updateActivityCount(totalCount);
+        }
 
-                var duration = '';
-                if (activity.completedAt) {
-                    var start = new Date(activity.startedAt);
-                    var end = new Date(activity.completedAt);
-                    var diff = Math.floor((end - start) / 1000 / 60);
-                    duration = diff + ' мин';
+        // ===== ГРУППИРОВКА ПО ДАТАМ =====
+
+        function groupActivitiesByDate(activities) {
+            var groups = {};
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            var yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            activities.forEach(function(activity) {
+                var activityDate = new Date(activity.lastActivityAt);
+                activityDate.setHours(0, 0, 0, 0);
+                
+                var dateKey;
+                var label;
+                
+                if (activityDate.getTime() === today.getTime()) {
+                    dateKey = 'today';
+                    label = 'Сегодня';
+                } else if (activityDate.getTime() === yesterday.getTime()) {
+                    dateKey = 'yesterday';
+                    label = 'Вчера';
+                } else {
+                    dateKey = 'date_' + activityDate.getTime();
+                    label = formatDate(activityDate);
                 }
+                
+                if (!groups[dateKey]) {
+                    groups[dateKey] = {
+                        label: label,
+                        date: activityDate,
+                        activities: []
+                    };
+                }
+                
+                groups[dateKey].activities.push(activity);
+            });
+            
+            // Сортируем группы по дате (новые первыми)
+            var sortedGroups = {};
+            Object.keys(groups)
+                .sort(function(a, b) {
+                    return groups[b].date - groups[a].date;
+                })
+                .forEach(function(key) {
+                    sortedGroups[key] = groups[key];
+                });
+            
+            return sortedGroups;
+        }
 
-                var actionButton = activity.status === 'completed' && activity.testResultId
-                    ? '<button class="btn btn-sm btn-modern-outline-info" onclick="showTestResult(\'' + activity.testType + '\', ' + activity.testResultId + ', \'' + activity.studentName + '\')">' +
-                      '<i class="fas fa-eye"></i> <span class="d-none d-md-inline">Подробно</span></button>'
-                    : '';
+        // ===== СОЗДАНИЕ ЗАГОЛОВКА ГРУППЫ =====
 
-                return '<tr data-search-text="' + 
-                    (activity.studentName + ' ' + activity.testTitle).toLowerCase() + '">' +
-                    '<td>' +
-                    '<div class="d-flex align-items-center gap-2">' +
-                    '<i class="fas ' + testTypeIcon + ' ' + testTypeIconClass + '"></i>' +
-                    '<div>' +
-                    '<strong class="text-dark-modern">' + activity.studentName + '</strong> - <span class="text-dark-modern">' + activity.testTitle + '</span>' +
-                    '<br><small class="text-muted-modern">' + statusBadge + '</small>' +
-                    '</div>' +
-                    '</div>' +
-                    '</td>' +
-                    '<td class="text-center d-none d-md-table-cell">' + percentageBadge + '</td>' +
-                    '<td class="text-center">' + (activity.status === 'completed' ? gradeBadge : '<span class="text-muted-modern">-</span>') + '</td>' +
-                    '<td class="text-center d-none d-md-table-cell"><small class="text-muted-modern">' + timeStr + '</small></td>' +
-                    '<td class="text-center">' + actionButton + '</td>' +
-                    '</tr>';
-            }).join('');
+        function createDateGroupHeader(label, count, dateKey, isExpanded) {
+            var icon = isExpanded ? 'fa-chevron-down' : 'fa-chevron-right';
+            
+            return '<tr class="date-group-header" onclick="toggleDateGroup(\'' + dateKey + '\')" style="cursor: pointer; background-color: #f8f9fa;">' +
+                   '<td colspan="5" class="py-2 px-3">' +
+                   '<div class="d-flex align-items-center justify-content-between">' +
+                   '<div class="d-flex align-items-center gap-2">' +
+                   '<i class="fas ' + icon + ' text-primary date-group-icon" id="icon-' + dateKey + '"></i>' +
+                   '<strong class="text-dark-modern">' + label + '</strong>' +
+                   '<span class="badge badge-modern-secondary badge-sm">' + count + '</span>' +
+                   '</div>' +
+                   '</div>' +
+                   '</td>' +
+                   '</tr>';
+        }
+
+        // ===== СОЗДАНИЕ СТРОКИ АКТИВНОСТИ =====
+
+        function createActivityRow(activity, dateKey, isVisible) {
+            var statusBadge = activity.status === 'completed' 
+                ? '<span class="badge badge-modern-success">Завершен</span>'
+                : activity.status === 'started'
+                ? '<span class="badge badge-modern-info">Начат</span>'
+                : '<span class="badge badge-modern-warning">В процессе</span>';
+            
+            var percentageBadge = '';
+            var gradeBadge = '';
+
+            // Для завершенных тестов показываем процент и оценку
+            if (activity.status === 'completed' && activity.percentage !== undefined) {
+                var percentColor = activity.percentage >= 80 ? 'success' : 
+                                  activity.percentage >= 60 ? 'warning' : 'danger';
+                percentageBadge = '<span class="badge badge-modern-' + percentColor + '">' + 
+                               activity.percentage.toFixed(1) + '%</span>';
+
+                var grade = activity.percentage >= 91 ? 5 :
+                           activity.percentage >= 80 ? 4 :
+                           activity.percentage >= 60 ? 3 : 2;
+                var gradeColor = grade === 5 ? 'success' :
+                                grade === 4 ? 'info' :
+                                grade === 3 ? 'warning' : 'danger';
+                gradeBadge = '<span class="badge badge-modern-' + gradeColor + '">' + grade + '</span>';
+            } else {
+                percentageBadge = '<span class="text-muted-modern">—</span>';
+                gradeBadge = '<span class="text-muted-modern">—</span>';
+            }
+
+            var testTypeIcon = {
+                'spelling': 'fa-spell-check',
+                'punctuation': 'fa-quote-right',
+                'orthoeopy': 'fa-volume-up',
+                'regular': 'fa-clipboard-check'
+            }[activity.testType] || 'fa-clipboard-list';
+
+            var testTypeIconClass = {
+                'spelling': 'nav-link-icon',
+                'punctuation': 'nav-link-icon-blue',
+                'orthoeopy': 'nav-link-icon-green',
+                'regular': 'nav-link-icon'
+            }[activity.testType] || 'nav-link-icon';
+
+            var lastActivity = new Date(activity.lastActivityAt);
+            var timeStr = lastActivity.toLocaleString('ru-RU', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            var actionButton = activity.status === 'completed' && activity.testResultId
+                ? '<button class="btn btn-sm btn-modern-outline-info" onclick="showTestResult(\'' + activity.testType + '\', ' + activity.testResultId + ', \'' + activity.studentName + '\')">' +
+                  '<i class="fas fa-eye"></i> <span class="d-none d-md-inline">Подробно</span></button>'
+                : '';
+
+            var displayStyle = isVisible ? '' : 'display: none;';
+
+            return '<tr class="activity-row date-group-' + dateKey + '" ' +
+                   'data-search-text="' + (activity.studentName + ' ' + activity.testTitle).toLowerCase() + '" ' +
+                   'data-date-group="' + dateKey + '" ' +
+                   'style="' + displayStyle + '">' +
+                   '<td>' +
+                   '<div class="d-flex align-items-center gap-2">' +
+                   '<i class="fas ' + testTypeIcon + ' ' + testTypeIconClass + '"></i>' +
+                   '<div>' +
+                   '<strong class="text-dark-modern">' + activity.studentName + '</strong> - <span class="text-dark-modern">' + activity.testTitle + '</span>' +
+                   '<br><small class="text-muted-modern">' + statusBadge + '</small>' +
+                   '</div>' +
+                   '</div>' +
+                   '</td>' +
+                   '<td class="text-center d-none d-md-table-cell">' + percentageBadge + '</td>' +
+                   '<td class="text-center">' + gradeBadge + '</td>' +
+                   '<td class="text-center d-none d-md-table-cell"><small class="text-muted-modern">' + timeStr + '</small></td>' +
+                   '<td class="text-center">' + actionButton + '</td>' +
+                   '</tr>';
+        }
+
+        // ===== ПЕРЕКЛЮЧЕНИЕ ГРУППЫ ДНЕЙ =====
+
+        function toggleDateGroup(dateKey) {
+            var rows = document.querySelectorAll('.date-group-' + dateKey);
+            var icon = document.getElementById('icon-' + dateKey);
+            
+            if (!rows.length || !icon) return;
+            
+            var isVisible = rows[0].style.display !== 'none';
+            
+            rows.forEach(function(row) {
+                row.style.display = isVisible ? 'none' : '';
+            });
+            
+            icon.className = isVisible ? 
+                'fas fa-chevron-right text-primary date-group-icon' : 
+                'fas fa-chevron-down text-primary date-group-icon';
+            
+            filterActivities();
+        }
+
+        // ===== ФОРМАТИРОВАНИЕ ДАТЫ =====
+
+        function formatDate(date) {
+            return date.toLocaleDateString('ru-RU', { 
+                day: 'numeric', 
+                month: 'long',
+                year: 'numeric'
+            });
         }
 
         function filterActivities() {
             var searchInput = document.getElementById('activitySearchInput');
-            var searchText = searchInput ? searchInput.value.toLowerCase() : '';
-            var rows = document.querySelectorAll('#activity-feed tr[data-search-text]');
+            if (!searchInput) return;
+
+            var searchText = searchInput.value.toLowerCase().trim();
+
+            var rows = document.querySelectorAll('.activity-row');
             var visibleCount = 0;
+            
+            var groupCounts = {};
 
             rows.forEach(function(row) {
-                var text = row.getAttribute('data-search-text') || '';
-                if (text.includes(searchText)) {
+                var rowSearchText = row.getAttribute('data-search-text') || '';
+                var dateGroup = row.getAttribute('data-date-group');
+                var groupIcon = document.getElementById('icon-' + dateGroup);
+                var isGroupExpanded = groupIcon && groupIcon.classList.contains('fa-chevron-down');
+                
+                if (!groupCounts[dateGroup]) {
+                    groupCounts[dateGroup] = { total: 0, visible: 0 };
+                }
+                groupCounts[dateGroup].total++;
+                
+                var matchesSearch = !searchText || rowSearchText.includes(searchText);
+                
+                if (matchesSearch && isGroupExpanded) {
                     row.style.display = '';
+                    groupCounts[dateGroup].visible++;
                     visibleCount++;
+                } else if (matchesSearch && !isGroupExpanded) {
+                    row.style.display = 'none';
                 } else {
                     row.style.display = 'none';
                 }
             });
+
+            // Обновляем счётчики в заголовках групп
+            Object.keys(groupCounts).forEach(function(dateGroup) {
+                var header = document.querySelector('.date-group-header [id^="icon-' + dateGroup + '"]');
+                if (header) {
+                    var badge = header.parentElement.parentElement.querySelector('.badge');
+                    if (badge) {
+                        var count = groupCounts[dateGroup];
+                        if (searchText && count.visible !== count.total) {
+                            badge.textContent = count.visible + ' / ' + count.total;
+                            badge.classList.remove('badge-modern-secondary');
+                            badge.classList.add('badge-modern-primary');
+                        } else {
+                            badge.textContent = count.total;
+                            badge.classList.remove('badge-modern-primary');
+                            badge.classList.add('badge-modern-secondary');
+                        }
+                    }
+                }
+            });
+
+            var noResults = document.getElementById('noActivityResults');
+            var tableBody = document.getElementById('activity-feed');
+            
+            if (visibleCount === 0 && searchText) {
+                if (tableBody) tableBody.style.display = 'none';
+                if (noResults) noResults.style.display = 'block';
+            } else {
+                if (tableBody) tableBody.style.display = '';
+                if (noResults) noResults.style.display = 'none';
+            }
 
             updateActivityCount(visibleCount);
             
             var clearButton = document.getElementById('clearActivitySearch');
             if (clearButton) {
                 clearButton.style.display = searchText ? 'inline-block' : 'none';
-            }
-
-            var noResults = document.getElementById('noActivityResults');
-            if (noResults) {
-                noResults.style.display = visibleCount === 0 && searchText ? 'block' : 'none';
             }
         }
 
@@ -620,8 +809,12 @@
         function updateActivityCount(count) {
             var countElement = document.getElementById('activityCount');
             if (countElement) {
-                var total = count !== undefined ? count : document.querySelectorAll('#activity-feed tr[data-search-text]').length;
-                countElement.textContent = 'Показано: ' + total;
+                var total = document.querySelectorAll('.activity-row').length;
+                if (count !== undefined) {
+                    countElement.textContent = 'Показано: ' + count + (count !== total ? ' из ' + total : '');
+                } else {
+                    countElement.textContent = 'Показано: ' + total;
+                }
             }
         }
 
@@ -677,10 +870,10 @@
 
         function prependActivity(activity) {
             allActivities.unshift(activity);
-            if (allActivities.length > 50) {
-                allActivities = allActivities.slice(0, 50);
+            if (allActivities.length > 100) {
+                allActivities = allActivities.slice(0, 100);
             }
-            renderActivities(allActivities);
+            displayActivities(allActivities);
             updateActivityCount();
         }
 
