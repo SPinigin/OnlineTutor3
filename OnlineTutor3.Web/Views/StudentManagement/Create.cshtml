@@ -5,88 +5,88 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
+        <div class="card shadow modern-card">
+            <div class="card-header auth-card-header" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
                 <h4 class="mb-0">
                     <i class="fas fa-user-plus"></i> Создание нового ученика
                 </h4>
             </div>
-            <div class="card-body">
+            <div class="card-body auth-card-body">
                 <form asp-action="Create" method="post">
                     <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="FirstName" class="form-label">
+                            <label asp-for="FirstName" class="form-label form-label-modern">
                                 <i class="fas fa-user"></i> Имя <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="FirstName" class="form-control" placeholder="Имя" />
+                            <input asp-for="FirstName" class="form-control form-control-modern" placeholder="Имя" />
                             <span asp-validation-for="FirstName" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="LastName" class="form-label">
+                            <label asp-for="LastName" class="form-label form-label-modern">
                                 <i class="fas fa-user"></i> Фамилия <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="LastName" class="form-control" placeholder="Фамилия" />
+                            <input asp-for="LastName" class="form-control form-control-modern" placeholder="Фамилия" />
                             <span asp-validation-for="LastName" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="Email" class="form-label">
+                            <label asp-for="Email" class="form-label form-label-modern">
                                 <i class="fas fa-envelope"></i> Email <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="Email" class="form-control" type="email" placeholder="example@email.com" />
+                            <input asp-for="Email" class="form-control form-control-modern" type="email" placeholder="example@email.com" />
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="PhoneNumber" class="form-label">
+                            <label asp-for="PhoneNumber" class="form-label form-label-modern">
                                 <i class="fas fa-phone"></i> Телефон
                             </label>
-                            <input asp-for="PhoneNumber" class="form-control" type="tel" placeholder="+7 (999) 999-99-99" />
+                            <input asp-for="PhoneNumber" class="form-control form-control-modern" type="tel" placeholder="+7 (999) 999-99-99" />
                             <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="DateOfBirth" class="form-label">
+                        <label asp-for="DateOfBirth" class="form-label form-label-modern">
                             <i class="fas fa-calendar"></i> Дата рождения <span class="text-danger">*</span>
                         </label>
-                        <input asp-for="DateOfBirth" class="form-control" type="date" />
+                        <input asp-for="DateOfBirth" class="form-control form-control-modern" type="date" />
                         <span asp-validation-for="DateOfBirth" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Password" class="form-label">
+                        <label asp-for="Password" class="form-label form-label-modern">
                             <i class="fas fa-lock"></i> Пароль <span class="text-danger">*</span>
                         </label>
-                        <input asp-for="Password" type="password" class="form-control" placeholder="Минимум 6 символов" id="Password" />
+                        <input asp-for="Password" type="password" class="form-control form-control-modern" placeholder="Минимум 6 символов" id="Password" />
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="School" class="form-label">
+                            <label asp-for="School" class="form-label form-label-modern">
                                 <i class="fas fa-school"></i> Школа
                             </label>
-                            <input asp-for="School" class="form-control" placeholder="Номер школы" />
+                            <input asp-for="School" class="form-control form-control-modern" placeholder="Номер школы" />
                             <span asp-validation-for="School" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="Grade" class="form-label">
+                            <label asp-for="Grade" class="form-label form-label-modern">
                                 <i class="fas fa-graduation-cap"></i> Класс в школе
                             </label>
-                            <input asp-for="Grade" class="form-control" type="number" min="1" max="11" placeholder="1-11" />
+                            <input asp-for="Grade" class="form-control form-control-modern" type="number" min="1" max="11" placeholder="1-11" />
                             <span asp-validation-for="Grade" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="ClassId" class="form-label">
+                        <label asp-for="ClassId" class="form-label form-label-modern">
                             <i class="fas fa-users"></i> Назначить в онлайн-класс
                         </label>
-                        <select asp-for="ClassId" class="form-select">
+                        <select asp-for="ClassId" class="form-select form-control-modern">
                             <option value="">Не назначать</option>
                             @if (ViewBag.Classes != null)
                             {
@@ -100,10 +100,10 @@
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a asp-action="Index" class="btn btn-outline-secondary">
+                        <a asp-action="Index" class="btn btn-modern-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Отмена
                         </a>
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-modern-success">
                             <i class="fas fa-save"></i> Создать ученика
                         </button>
                     </div>

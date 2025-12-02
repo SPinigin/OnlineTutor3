@@ -5,89 +5,89 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
+        <div class="card shadow modern-card">
+            <div class="card-header auth-card-header">
                 <h4 class="mb-0">
                     <i class="fas fa-edit"></i> Редактирование ученика
                 </h4>
             </div>
-            <div class="card-body">
+            <div class="card-body auth-card-body">
                 <form asp-action="Edit" method="post">
                     <input asp-for="Id" type="hidden" />
                     <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="FirstName" class="form-label">
+                            <label asp-for="FirstName" class="form-label form-label-modern">
                                 <i class="fas fa-user"></i> Имя <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="FirstName" class="form-control" />
+                            <input asp-for="FirstName" class="form-control form-control-modern" />
                             <span asp-validation-for="FirstName" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="LastName" class="form-label">
+                            <label asp-for="LastName" class="form-label form-label-modern">
                                 <i class="fas fa-user"></i> Фамилия <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="LastName" class="form-control" />
+                            <input asp-for="LastName" class="form-control form-control-modern" />
                             <span asp-validation-for="LastName" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="Email" class="form-label">
+                            <label asp-for="Email" class="form-label form-label-modern">
                                 <i class="fas fa-envelope"></i> Email <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="Email" class="form-control" type="email" />
+                            <input asp-for="Email" class="form-control form-control-modern" type="email" />
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="PhoneNumber" class="form-label">
+                            <label asp-for="PhoneNumber" class="form-label form-label-modern">
                                 <i class="fas fa-phone"></i> Телефон
                             </label>
-                            <input asp-for="PhoneNumber" class="form-control" type="tel" />
+                            <input asp-for="PhoneNumber" class="form-control form-control-modern" type="tel" />
                             <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="DateOfBirth" class="form-label">
+                        <label asp-for="DateOfBirth" class="form-label form-label-modern">
                             <i class="fas fa-calendar"></i> Дата рождения <span class="text-danger">*</span>
                         </label>
-                        <input asp-for="DateOfBirth" class="form-control" type="date" />
+                        <input asp-for="DateOfBirth" class="form-control form-control-modern" type="date" />
                         <span asp-validation-for="DateOfBirth" class="text-danger"></span>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="School" class="form-label">
+                            <label asp-for="School" class="form-label form-label-modern">
                                 <i class="fas fa-school"></i> Школа
                             </label>
-                            <input asp-for="School" class="form-control" />
+                            <input asp-for="School" class="form-control form-control-modern" />
                             <span asp-validation-for="School" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="Grade" class="form-label">
+                            <label asp-for="Grade" class="form-label form-label-modern">
                                 <i class="fas fa-graduation-cap"></i> Класс в школе
                             </label>
-                            <input asp-for="Grade" class="form-control" type="number" min="1" max="11" />
+                            <input asp-for="Grade" class="form-control form-control-modern" type="number" min="1" max="11" />
                             <span asp-validation-for="Grade" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="StudentNumber" class="form-label">
+                        <label asp-for="StudentNumber" class="form-label form-label-modern">
                             <i class="fas fa-hashtag"></i> Номер ученика
                         </label>
-                        <input asp-for="StudentNumber" class="form-control" />
+                        <input asp-for="StudentNumber" class="form-control form-control-modern" />
                         <span asp-validation-for="StudentNumber" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="ClassId" class="form-label">
+                        <label asp-for="ClassId" class="form-label form-label-modern">
                             <i class="fas fa-users"></i> Назначить в онлайн-класс
                         </label>
-                        <select asp-for="ClassId" class="form-select">
+                        <select asp-for="ClassId" class="form-select form-control-modern">
                             <option value="">Не назначать</option>
                             @if (ViewBag.Classes != null)
                             {
@@ -101,10 +101,10 @@
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a asp-action="Index" class="btn btn-outline-secondary">
+                        <a asp-action="Index" class="btn btn-modern-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Отмена
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-modern-primary">
                             <i class="fas fa-save"></i> Сохранить изменения
                         </button>
                     </div>
