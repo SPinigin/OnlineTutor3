@@ -6,11 +6,11 @@
 <div class="container py-4">
     <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="mb-0">
-                    <i class="fas fa-user-circle text-primary"></i> Мой профиль
+            <div class="page-header">
+                <h4 class="page-header-title">
+                    <i class="fas fa-user-circle page-header-icon"></i> Мой профиль
                 </h4>
-                <a asp-controller="Account" asp-action="EditProfile" class="btn btn-outline-primary btn-sm">
+                <a asp-controller="Account" asp-action="EditProfile" class="btn modern-btn-outline btn-sm">
                     <i class="fas fa-edit"></i> Редактировать
                 </a>
             </div>
@@ -19,18 +19,18 @@
 
     <div class="row">
         <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm modern-card">
                 <div class="card-body text-center">
                     <div class="mb-3">
-                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center text-white"
-                             style="width: 120px; height: 120px; font-size: 2.5rem;">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center text-white"
+                             style="width: 120px; height: 120px; font-size: 2.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                             @Model.FirstName.Substring(0, 1)@Model.LastName.Substring(0, 1)
                         </div>
                     </div>
 
-                    <h5 class="mb-1">@Model.FullName</h5>
-                    <p class="text-muted mb-2">@Model.Age лет</p>
-                    <p class="text-muted mb-3">
+                    <h5 class="mb-1 text-dark-modern">@Model.FullName</h5>
+                    <p class="text-muted-modern mb-2">@Model.Age лет</p>
+                    <p class="mb-3">
                         @if (User.IsInRole("Admin"))
                         {
                             <span class="badge bg-danger">
@@ -39,13 +39,13 @@
                         }
                         else if (User.IsInRole("Teacher"))
                         {
-                            <span class="badge bg-primary">
+                            <span class="badge badge-modern-primary">
                                 <i class="fas fa-chalkboard-teacher"></i> Преподаватель
                             </span>
                         }
                         else if (User.IsInRole("Student"))
                         {
-                            <span class="badge bg-success">
+                            <span class="badge badge-modern-success">
                                 <i class="fas fa-user-graduate"></i> Ученик
                             </span>
                         }
@@ -55,58 +55,58 @@
         </div>
 
         <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h6 class="mb-0">
-                        <i class="fas fa-info-circle text-primary"></i> Личная информация
+            <div class="card shadow-sm modern-card">
+                <div class="card-header modern-card-header">
+                    <h6 class="modern-card-title">
+                        <i class="fas fa-info-circle" style="color: #667eea;"></i> Личная информация
                     </h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body modern-card-body">
                     <div class="row mb-3">
                         <div class="col-sm-4">
-                            <strong>Имя:</strong>
+                            <strong class="text-dark-modern">Имя:</strong>
                         </div>
-                        <div class="col-sm-8">
+                        <div class="col-sm-8 text-muted-modern">
                             @Model.FirstName
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-4">
-                            <strong>Фамилия:</strong>
+                            <strong class="text-dark-modern">Фамилия:</strong>
                         </div>
-                        <div class="col-sm-8">
+                        <div class="col-sm-8 text-muted-modern">
                             @Model.LastName
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-4">
-                            <strong>Email:</strong>
+                            <strong class="text-dark-modern">Email:</strong>
                         </div>
-                        <div class="col-sm-8">
+                        <div class="col-sm-8 text-muted-modern">
                             @Model.Email
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-4">
-                            <strong>Телефон:</strong>
+                            <strong class="text-dark-modern">Телефон:</strong>
                         </div>
-                        <div class="col-sm-8">
+                        <div class="col-sm-8 text-muted-modern">
                             @(Model.PhoneNumber ?? "Не указан")
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-4">
-                            <strong>Дата рождения:</strong>
+                            <strong class="text-dark-modern">Дата рождения:</strong>
                         </div>
-                        <div class="col-sm-8">
+                        <div class="col-sm-8 text-muted-modern">
                             @Model.DateOfBirth.ToString("dd.MM.yyyy")
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-4">
-                            <strong>Дата регистрации:</strong>
+                            <strong class="text-dark-modern">Дата регистрации:</strong>
                         </div>
-                        <div class="col-sm-8">
+                        <div class="col-sm-8 text-muted-modern">
                             @Model.CreatedAt.ToString("dd.MM.yyyy")
                         </div>
                     </div>
@@ -114,9 +114,9 @@
                     {
                         <div class="row mb-3">
                             <div class="col-sm-4">
-                                <strong>Последний вход:</strong>
+                                <strong class="text-dark-modern">Последний вход:</strong>
                             </div>
-                            <div class="col-sm-8">
+                            <div class="col-sm-8 text-muted-modern">
                                 @Model.LastLoginAt.Value.ToString("dd.MM.yyyy HH:mm")
                             </div>
                         </div>
@@ -124,15 +124,15 @@
                 </div>
             </div>
 
-            <div class="card shadow-sm mt-3">
-                <div class="card-header bg-white">
-                    <h6 class="mb-0">
-                        <i class="fas fa-cog text-primary"></i> Действия
+            <div class="card shadow-sm mt-3 modern-card">
+                <div class="card-header modern-card-header">
+                    <h6 class="modern-card-title">
+                        <i class="fas fa-cog" style="color: #667eea;"></i> Действия
                     </h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body modern-card-body">
                     <div class="d-grid gap-2">
-                        <a asp-controller="Account" asp-action="ChangePassword" class="btn btn-outline-primary">
+                        <a asp-controller="Account" asp-action="ChangePassword" class="btn modern-btn-outline">
                             <i class="fas fa-key"></i> Изменить пароль
                         </a>
                     </div>

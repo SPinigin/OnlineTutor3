@@ -5,49 +5,49 @@
 
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-4">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white text-center">
+        <div class="card shadow auth-card">
+            <div class="card-header auth-card-header">
                 <h4><i class="fas fa-sign-in-alt"></i> Вход в систему</h4>
             </div>
-            <div class="card-body">
+            <div class="card-body auth-card-body">
                 <form asp-action="Login" method="post">
                     <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
                     <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                     <div class="mb-3">
-                        <label asp-for="Email" class="form-label">
+                        <label asp-for="Email" class="form-label form-label-modern">
                             <i class="fas fa-envelope"></i> Email
                         </label>
-                        <input asp-for="Email" class="form-control" placeholder="Введите ваш email" />
+                        <input asp-for="Email" class="form-control form-control-modern" placeholder="Введите ваш email" />
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Password" class="form-label">
+                        <label asp-for="Password" class="form-label form-label-modern">
                             <i class="fas fa-lock"></i> Пароль
                         </label>
-                        <input asp-for="Password" type="password" class="form-control" placeholder="Введите пароль" id="LoginPassword" />
+                        <input asp-for="Password" type="password" class="form-control form-control-modern" placeholder="Введите пароль" id="LoginPassword" />
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3 form-check">
                         <input asp-for="RememberMe" class="form-check-input" />
-                        <label asp-for="RememberMe" class="form-check-label">
+                        <label asp-for="RememberMe" class="form-check-label text-dark-modern">
                             Запомнить меня
                         </label>
                     </div>
 
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-modern-primary">
                             <i class="fas fa-sign-in-alt"></i> Войти
                         </button>
                     </div>
                 </form>
             </div>
-            <div class="card-footer text-center">
-                <p class="mb-0">
+            <div class="card-footer auth-card-footer">
+                <p class="mb-0 text-muted-modern">
                     Нет аккаунта?
-                    <a asp-action="Register" class="text-decoration-none">
+                    <a asp-action="Register" class="text-decoration-none" style="color: #667eea; font-weight: 500;">
                         <i class="fas fa-user-plus"></i> Зарегистрироваться
                     </a>
                 </p>
