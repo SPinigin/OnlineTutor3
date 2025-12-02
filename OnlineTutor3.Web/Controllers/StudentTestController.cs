@@ -110,7 +110,6 @@ namespace OnlineTutor3.Web.Controllers
                 var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
                 if (student == null)
                 {
-                    _logger.LogWarning("Студент не найден для пользователя {UserId}", currentUser.Id);
                     TempData["ErrorMessage"] = "Профиль студента не найден. Обратитесь к администратору.";
                     return RedirectToAction("Index", "Student");
                 }
@@ -313,7 +312,6 @@ namespace OnlineTutor3.Web.Controllers
                 var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
                 if (student == null)
                 {
-                    _logger.LogWarning("Студент не найден для пользователя {UserId}", currentUser.Id);
                     TempData["ErrorMessage"] = "Профиль студента не найден. Обратитесь к администратору.";
                     return RedirectToAction("Index", "Student");
                 }
@@ -562,8 +560,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 // Используем сервис для начала теста
                 var testResult = await _studentTestService.StartSpellingTestAsync(student.Id, id);
-                
-                _logger.LogInformation("Студент {StudentId} начал тест по орфографии {TestId}", student.Id, id);
                 
                 // Отправляем уведомление через SignalR
                 await SendTestStartedNotificationAsync(testResult, "spelling", currentUser.FullName ?? currentUser.Email ?? "Студент");
@@ -905,9 +901,6 @@ namespace OnlineTutor3.Web.Controllers
                 // Завершаем тест (устанавливает CompletedAt и IsCompleted)
                 await _testResultService.CompleteTestResultAsync(testResult);
 
-                _logger.LogInformation("Студент {StudentId} завершил тест по орфографии {ResultId}. Баллы: {Score}/{MaxScore}, Процент: {Percentage}",
-                    student.Id, testResult.Id, testResult.Score, testResult.MaxScore, testResult.Percentage);
-
                 // Отправляем уведомление через SignalR
                 await SendTestCompletedNotificationAsync(testResult, "spelling", currentUser.FullName ?? currentUser.Email ?? "Студент");
 
@@ -942,8 +935,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 // Используем сервис для начала теста
                 var testResult = await _studentTestService.StartPunctuationTestAsync(student.Id, id);
-                
-                _logger.LogInformation("Студент {StudentId} начал тест по пунктуации {TestId}", student.Id, id);
                 
                 // Отправляем уведомление через SignalR
                 await SendTestStartedNotificationAsync(testResult, "punctuation", currentUser.FullName ?? currentUser.Email ?? "Студент");
@@ -1189,9 +1180,6 @@ namespace OnlineTutor3.Web.Controllers
                 // Завершаем тест (устанавливает CompletedAt и IsCompleted)
                 await _testResultService.CompleteTestResultAsync(testResult);
 
-                _logger.LogInformation("Студент {StudentId} завершил тест по пунктуации {ResultId}. Баллы: {Score}/{MaxScore}, Процент: {Percentage}",
-                    student.Id, testResult.Id, testResult.Score, testResult.MaxScore, testResult.Percentage);
-
                 // Отправляем уведомление через SignalR
                 await SendTestCompletedNotificationAsync(testResult, "punctuation", currentUser.FullName ?? currentUser.Email ?? "Студент");
 
@@ -1226,8 +1214,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 // Используем сервис для начала теста
                 var testResult = await _studentTestService.StartOrthoeopyTestAsync(student.Id, id);
-                
-                _logger.LogInformation("Студент {StudentId} начал тест по орфоэпии {TestId}", student.Id, id);
                 
                 // Отправляем уведомление через SignalR
                 await SendTestStartedNotificationAsync(testResult, "orthoeopy", currentUser.FullName ?? currentUser.Email ?? "Студент");
@@ -1473,9 +1459,6 @@ namespace OnlineTutor3.Web.Controllers
                 // Завершаем тест (устанавливает CompletedAt и IsCompleted)
                 await _testResultService.CompleteTestResultAsync(testResult);
 
-                _logger.LogInformation("Студент {StudentId} завершил тест по орфоэпии {ResultId}. Баллы: {Score}/{MaxScore}, Процент: {Percentage}",
-                    student.Id, testResult.Id, testResult.Score, testResult.MaxScore, testResult.Percentage);
-
                 // Отправляем уведомление через SignalR
                 await SendTestCompletedNotificationAsync(testResult, "orthoeopy", currentUser.FullName ?? currentUser.Email ?? "Студент");
 
@@ -1510,8 +1493,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 // Используем сервис для начала теста
                 var testResult = await _studentTestService.StartRegularTestAsync(student.Id, id);
-                
-                _logger.LogInformation("Студент {StudentId} начал классический тест {TestId}", student.Id, id);
                 
                 // Отправляем уведомление через SignalR
                 await SendTestStartedNotificationAsync(testResult, "regular", currentUser.FullName ?? currentUser.Email ?? "Студент");
@@ -1789,9 +1770,6 @@ namespace OnlineTutor3.Web.Controllers
                 
                 // Завершаем тест (устанавливает CompletedAt и IsCompleted)
                 await _testResultService.CompleteTestResultAsync(testResult);
-
-                _logger.LogInformation("Студент {StudentId} завершил классический тест {ResultId}. Баллы: {Score}/{MaxScore}, Процент: {Percentage}",
-                    student.Id, testResult.Id, testResult.Score, testResult.MaxScore, testResult.Percentage);
 
                 // Отправляем уведомление через SignalR
                 await SendTestCompletedNotificationAsync(testResult, "regular", currentUser.FullName ?? currentUser.Email ?? "Студент");
@@ -2286,8 +2264,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 if (string.IsNullOrEmpty(teacherId) || string.IsNullOrEmpty(testTitle) || testId == 0)
                 {
-                    _logger.LogWarning("Не удалось определить TeacherId или TestTitle для отправки уведомления. TestType: {TestType}, TestResultId: {TestResultId}", 
-                        testType, testResult.Id);
                     return;
                 }
 
@@ -2309,9 +2285,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 await _hubContext.Clients.Group($"teacher_{teacherId}")
                     .SendAsync("StudentTestActivity", notificationData);
-
-                _logger.LogInformation("SignalR: Отправлено уведомление о завершении теста {TestType} {TestId} студентом {StudentName}",
-                    testType, testId, studentName);
             }
             catch (Exception ex)
             {
@@ -2385,8 +2358,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 if (string.IsNullOrEmpty(teacherId) || string.IsNullOrEmpty(testTitle) || testId == 0)
                 {
-                    _logger.LogWarning("Не удалось определить TeacherId или TestTitle для отправки уведомления о начале теста. TestType: {TestType}, TestResultId: {TestResultId}", 
-                        testType, testResult.Id);
                     return;
                 }
 
@@ -2408,9 +2379,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 await _hubContext.Clients.Group($"teacher_{teacherId}")
                     .SendAsync("StudentTestActivity", notificationData);
-
-                _logger.LogInformation("SignalR: Отправлено уведомление о начале теста {TestType} {TestId} студентом {StudentName}",
-                    testType, testId, studentName);
             }
             catch (Exception ex)
             {

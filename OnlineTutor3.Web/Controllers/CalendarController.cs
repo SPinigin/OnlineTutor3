@@ -257,7 +257,6 @@ namespace OnlineTutor3.Web.Controllers
 
                     await _calendarService.CreateAsync(calendarEvent);
 
-                    _logger.LogInformation("Учитель {TeacherId} создал событие {EventId}: {Title}", currentUser.Id, calendarEvent.Id, model.Title);
                     TempData["SuccessMessage"] = "Занятие успешно добавлено в календарь!";
                     return RedirectToAction(nameof(Index));
                 }
@@ -402,7 +401,6 @@ namespace OnlineTutor3.Web.Controllers
 
                     await _calendarService.UpdateAsync(calendarEvent);
 
-                    _logger.LogInformation("Учитель {TeacherId} обновил событие {EventId}", currentUser.Id, id);
                     TempData["SuccessMessage"] = "Занятие успешно обновлено!";
                     return RedirectToAction(nameof(Index));
                 }
@@ -563,7 +561,6 @@ namespace OnlineTutor3.Web.Controllers
                 var eventTitle = calendarEvent.Title;
                 await _calendarService.DeleteAsync(id);
 
-                _logger.LogInformation("Учитель {TeacherId} удалил событие {EventId}: {Title}", currentUser.Id, id, eventTitle);
                 TempData["SuccessMessage"] = "Занятие удалено из календаря";
                 return RedirectToAction(nameof(Index));
             }
@@ -678,9 +675,6 @@ namespace OnlineTutor3.Web.Controllers
                 calendarEvent.IsCompleted = !calendarEvent.IsCompleted;
 
                 await _calendarService.UpdateAsync(calendarEvent);
-
-                _logger.LogInformation("Учитель {TeacherId} изменил статус события {EventId} с {OldStatus} на {NewStatus}",
-                    currentUser.Id, id, oldStatus, calendarEvent.IsCompleted);
 
                 var status = calendarEvent.IsCompleted ? "завершено" : "возвращено в активные";
                 TempData["InfoMessage"] = $"Занятие \"{calendarEvent.Title}\" {status}";

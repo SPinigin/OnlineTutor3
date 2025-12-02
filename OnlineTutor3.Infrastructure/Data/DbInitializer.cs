@@ -23,7 +23,6 @@ namespace OnlineTutor3.Infrastructure.Data
             try
             {
                 await EnsureRolesCreatedAsync(roleManager, logger);
-                logger.LogInformation("Роли успешно созданы/проверены.");
             }
             catch (Exception rolesEx)
             {
@@ -43,12 +42,11 @@ namespace OnlineTutor3.Infrastructure.Data
                     if (!await roleManager.RoleExistsAsync(role))
                     {
                         await roleManager.CreateAsync(new IdentityRole(role));
-                        logger.LogInformation("Роль {Role} создана.", role);
                     }
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Не удалось создать/проверить роль {Role}.", role);
+                    logger.LogError(ex, "Не удалось создать/проверить роль {Role}.", role);
                 }
             }
         }

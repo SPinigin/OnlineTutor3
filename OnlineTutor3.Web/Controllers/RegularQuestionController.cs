@@ -163,8 +163,6 @@ namespace OnlineTutor3.Web.Controllers
                         }
                     }
 
-                    _logger.LogInformation("Учитель {TeacherId} создал вопрос классического теста {QuestionId} для теста {TestId}",
-                        currentUser.Id, questionId, model.RegularTestId);
 
                     TempData["SuccessMessage"] = "Вопрос успешно добавлен!";
                     return RedirectToAction("Details", "RegularTest", new { id = model.RegularTestId });
@@ -367,8 +365,6 @@ namespace OnlineTutor3.Web.Controllers
                         }
                     }
 
-                    _logger.LogInformation("Учитель {TeacherId} обновил вопрос классического теста {QuestionId}",
-                        currentUser.Id, id);
 
                     TempData["SuccessMessage"] = "Вопрос успешно обновлен!";
                     return RedirectToAction("Details", "RegularTest", new { id = model.RegularTestId });
@@ -480,8 +476,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 await _questionRepository.DeleteAsync(id);
 
-                _logger.LogInformation("Учитель {TeacherId} удалил вопрос классического теста {QuestionId}",
-                    currentUser.Id, id);
 
                 TempData["SuccessMessage"] = "Вопрос успешно удален!";
                 return RedirectToAction("Details", "RegularTest", new { id = testId });

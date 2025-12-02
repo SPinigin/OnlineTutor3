@@ -41,8 +41,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 var students = await _studentService.GetByTeacherIdAsync(currentUser.Id);
                 
-                _logger.LogInformation("Получено студентов для учителя {TeacherId}: {Count}", currentUser.Id, students?.Count ?? 0);
-                
                 if (students == null)
                 {
                     students = new List<Student>();
@@ -55,8 +53,6 @@ namespace OnlineTutor3.Web.Controllers
                     var user = await _userManager.FindByIdAsync(student.UserId);
                     studentsWithUsers.Add((student, user));
                 }
-                
-                _logger.LogInformation("Загружено студентов с пользователями: {Count}", studentsWithUsers.Count);
 
                 // Фильтрация по классу
                 if (classFilter.HasValue && classFilter.Value > 0)
@@ -234,9 +230,6 @@ namespace OnlineTutor3.Web.Controllers
 
                     await _studentService.CreateAsync(student);
 
-                    _logger.LogInformation("Учитель {TeacherId} создал ученика {StudentId}: {StudentName}, Email: {Email}",
-                        currentUser.Id, student.Id, user.FullName, model.Email);
-
                     TempData["SuccessMessage"] = $"Ученик {user.FullName} успешно создан!";
                     return RedirectToAction(nameof(Index));
                 }
@@ -400,9 +393,6 @@ namespace OnlineTutor3.Web.Controllers
 
                 await _studentService.UpdateAsync(student);
 
-                _logger.LogInformation("Учитель {TeacherId} обновил ученика {StudentId}: {StudentName}",
-                    currentUser.Id, id, user.FullName);
-
                 TempData["SuccessMessage"] = $"Данные ученика {user.FullName} успешно обновлены!";
                 return RedirectToAction(nameof(Index));
             }
@@ -498,9 +488,6 @@ namespace OnlineTutor3.Web.Controllers
                 {
                     await _userManager.DeleteAsync(user);
                 }
-
-                _logger.LogInformation("Учитель {TeacherId} удалил ученика {StudentId}: {StudentName}",
-                    currentUser.Id, id, studentName);
 
                 TempData["SuccessMessage"] = $"Ученик {studentName} успешно удален!";
                 return RedirectToAction(nameof(Index));
@@ -606,9 +593,6 @@ namespace OnlineTutor3.Web.Controllers
                 var className = classId.HasValue 
                     ? (await _classService.GetByIdAsync(classId.Value))?.Name ?? "класс"
                     : "не назначен";
-
-                _logger.LogInformation("Учитель {TeacherId} назначил ученика {StudentId} ({StudentName}) в класс {ClassId}",
-                    currentUser.Id, id, studentName, classId);
 
                 TempData["SuccessMessage"] = $"Ученик {studentName} успешно назначен в {className}!";
                 return RedirectToAction(nameof(Index));

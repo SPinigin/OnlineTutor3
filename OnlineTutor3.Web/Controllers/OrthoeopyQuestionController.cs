@@ -116,9 +116,6 @@ namespace OnlineTutor3.Web.Controllers
 
                     await _questionRepository.CreateAsync(question);
 
-                    _logger.LogInformation("Учитель {TeacherId} создал вопрос по орфоэпии {QuestionId} для теста {TestId}",
-                        currentUser.Id, question.Id, model.OrthoeopyTestId);
-
                     TempData["SuccessMessage"] = "Вопрос успешно добавлен!";
                     return RedirectToAction("Details", "OrthoeopyTest", new { id = model.OrthoeopyTestId });
                 }
@@ -254,9 +251,6 @@ namespace OnlineTutor3.Web.Controllers
 
                     await _questionRepository.UpdateAsync(question);
 
-                    _logger.LogInformation("Учитель {TeacherId} обновил вопрос по орфоэпии {QuestionId}",
-                        currentUser.Id, id);
-
                     TempData["SuccessMessage"] = "Вопрос успешно обновлен!";
                     return RedirectToAction("Details", "OrthoeopyTest", new { id = model.OrthoeopyTestId });
                 }
@@ -354,9 +348,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
 
                 await _questionRepository.DeleteAsync(id);
-
-                _logger.LogInformation("Учитель {TeacherId} удалил вопрос по орфоэпии {QuestionId}",
-                    currentUser.Id, id);
 
                 TempData["SuccessMessage"] = "Вопрос успешно удален!";
                 return RedirectToAction("Details", "OrthoeopyTest", new { id = testId });

@@ -602,9 +602,6 @@ namespace OnlineTutor3.Web.Controllers
                 HttpContext.Session.SetString(sessionKey, System.Text.Json.JsonSerializer.Serialize(importData));
                 TempData["ImportSessionKey"] = sessionKey;
 
-                _logger.LogInformation("Учитель {TeacherId} инициировал импорт {Count} вопросов для теста {TestId}",
-                    currentUser.Id, questions.Count, model.SpellingTestId);
-
                 return RedirectToAction(nameof(PreviewQuestions));
             }
             catch (Exception ex)
@@ -766,17 +763,14 @@ namespace OnlineTutor3.Web.Controllers
                         await _questionRepository.CreateAsync(question);
                         importedCount++;
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        _logger.LogWarning(ex, "Ошибка при создании вопроса из строки {RowNumber}", importQuestion.RowNumber);
+                        // Пропускаем невалидные вопросы
                     }
                 }
 
                 // Удаляем данные из сессии
                 HttpContext.Session.Remove(sessionKey);
-
-                _logger.LogInformation("Учитель {TeacherId} успешно импортировал {Count} вопросов для теста {TestId}",
-                    currentUser.Id, importedCount, testId);
 
                 TempData["SuccessMessage"] = $"Успешно импортировано {importedCount} вопросов!";
                 return RedirectToAction("Details", new { id = testId });

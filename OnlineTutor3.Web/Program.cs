@@ -26,7 +26,6 @@ try
     try
     {
         OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-        logger.Info("EPPlus license configured successfully");
     }
     catch (Exception ex)
     {
@@ -39,8 +38,6 @@ builder.Services.AddScoped<OnlineTutor3.Web.Services.PunctuationQuestionImportSe
 builder.Services.AddScoped<OnlineTutor3.Web.Services.OrthoeopyQuestionImportService>();
 builder.Services.AddScoped<OnlineTutor3.Web.Services.RegularQuestionImportService>();
 
-    logger.Info("Building application. Environment: {Environment}", builder.Environment.EnvironmentName);
-    
     var app = builder.Build();
 
     // Инициализация базы данных
@@ -61,7 +58,6 @@ builder.Services.AddScoped<OnlineTutor3.Web.Services.RegularQuestionImportServic
     // Настройка middleware
     app.UseWeb();
 
-    logger.Info("Приложение готово к запуску");
     app.Run();
 }
 catch (Exception ex)

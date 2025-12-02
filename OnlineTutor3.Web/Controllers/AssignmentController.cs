@@ -69,7 +69,6 @@ namespace OnlineTutor3.Web.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null)
                 {
-                    _logger.LogWarning("Current user is null in Assignment/Index");
                     return Challenge();
                 }
 
@@ -105,36 +104,32 @@ namespace OnlineTutor3.Web.Controllers
                             {
                                 spellingTests = await _spellingTestService.GetByAssignmentIdAsync(assignment.Id);
                             }
-                            catch (Exception ex)
+                            catch
                             {
-                                _logger.LogWarning(ex, "Ошибка при загрузке тестов по орфографии для задания {AssignmentId}", assignment.Id);
                             }
 
                             try
                             {
                                 punctuationTests = await _punctuationTestService.GetByAssignmentIdAsync(assignment.Id);
                             }
-                            catch (Exception ex)
+                            catch
                             {
-                                _logger.LogWarning(ex, "Ошибка при загрузке тестов по пунктуации для задания {AssignmentId}", assignment.Id);
                             }
 
                             try
                             {
                                 orthoeopyTests = await _orthoeopyTestService.GetByAssignmentIdAsync(assignment.Id);
                             }
-                            catch (Exception ex)
+                            catch
                             {
-                                _logger.LogWarning(ex, "Ошибка при загрузке тестов по орфоэпии для задания {AssignmentId}", assignment.Id);
                             }
 
                             try
                             {
                                 regularTests = await _regularTestService.GetByAssignmentIdAsync(assignment.Id);
                             }
-                            catch (Exception ex)
+                            catch
                             {
-                                _logger.LogWarning(ex, "Ошибка при загрузке классических тестов для задания {AssignmentId}", assignment.Id);
                             }
 
                             // Загружаем количество вопросов для каждого теста
@@ -145,9 +140,8 @@ namespace OnlineTutor3.Web.Controllers
                                 {
                                     spellingQuestionCounts[test.Id] = await _spellingQuestionRepository.GetCountByTestIdAsync(test.Id);
                                 }
-                                catch (Exception ex)
+                                catch
                                 {
-                                    _logger.LogWarning(ex, "Ошибка при получении количества вопросов для теста по орфографии {TestId}", test.Id);
                                     spellingQuestionCounts[test.Id] = 0;
                                 }
                             }
@@ -159,9 +153,8 @@ namespace OnlineTutor3.Web.Controllers
                                 {
                                     punctuationQuestionCounts[test.Id] = await _punctuationQuestionRepository.GetCountByTestIdAsync(test.Id);
                                 }
-                                catch (Exception ex)
+                                catch
                                 {
-                                    _logger.LogWarning(ex, "Ошибка при получении количества вопросов для теста по пунктуации {TestId}", test.Id);
                                     punctuationQuestionCounts[test.Id] = 0;
                                 }
                             }
@@ -173,9 +166,8 @@ namespace OnlineTutor3.Web.Controllers
                                 {
                                     orthoeopyQuestionCounts[test.Id] = await _orthoeopyQuestionRepository.GetCountByTestIdAsync(test.Id);
                                 }
-                                catch (Exception ex)
+                                catch
                                 {
-                                    _logger.LogWarning(ex, "Ошибка при получении количества вопросов для теста по орфоэпии {TestId}", test.Id);
                                     orthoeopyQuestionCounts[test.Id] = 0;
                                 }
                             }
@@ -187,9 +179,8 @@ namespace OnlineTutor3.Web.Controllers
                                 {
                                     regularQuestionCounts[test.Id] = await _regularQuestionRepository.GetCountByTestIdAsync(test.Id);
                                 }
-                                catch (Exception ex)
+                                catch
                                 {
-                                    _logger.LogWarning(ex, "Ошибка при получении количества вопросов для классического теста {TestId}", test.Id);
                                     regularQuestionCounts[test.Id] = 0;
                                 }
                             }
@@ -299,7 +290,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Ошибка при загрузке тестов по орфографии для задания {AssignmentId}", id);
                 }
 
                 try
@@ -308,7 +298,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Ошибка при загрузке тестов по пунктуации для задания {AssignmentId}", id);
                 }
 
                 try
@@ -317,7 +306,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Ошибка при загрузке тестов по орфоэпии для задания {AssignmentId}", id);
                 }
 
                 try
@@ -326,7 +314,6 @@ namespace OnlineTutor3.Web.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Ошибка при загрузке классических тестов для задания {AssignmentId}", id);
                 }
 
                 // Загружаем количество вопросов для каждого теста
@@ -339,7 +326,6 @@ namespace OnlineTutor3.Web.Controllers
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Ошибка при получении количества вопросов для теста по орфографии {TestId}", test.Id);
                         spellingQuestionCounts[test.Id] = 0;
                     }
                 }
@@ -353,7 +339,6 @@ namespace OnlineTutor3.Web.Controllers
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Ошибка при получении количества вопросов для теста по пунктуации {TestId}", test.Id);
                         punctuationQuestionCounts[test.Id] = 0;
                     }
                 }
@@ -367,7 +352,6 @@ namespace OnlineTutor3.Web.Controllers
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Ошибка при получении количества вопросов для теста по орфоэпии {TestId}", test.Id);
                         orthoeopyQuestionCounts[test.Id] = 0;
                     }
                 }
@@ -381,7 +365,6 @@ namespace OnlineTutor3.Web.Controllers
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Ошибка при получении количества вопросов для классического теста {TestId}", test.Id);
                         regularQuestionCounts[test.Id] = 0;
                     }
                 }
