@@ -177,12 +177,12 @@ else
                                 <table class="table modern-table table-sm mb-0">
                                     <thead>
                                         <tr>
-                                            <th style="width: 5%;">Тип</th>
-                                            <th style="width: 35%;">Название</th>
-                                            <th style="width: 15%;" class="text-center">Вопросов</th>
-                                            <th style="width: 10%;" class="text-center">Время</th>
-                                            <th style="width: 10%;" class="text-center">Статус</th>
-                                            <th style="width: 25%;" class="text-center">Действия</th>
+                                            <th style="min-width: 40px;">Тип</th>
+                                            <th>Название</th>
+                                            <th class="text-center" style="min-width: 60px;">Вопросов</th>
+                                            <th class="text-center" style="min-width: 50px;">Время</th>
+                                            <th class="text-center" style="min-width: 50px;">Статус</th>
+                                            <th class="text-center" style="min-width: 120px;">Действия</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -212,9 +212,10 @@ else
                                                         <small class="text-muted-modern">@test.TimeLimit мин</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                                        <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
+                                                        <i class="fas @(test.IsActive ? "fa-check-circle text-success" : "fa-pause-circle text-secondary") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();">
                                                         <div class="d-flex gap-1 justify-content-center">
@@ -262,9 +263,10 @@ else
                                                         <small class="text-muted-modern">@test.TimeLimit мин</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                                        <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
+                                                        <i class="fas @(test.IsActive ? "fa-check-circle text-success" : "fa-pause-circle text-secondary") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();">
                                                         <div class="d-flex gap-1 justify-content-center">
@@ -312,9 +314,10 @@ else
                                                         <small class="text-muted-modern">@test.TimeLimit мин</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                                        <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
+                                                        <i class="fas @(test.IsActive ? "fa-check-circle text-success" : "fa-pause-circle text-secondary") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();">
                                                         <div class="d-flex gap-1 justify-content-center">
@@ -362,9 +365,10 @@ else
                                                         <small class="text-muted-modern">@test.TimeLimit мин</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm">
+                                                        <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
+                                                        <i class="fas @(test.IsActive ? "fa-check-circle text-success" : "fa-pause-circle text-secondary") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();">
                                                         <div class="d-flex gap-1 justify-content-center">

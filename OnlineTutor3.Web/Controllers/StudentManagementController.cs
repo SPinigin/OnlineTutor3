@@ -513,6 +513,114 @@ namespace OnlineTutor3.Web.Controllers
             }
         }
 
+        // GET: StudentManagement/AssignToClass/5
+        public async Task<IActionResult> AssignToClass(int? id)
+        {
+            if (id == null) return NotFound();
+
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentService.GetByIdAsync(id.Value);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                // Проверяем доступ
+                if (student.ClassId.HasValue)
+                {
+                    var @class = await _classService.GetByIdAsync(student.ClassId.Value);
+                    if (@class != null && @class.TeacherId != currentUser.Id)
+                    {
+                        return Forbid();
+                    }
+                }
+
+                var classes = await _classService.GetByTeacherIdAsync(currentUser.Id);
+                var activeClasses = classes.Where(c => c.IsActive).OrderBy(c => c.Name).ToList();
+                ViewBag.Classes = new SelectList(activeClasses, "Id", "Name", student.ClassId);
+                ViewBag.StudentId = id.Value;
+                ViewBag.CurrentClassId = student.ClassId;
+
+                return PartialView("_AssignToClassModal", student);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке данных для назначения класса ученику {StudentId}", id);
+                return NotFound();
+            }
+        }
+
+        // POST: StudentManagement/AssignToClass/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignToClass(int id, int? classId)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentService.GetByIdAsync(id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                // Проверяем доступ
+                if (student.ClassId.HasValue)
+                {
+                    var @class = await _classService.GetByIdAsync(student.ClassId.Value);
+                    if (@class != null && @class.TeacherId != currentUser.Id)
+                    {
+                        return Forbid();
+                    }
+                }
+
+                // Проверяем, что выбранный класс принадлежит учителю
+                if (classId.HasValue)
+                {
+                    var selectedClass = await _classService.GetByIdAsync(classId.Value);
+                    if (selectedClass == null || selectedClass.TeacherId != currentUser.Id)
+                    {
+                        TempData["ErrorMessage"] = "Выбранный класс не найден или у вас нет доступа к нему.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+
+                // Обновляем класс ученика
+                student.ClassId = classId;
+                await _studentService.UpdateAsync(student);
+
+                var user = await _userManager.FindByIdAsync(student.UserId);
+                var studentName = user != null ? user.FullName : "Ученик";
+                var className = classId.HasValue 
+                    ? (await _classService.GetByIdAsync(classId.Value))?.Name ?? "класс"
+                    : "не назначен";
+
+                _logger.LogInformation("Учитель {TeacherId} назначил ученика {StudentId} ({StudentName}) в класс {ClassId}",
+                    currentUser.Id, id, studentName, classId);
+
+                TempData["SuccessMessage"] = $"Ученик {studentName} успешно назначен в {className}!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при назначении класса ученику {StudentId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при назначении класса.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
         // Генерация номера ученика
         private async Task<string> GenerateStudentNumber()
         {

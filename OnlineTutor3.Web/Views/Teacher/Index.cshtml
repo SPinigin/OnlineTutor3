@@ -171,11 +171,11 @@
                                 <thead>
                                     <tr>
                                         <th>Ученик</th>
-                                        <th>Класс</th>
+                                        <th class="d-none d-md-table-cell">Класс</th>
                                         <th>Тест</th>
-                                        <th>Предмет</th>
+                                        <th class="d-none d-md-table-cell">Предмет</th>
                                         <th class="text-center">Оценка</th>
-                                        <th class="text-center">Дата</th>
+                                        <th class="text-center d-none d-md-table-cell">Дата</th>
                                         <th class="text-center">Действия</th>
                                     </tr>
                                 </thead>
@@ -208,18 +208,24 @@
                                         } : "secondary";
                                         <tr>
                                             <td>
-                                                <span class="fw-bold text-dark-modern">@completion.StudentName</span>
+                                                <div>
+                                                    <span class="fw-bold text-dark-modern">@completion.StudentName</span>
+                                                    <small class="text-muted-modern d-md-none d-block">@(completion.ClassName ?? "—")</small>
+                                                </div>
                                             </td>
-                                            <td>
+                                            <td class="d-none d-md-table-cell">
                                                 <span class="text-muted-modern">@(completion.ClassName ?? "—")</span>
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center gap-2">
                                                     <i class="fas @testTypeIcon" style="color: #667eea;"></i>
-                                                    <span class="fw-bold text-dark-modern">@completion.TestTitle</span>
+                                                    <div>
+                                                        <span class="fw-bold text-dark-modern">@completion.TestTitle</span>
+                                                        <small class="badge modern-badge d-md-none ms-1">@completion.SubjectName</small>
+                                                    </div>
                                                 </div>
                                             </td>
-                                            <td>
+                                            <td class="d-none d-md-table-cell">
                                                 <span class="badge modern-badge">@completion.SubjectName</span>
                                             </td>
                                             <td class="text-center">
@@ -234,9 +240,8 @@
                                                     <span class="text-muted-modern">—</span>
                                                 }
                                             </td>
-                                            <td class="text-center">
-                                                <span class="text-muted-modern d-none d-md-inline">@completion.CompletedAt.ToString("dd.MM.yyyy HH:mm")</span>
-                                                <span class="text-muted-modern d-md-none">@completion.CompletedAt.ToString("dd.MM.yyyy")</span>
+                                            <td class="text-center d-none d-md-table-cell">
+                                                <span class="text-muted-modern">@completion.CompletedAt.ToString("dd.MM.yyyy HH:mm")</span>
                                             </td>
                                             <td class="text-center">
                                                 <a href="#" 
