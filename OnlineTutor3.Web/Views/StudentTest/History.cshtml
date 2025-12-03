@@ -74,9 +74,9 @@ else
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm stat-card stat-card-green">
+            <div class="card border-0 shadow-sm stat-card stat-card-blue">
                 <div class="card-body text-center py-1 px-2">
-                    <div class="stat-card-icon stat-icon-green">
+                    <div class="stat-card-icon stat-icon-blue">
                         <i class="fas fa-percent"></i>
                     </div>
                     <div class="stat-card-value">@Model.AveragePercentage.ToString("F1")%</div>
@@ -85,18 +85,24 @@ else
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card text-center h-100 shadow-sm border-0">
-                <div class="card-body">
-                    <h4 class="text-info mb-1">@Model.BestPercentage.ToString("F1")%</h4>
-                    <small class="text-muted">Лучший результат</small>
+            <div class="card border-0 shadow-sm stat-card stat-card-pink">
+                <div class="card-body text-center py-1 px-2">
+                    <div class="stat-card-icon stat-icon-pink">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-card-value">@Model.BestPercentage.ToString("F1")%</div>
+                    <small class="stat-card-label">Лучший результат</small>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card text-center h-100 shadow-sm border-0">
-                <div class="card-body">
-                    <h4 class="text-warning mb-1">@Model.TotalPoints</h4>
-                    <small class="text-muted">Всего баллов</small>
+            <div class="card border-0 shadow-sm stat-card stat-card-green">
+                <div class="card-body text-center py-1 px-2">
+                    <div class="stat-card-icon stat-icon-green">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-card-value">@Model.TotalPoints</div>
+                    <small class="stat-card-label">Баллов набрано</small>
                 </div>
             </div>
         </div>
