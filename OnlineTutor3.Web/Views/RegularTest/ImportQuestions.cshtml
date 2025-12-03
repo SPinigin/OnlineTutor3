@@ -4,112 +4,124 @@
     var test = ViewBag.Test as OnlineTutor3.Domain.Entities.RegularTest;
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-10 col-lg-8">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white py-2">
-                <h5 class="mb-0">
-                    <i class="fas fa-file-import"></i> Импорт вопросов классического теста
-                </h5>
-            </div>
-            <div class="card-body p-2">
-                @if (test != null)
-                {
-                    <div class="alert alert-info alert-sm py-2 mb-2">
-                        <i class="fas fa-info-circle"></i> 
-                        <strong>Тест:</strong> @test.Title
-                    </div>
-                }
+<div class="page-header">
+    <div>
+        <h4 class="page-header-title">
+            <i class="fas fa-file-import page-header-icon"></i>
+            <span>Импорт вопросов классического теста</span>
+        </h4>
+        @if (test != null)
+        {
+            <p class="text-muted-modern mb-0 small">
+                <i class="fas fa-clipboard-check"></i> Тест: @test.Title
+            </p>
+        }
+    </div>
+    <div>
+        <a asp-action="Details" asp-route-id="@test!.Id" class="btn btn-sm btn-modern-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Назад к тесту
+        </a>
+    </div>
+</div>
 
-                <div class="alert alert-warning alert-sm py-2 mb-2">
-                    <h6 class="small mb-1"><i class="fas fa-exclamation-triangle"></i> Инструкция по импорту:</h6>
-                    <ol class="small mb-0">
-                        <li>Скачайте шаблон Excel файла</li>
-                        <li>Заполните вопросы согласно формату</li>
-                        <li>Загрузите заполненный файл</li>
-                        <li>Проверьте данные и подтвердите импорт</li>
-                    </ol>
-                </div>
+<div class="card mb-3 modern-card">
+    <div class="card-header modern-card-header">
+        <h5 class="modern-card-title mb-0">
+            <i class="fas fa-file-excel gradient-icon-blue"></i> Загрузка файла
+        </h5>
+    </div>
+    <div class="card-body modern-card-body">
+        <div class="alert alert-info border-0 shadow-sm mb-3" style="background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%); border-left: 4px solid #4facfe !important;">
+            <h6 class="mb-2 text-dark-modern">
+                <i class="fas fa-exclamation-triangle text-info"></i> Инструкция по импорту:
+            </h6>
+            <ol class="mb-0 small text-muted-modern">
+                <li>Скачайте шаблон Excel файла</li>
+                <li>Заполните вопросы согласно формату</li>
+                <li>Загрузите заполненный файл</li>
+                <li>Проверьте данные и подтвердите импорт</li>
+            </ol>
+        </div>
 
-                <div class="text-center mb-3">
-                    <a asp-action="DownloadTemplate" class="btn btn-sm btn-success">
-                        <i class="fas fa-download"></i> Скачать шаблон Excel
-                    </a>
-                    <div class="form-text small mt-1">
-                        <i class="fas fa-lightbulb"></i> Шаблон содержит примеры и инструкции по заполнению
-                    </div>
-                </div>
-
-                <hr class="my-2">
-
-                <form asp-action="ImportQuestions" method="post" enctype="multipart/form-data">
-                    <input asp-for="RegularTestId" type="hidden" />
-                    <div asp-validation-summary="All" class="text-danger mb-2 small"></div>
-
-                    <div class="mb-2">
-                        <label asp-for="ExcelFile" class="form-label small">
-                            <i class="fas fa-file-excel"></i> Excel файл с вопросами <span class="text-danger">*</span>
-                        </label>
-                        <input asp-for="ExcelFile" class="form-control form-control-sm" type="file" accept=".xlsx,.xls" />
-                        <span asp-validation-for="ExcelFile" class="text-danger small"></span>
-                        <div class="form-text small">
-                            <i class="fas fa-info-circle"></i> Поддерживаются файлы .xlsx и .xls (максимум 10 МБ)
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="PointsPerQuestion" class="form-label small">
-                            <i class="fas fa-star"></i> Баллы за каждый правильный ответ
-                        </label>
-                        <input asp-for="PointsPerQuestion" class="form-control form-control-sm" type="number" min="1" max="100" />
-                        <span asp-validation-for="PointsPerQuestion" class="text-danger small"></span>
-                        <div class="form-text small">
-                            <i class="fas fa-info-circle"></i> Количество баллов, которое получит ученик за правильный ответ
-                        </div>
-                    </div>
-
-                    <div class="alert alert-light border small mb-3">
-                        <h6 class="small mb-2"><i class="fas fa-table"></i> Формат данных в Excel файле:</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-bordered mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="small">Текст вопроса*</th>
-                                        <th class="small">Тип*</th>
-                                        <th class="small">Вариант 1*</th>
-                                        <th class="small">Правильный 1*</th>
-                                        <th class="small">Вариант 2*</th>
-                                        <th class="small">Правильный 2</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="small">Столица России?</td>
-                                        <td class="small">1</td>
-                                        <td class="small">Москва</td>
-                                        <td class="small">Да</td>
-                                        <td class="small">Санкт-Петербург</td>
-                                        <td class="small"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <small class="text-muted">
-                            <i class="fas fa-asterisk text-danger"></i> Поля отмеченные * обязательны. Тип: 1 (Одиночный выбор), 2 (Множественный выбор), 3 (Верно/Неверно)
-                        </small>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2 mt-3">
-                        <a asp-action="Details" asp-route-id="@test!.Id" class="btn btn-sm btn-outline-secondary">
-                            <i class="fas fa-arrow-left"></i> Назад к тесту
-                        </a>
-                        <button type="submit" class="btn btn-sm btn-primary">
-                            <i class="fas fa-upload"></i> Загрузить и проверить
-                        </button>
-                    </div>
-                </form>
+        <div class="text-center mb-4">
+            <a asp-action="DownloadTemplate" class="btn btn-modern-success">
+                <i class="fas fa-download"></i> Скачать шаблон Excel
+            </a>
+            <div class="form-text text-muted-modern small mt-2">
+                <i class="fas fa-lightbulb"></i> Шаблон содержит примеры и инструкции по заполнению
             </div>
         </div>
+
+        <form asp-action="ImportQuestions" method="post" enctype="multipart/form-data">
+            <input asp-for="RegularTestId" type="hidden" />
+            <div asp-validation-summary="All" class="text-danger mb-3 small"></div>
+
+            <div class="mb-3">
+                <label asp-for="ExcelFile" class="form-label text-dark-modern">
+                    <i class="fas fa-file-excel text-info"></i> Excel файл с вопросами <span class="text-danger">*</span>
+                </label>
+                <input asp-for="ExcelFile" class="form-control form-control-modern" type="file" accept=".xlsx,.xls" />
+                <span asp-validation-for="ExcelFile" class="text-danger small"></span>
+                <div class="form-text text-muted-modern small">
+                    <i class="fas fa-info-circle"></i> Поддерживаются файлы .xlsx и .xls (максимум 10 МБ)
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PointsPerQuestion" class="form-label text-dark-modern">
+                    <i class="fas fa-star text-warning"></i> Баллы за каждый правильный ответ
+                </label>
+                <input asp-for="PointsPerQuestion" class="form-control form-control-modern" type="number" min="1" max="100" />
+                <span asp-validation-for="PointsPerQuestion" class="text-danger small"></span>
+                <div class="form-text text-muted-modern small">
+                    <i class="fas fa-info-circle"></i> Количество баллов, которое получит ученик за правильный ответ
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-3" style="background: #f8f9fa;">
+                <div class="card-body p-3">
+                    <h6 class="text-dark-modern mb-3">
+                        <i class="fas fa-table text-primary"></i> Формат данных в Excel файле:
+                    </h6>
+                    <div class="table-responsive">
+                        <table class="table modern-table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="small">Текст вопроса*</th>
+                                    <th class="small">Тип*</th>
+                                    <th class="small">Вариант 1*</th>
+                                    <th class="small">Правильный 1*</th>
+                                    <th class="small">Вариант 2*</th>
+                                    <th class="small">Правильный 2</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="small">Столица России?</td>
+                                    <td class="small"><strong>1</strong></td>
+                                    <td class="small">Москва</td>
+                                    <td class="small"><strong>Да</strong></td>
+                                    <td class="small">Санкт-Петербург</td>
+                                    <td class="small text-muted-modern"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <small class="text-muted-modern mt-2 d-block">
+                        <i class="fas fa-asterisk text-danger"></i> Поля отмеченные * обязательны. Тип: 1 (Одиночный выбор), 2 (Множественный выбор), 3 (Верно/Неверно)
+                    </small>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Details" asp-route-id="@test!.Id" class="btn btn-modern-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Отмена
+                </a>
+                <button type="submit" class="btn btn-modern-primary">
+                    <i class="fas fa-upload"></i> Загрузить и проверить
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -130,4 +142,3 @@
         });
     </script>
 }
-
