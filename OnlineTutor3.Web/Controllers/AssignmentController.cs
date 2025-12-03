@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using OnlineTutor3.Application.Interfaces;
 using OnlineTutor3.Domain.Entities;
 using OnlineTutor3.Web.ViewModels;
+using System.Text.RegularExpressions;
 
 namespace OnlineTutor3.Web.Controllers
 {
@@ -87,6 +88,8 @@ namespace OnlineTutor3.Web.Controllers
                     assignments = await _assignmentService.GetByTeacherIdAsync(currentUser.Id) ?? new List<Assignment>();
                 }
 
+                assignments = assignments.OrderBy(a => a.Title, new NaturalStringComparer()).ToList();
+
                 // Загружаем тесты для каждого задания
                 var assignmentsWithTests = new Dictionary<int, AssignmentTestsViewModel>();
                 if (assignments != null && assignments.Any())
@@ -100,9 +103,12 @@ namespace OnlineTutor3.Web.Controllers
                             List<OrthoeopyTest> orthoeopyTests = new List<OrthoeopyTest>();
                             List<RegularTest> regularTests = new List<RegularTest>();
 
+                            var naturalComparer = new NaturalStringComparer();
+                            
                             try
                             {
                                 spellingTests = await _spellingTestService.GetByAssignmentIdAsync(assignment.Id);
+                                spellingTests = spellingTests.OrderBy(t => t.Title, naturalComparer).ToList();
                             }
                             catch
                             {
@@ -111,6 +117,7 @@ namespace OnlineTutor3.Web.Controllers
                             try
                             {
                                 punctuationTests = await _punctuationTestService.GetByAssignmentIdAsync(assignment.Id);
+                                punctuationTests = punctuationTests.OrderBy(t => t.Title, naturalComparer).ToList();
                             }
                             catch
                             {
@@ -119,6 +126,7 @@ namespace OnlineTutor3.Web.Controllers
                             try
                             {
                                 orthoeopyTests = await _orthoeopyTestService.GetByAssignmentIdAsync(assignment.Id);
+                                orthoeopyTests = orthoeopyTests.OrderBy(t => t.Title, naturalComparer).ToList();
                             }
                             catch
                             {
@@ -127,6 +135,7 @@ namespace OnlineTutor3.Web.Controllers
                             try
                             {
                                 regularTests = await _regularTestService.GetByAssignmentIdAsync(assignment.Id);
+                                regularTests = regularTests.OrderBy(t => t.Title, naturalComparer).ToList();
                             }
                             catch
                             {
@@ -793,6 +802,44 @@ namespace OnlineTutor3.Web.Controllers
                 _logger.LogError(ex, "Ошибка в Assignment/Delete (POST) для ID: {AssignmentId}", id);
                 TempData["ErrorMessage"] = "Произошла ошибка при удалении задания.";
                 return RedirectToAction(nameof(Index));
+            }
+        }
+
+        private class NaturalStringComparer : IComparer<string>
+        {
+            public int Compare(string? x, string? y)
+            {
+                if (x == null && y == null) return 0;
+                if (x == null) return -1;
+                if (y == null) return 1;
+
+                // Разбиваем строки на части (текст и числа)
+                var partsX = Regex.Split(x, @"(\d+)");
+                var partsY = Regex.Split(y, @"(\d+)");
+
+                int minLength = Math.Min(partsX.Length, partsY.Length);
+
+                for (int i = 0; i < minLength; i++)
+                {
+                    var partX = partsX[i];
+                    var partY = partsY[i];
+
+                    // Если обе части - числа, сравниваем как числа
+                    if (int.TryParse(partX, out int numX) && int.TryParse(partY, out int numY))
+                    {
+                        int comparison = numX.CompareTo(numY);
+                        if (comparison != 0) return comparison;
+                    }
+                    else
+                    {
+                        // Иначе сравниваем как строки
+                        int comparison = string.Compare(partX, partY, StringComparison.OrdinalIgnoreCase);
+                        if (comparison != 0) return comparison;
+                    }
+                }
+
+                // Если все части совпадают, сравниваем по длине
+                return partsX.Length.CompareTo(partsY.Length);
             }
         }
     }
