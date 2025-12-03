@@ -227,6 +227,11 @@ else
                                                             <a asp-controller="SpellingTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
+                                                            <form asp-controller="SpellingTest" asp-action="ToggleActive" asp-route-id="@test.Id" method="post" class="d-inline" style="margin: 0;">
+                                                                <button type="submit" class="btn btn-sm btn-modern-outline-@(test.IsActive ? "warning" : "success")" title="@(test.IsActive ? "Деактивировать" : "Активировать")">
+                                                                    <i class="fas fa-@(test.IsActive ? "toggle-on" : "toggle-off")"></i>
+                                                                </button>
+                                                            </form>
                                                             <a asp-controller="SpellingTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                                                 <i class="fas fa-trash"></i>
                                                             </a>
@@ -277,6 +282,11 @@ else
                                                             <a asp-controller="PunctuationTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
+                                                            <form asp-controller="PunctuationTest" asp-action="ToggleActive" asp-route-id="@test.Id" method="post" class="d-inline" style="margin: 0;">
+                                                                <button type="submit" class="btn btn-sm btn-modern-outline-@(test.IsActive ? "warning" : "success")" title="@(test.IsActive ? "Деактивировать" : "Активировать")">
+                                                                    <i class="fas fa-@(test.IsActive ? "toggle-on" : "toggle-off")"></i>
+                                                                </button>
+                                                            </form>
                                                             <a asp-controller="PunctuationTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                                                 <i class="fas fa-trash"></i>
                                                             </a>
@@ -327,6 +337,11 @@ else
                                                             <a asp-controller="OrthoeopyTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
+                                                            <form asp-controller="OrthoeopyTest" asp-action="ToggleActive" asp-route-id="@test.Id" method="post" class="d-inline" style="margin: 0;">
+                                                                <button type="submit" class="btn btn-sm btn-modern-outline-@(test.IsActive ? "warning" : "success")" title="@(test.IsActive ? "Деактивировать" : "Активировать")">
+                                                                    <i class="fas fa-@(test.IsActive ? "toggle-on" : "toggle-off")"></i>
+                                                                </button>
+                                                            </form>
                                                             <a asp-controller="OrthoeopyTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                                                 <i class="fas fa-trash"></i>
                                                             </a>
@@ -377,6 +392,11 @@ else
                                                             <a asp-controller="RegularTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
+                                                            <form asp-controller="RegularTest" asp-action="ToggleActive" asp-route-id="@test.Id" method="post" class="d-inline" style="margin: 0;">
+                                                                <button type="submit" class="btn btn-sm btn-modern-outline-@(test.IsActive ? "warning" : "success")" title="@(test.IsActive ? "Деактивировать" : "Активировать")">
+                                                                    <i class="fas fa-@(test.IsActive ? "toggle-on" : "toggle-off")"></i>
+                                                                </button>
+                                                            </form>
                                                             <a asp-controller="RegularTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                                                 <i class="fas fa-trash"></i>
                                                             </a>
