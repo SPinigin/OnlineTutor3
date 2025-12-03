@@ -8,178 +8,244 @@
     var invalidQuestions = Model?.Where(q => !q.IsValid).ToList() ?? new List<OnlineTutor3.Web.ViewModels.ImportRegularQuestionRow>();
 }
 
-<div class="row justify-content-center">
-    <div class="col-12">
-        <div class="card shadow-sm mb-3">
-            <div class="card-header bg-primary text-white py-2">
-                <h5 class="mb-0">
-                    <i class="fas fa-eye"></i> Предпросмотр импорта вопросов
-                </h5>
+<div class="page-header">
+    <div>
+        <h4 class="page-header-title">
+            <i class="fas fa-eye page-header-icon"></i>
+            <span>Предпросмотр импорта вопросов</span>
+        </h4>
+        @if (test != null)
+        {
+            <p class="text-muted-modern mb-0 small">
+                <i class="fas fa-clipboard-check"></i> Тест: @test.Title
+            </p>
+        }
+    </div>
+    <div>
+        <a asp-action="ImportQuestions" asp-route-id="@test!.Id" class="btn btn-sm btn-modern-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Назад
+        </a>
+    </div>
+</div>
+
+<div class="row mb-3 g-2 g-md-3" style="flex-wrap: nowrap;">
+    <div class="col-4">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body text-center py-1 px-1 px-md-2">
+                <div class="stat-card-icon stat-icon-blue" style="font-size: 0.9rem;">
+                    <i class="fas fa-list"></i>
+                </div>
+                <div class="stat-card-value" style="font-size: 1rem;">@Model.Count</div>
+                <small class="stat-card-label" style="font-size: 0.65rem;">Всего вопросов</small>
             </div>
-            <div class="card-body p-2">
-                @if (test != null)
-                {
-                    <div class="alert alert-info alert-sm py-2 mb-2">
-                        <i class="fas fa-info-circle"></i> 
-                        <strong>Тест:</strong> @test.Title
-                    </div>
-                }
-
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <div class="card border-primary">
-                            <div class="card-body text-center py-2">
-                                <h6 class="mb-0 text-primary">@Model.Count</h6>
-                                <small class="text-muted">Всего вопросов</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card border-success">
-                            <div class="card-body text-center py-2">
-                                <h6 class="mb-0 text-success">@validQuestions.Count</h6>
-                                <small class="text-muted">Валидных</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card border-danger">
-                            <div class="card-body text-center py-2">
-                                <h6 class="mb-0 text-danger">@invalidQuestions.Count</h6>
-                                <small class="text-muted">С ошибками</small>
-                            </div>
-                        </div>
-                    </div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card border-0 shadow-sm stat-card stat-card-green">
+            <div class="card-body text-center py-1 px-1 px-md-2">
+                <div class="stat-card-icon stat-icon-green" style="font-size: 0.9rem;">
+                    <i class="fas fa-check-circle"></i>
                 </div>
-
-                @if (invalidQuestions.Any())
-                {
-                    <div class="alert alert-danger alert-sm py-2 mb-2">
-                        <h6 class="small mb-1"><i class="fas fa-exclamation-triangle"></i> Вопросы с ошибками:</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-bordered mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="small" style="width: 5%;">Строка</th>
-                                        <th class="small" style="width: 40%;">Текст вопроса</th>
-                                        <th class="small" style="width: 15%;">Тип</th>
-                                        <th class="small" style="width: 40%;">Ошибки</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var question in invalidQuestions)
-                                    {
-                                        <tr>
-                                            <td class="small">@question.RowNumber</td>
-                                            <td class="small">@question.Text</td>
-                                            <td class="small">@question.Type</td>
-                                            <td class="small">
-                                                <ul class="mb-0">
-                                                    @foreach (var error in question.Errors)
-                                                    {
-                                                        <li class="text-danger">@error</li>
-                                                    }
-                                                </ul>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                }
-
-                @if (validQuestions.Any())
-                {
-                    <div class="alert alert-success alert-sm py-2 mb-2">
-                        <h6 class="small mb-1"><i class="fas fa-check-circle"></i> Валидные вопросы (@validQuestions.Count):</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-bordered table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="small" style="width: 5%;">#</th>
-                                        <th class="small" style="width: 35%;">Текст вопроса</th>
-                                        <th class="small" style="width: 15%;">Тип</th>
-                                        <th class="small" style="width: 30%;">Варианты ответов</th>
-                                        <th class="small" style="width: 10%;">Баллы</th>
-                                        <th class="small" style="width: 5%;">Подсказка</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @for (int i = 0; i < validQuestions.Count; i++)
-                                    {
-                                        var question = validQuestions[i];
-                                        var options = question.GetOptions();
-                                        var typeName = question.Type switch
-                                        {
-                                            "1" or "Одиночный выбор" => "Одиночный выбор",
-                                            "2" or "Множественный выбор" => "Множественный выбор",
-                                            "3" or "Верно/Неверно" => "Верно/Неверно",
-                                            _ => question.Type ?? "-"
-                                        };
-                                        <tr>
-                                            <td class="small">@(i + 1)</td>
-                                            <td class="small">@question.Text</td>
-                                            <td class="small">
-                                                <span class="badge bg-secondary badge-sm">@typeName</span>
-                                            </td>
-                                            <td class="small">
-                                                @if (options != null && options.Any())
-                                                {
-                                                    @foreach (var option in options)
-                                                    {
-                                                        <div class="small">
-                                                            @if (option.IsCorrect)
-                                                            {
-                                                                <i class="fas fa-check-circle text-success"></i>
-                                                            }
-                                                            else
-                                                            {
-                                                                <i class="fas fa-circle text-muted"></i>
-                                                            }
-                                                            @option.Text
-                                                        </div>
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">-</span>
-                                                }
-                                            </td>
-                                            <td class="small">@pointsPerQuestion</td>
-                                            <td class="small">@(string.IsNullOrEmpty(question.Hint) ? "-" : "✓")</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                }
-
-                @if (!validQuestions.Any())
-                {
-                    <div class="alert alert-warning alert-sm py-2 mb-2">
-                        <i class="fas fa-exclamation-triangle"></i> 
-                        Нет валидных вопросов для импорта. Исправьте ошибки и попробуйте снова.
-                    </div>
-                }
-
-                <div class="d-flex justify-content-end gap-2 mt-3">
-                    <a asp-action="ImportQuestions" asp-route-id="@test!.Id" class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i> Назад
-                    </a>
-                    @if (validQuestions.Any())
-                    {
-                        <form asp-action="ConfirmImport" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-success">
-                                <i class="fas fa-check"></i> Подтвердить импорт (@validQuestions.Count вопросов)
-                            </button>
-                        </form>
-                    }
+                <div class="stat-card-value" style="font-size: 1rem;">@validQuestions.Count</div>
+                <small class="stat-card-label" style="font-size: 0.65rem;">Валидных</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card border-0 shadow-sm stat-card stat-card-pink">
+            <div class="card-body text-center py-1 px-1 px-md-2">
+                <div class="stat-card-icon stat-icon-pink" style="font-size: 0.9rem;">
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
+                <div class="stat-card-value" style="font-size: 1rem;">@invalidQuestions.Count</div>
+                <small class="stat-card-label" style="font-size: 0.65rem;">С ошибками</small>
             </div>
         </div>
     </div>
 </div>
 
+@if (invalidQuestions.Any() || validQuestions.Any())
+{
+    <div class="card mb-3 modern-card">
+        <div class="card-header modern-card-header py-1">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h6 class="mb-0 modern-card-title" style="font-size: 0.85rem;">
+                    <i class="fas fa-list-alt nav-link-icon"></i> Предпросмотр вопросов
+                </h6>
+                
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="showErrorsOnly" checked style="font-size: 0.8rem;">
+                    <label class="form-check-label text-dark-modern" for="showErrorsOnly" style="font-size: 0.75rem;">
+                        Только ошибки
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (invalidQuestions.Any())
+{
+    <div class="card mb-3 modern-card border-danger">
+        <div class="card-header modern-card-header" style="border-left: 4px solid #dc3545;">
+            <h5 class="modern-card-title mb-0 text-danger">
+                <i class="fas fa-exclamation-triangle"></i> Вопросы с ошибками
+            </h5>
+        </div>
+        <div class="card-body modern-card-body">
+            <div class="table-responsive-md">
+                <table class="table modern-table table-sm mb-0" style="table-layout: auto; width: 100%;">
+                    <thead>
+                        <tr>
+                            <th class="small" style="width: 5%; min-width: 50px;">Строка</th>
+                            <th class="small" style="min-width: 150px;">Текст вопроса</th>
+                            <th class="small" style="width: 15%; min-width: 80px;">Тип</th>
+                            <th class="small" style="min-width: 150px;">Ошибки</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var question in invalidQuestions)
+                        {
+                            <tr>
+                                <td class="small text-muted-modern">@question.RowNumber</td>
+                                <td class="small text-dark-modern">@question.Text</td>
+                                <td class="small text-dark-modern">@question.Type</td>
+                                <td class="small">
+                                    <ul class="mb-0 ps-3">
+                                        @foreach (var error in question.Errors)
+                                        {
+                                            <li class="text-danger small">@error</li>
+                                        }
+                                    </ul>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+@if (validQuestions.Any())
+{
+    <div class="card mb-3 modern-card border-success valid-questions-section">
+        <div class="card-header modern-card-header" style="border-left: 4px solid #28a745;">
+            <h5 class="modern-card-title mb-0 text-success">
+                <i class="fas fa-check-circle"></i> Валидные вопросы (@validQuestions.Count)
+            </h5>
+        </div>
+        <div class="card-body modern-card-body">
+            <div class="table-responsive-md">
+                <table class="table modern-table table-sm mb-0" style="table-layout: auto; width: 100%;">
+                    <thead>
+                        <tr>
+                            <th class="small" style="width: 5%; min-width: 40px;">#</th>
+                            <th class="small" style="min-width: 150px;">Текст вопроса</th>
+                            <th class="small" style="width: 15%; min-width: 100px;">Тип</th>
+                            <th class="small d-none d-md-table-cell" style="width: 30%;">Варианты ответов</th>
+                            <th class="small d-none d-md-table-cell" style="width: 10%;">Баллы</th>
+                            <th class="small d-none d-md-table-cell" style="width: 5%;">Подсказка</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < validQuestions.Count; i++)
+                        {
+                            var question = validQuestions[i];
+                            var options = question.GetOptions();
+                            var typeName = question.Type switch
+                            {
+                                "1" or "Одиночный выбор" => "Одиночный выбор",
+                                "2" or "Множественный выбор" => "Множественный выбор",
+                                "3" or "Верно/Неверно" => "Верно/Неверно",
+                                _ => question.Type ?? "-"
+                            };
+                            <tr>
+                                <td class="small text-muted-modern">@(i + 1)</td>
+                                <td class="small text-dark-modern">@question.Text</td>
+                                <td class="small">
+                                    <span class="badge badge-modern-secondary badge-sm">@typeName</span>
+                                </td>
+                                <td class="small d-none d-md-table-cell">
+                                    @if (options != null && options.Any())
+                                    {
+                                        @foreach (var option in options)
+                                        {
+                                            <div class="small mb-1">
+                                                @if (option.IsCorrect)
+                                                {
+                                                    <i class="fas fa-check-circle text-success"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fas fa-circle text-muted-modern"></i>
+                                                }
+                                                <span class="text-dark-modern">@option.Text</span>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted-modern">-</span>
+                                    }
+                                </td>
+                                <td class="small text-muted-modern d-none d-md-table-cell">@pointsPerQuestion</td>
+                                <td class="small text-muted-modern d-none d-md-table-cell">@(string.IsNullOrEmpty(question.Hint) ? "-" : "✓")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+@if (!validQuestions.Any())
+{
+    <div class="card mb-3 modern-card border-warning">
+        <div class="card-body modern-card-body">
+            <div class="alert alert-warning border-0 shadow-sm mb-0" style="background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%); border-left: 4px solid #ffc107 !important;">
+                <i class="fas fa-exclamation-triangle text-warning"></i> 
+                <span class="text-dark-modern">Нет валидных вопросов для импорта. Исправьте ошибки и попробуйте снова.</span>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="d-flex justify-content-end gap-2">
+    <a asp-action="ImportQuestions" asp-route-id="@test!.Id" class="btn btn-modern-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Назад
+    </a>
+    @if (validQuestions.Any())
+    {
+        <form asp-action="ConfirmImport" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-modern-success">
+                <i class="fas fa-check"></i> Подтвердить импорт (@validQuestions.Count вопросов)
+            </button>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Применяем фильтр при загрузке страницы
+            function applyFilter() {
+                if ($('#showErrorsOnly').is(':checked')) {
+                    $('.valid-questions-section').hide();
+                } else {
+                    $('.valid-questions-section').show();
+                }
+            }
+            
+            // Применяем фильтр сразу при загрузке
+            applyFilter();
+            
+            // Обработчик изменения переключателя
+            $('#showErrorsOnly').on('change', function() {
+                applyFilter();
+            });
+        });
+    </script>
+}

@@ -434,6 +434,47 @@ namespace OnlineTutor3.Web.Controllers
             }
         }
 
+        // POST: RegularTest/ToggleActive/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleActive(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var test = await _testService.GetByIdAsync(id);
+                if (test == null)
+                {
+                    return NotFound();
+                }
+
+                // Проверяем доступ
+                var canAccess = await _testService.TeacherCanAccessTestAsync(currentUser.Id, id);
+                if (!canAccess)
+                {
+                    return NotFound();
+                }
+
+                test.IsActive = !test.IsActive;
+                await _testService.UpdateAsync(test);
+                
+                var actionText = test.IsActive ? "активирован" : "деактивирован";
+                TempData["SuccessMessage"] = $"Тест \"{test.Title}\" успешно {actionText}!";
+                return RedirectToAction("Index", "Assignment");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при изменении статуса классического теста {TestId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при изменении статуса теста.";
+                return RedirectToAction("Index", "Assignment");
+            }
+        }
+
         #region Question Import
 
         // GET: RegularTest/ImportQuestions/5
