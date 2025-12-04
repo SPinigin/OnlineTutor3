@@ -213,6 +213,7 @@
     font-weight: 600;
     color: #2d3748;
     border-bottom: 2px solid #e9ecef;
+    white-space: nowrap;
 }
 
 .modern-table tbody td {
@@ -226,6 +227,33 @@
 
 .modern-table tbody tr:hover {
     background-color: rgba(102, 126, 234, 0.05) !important;
+}
+
+/* ===== STUDENT MANAGEMENT TABLE HEADERS ===== */
+.modern-table thead th.th-school-class {
+    min-width: 120px;
+}
+
+.modern-table thead th.th-online-class {
+    min-width: 130px;
+}
+
+.modern-table thead th.th-date-added {
+    min-width: 140px;
+}
+
+.modern-table thead th.th-actions {
+    min-width: 180px;
+}
+
+/* ===== STUDENT MANAGEMENT TABLE CELLS ===== */
+.modern-table tbody td.text-center {
+    text-align: center;
+}
+
+.badge-compact {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
 }
 
 /* ===== MODERN BADGES ===== */
