@@ -91,6 +91,12 @@
             <a asp-action="ImportQuestions" asp-route-id="@Model.Id" class="btn btn-sm btn-modern-outline-info" title="Импорт из Excel">
                 <i class="fas fa-file-import"></i> <span class="d-none d-md-inline">Импорт из Excel</span>
             </a>
+            @if (questions.Any())
+            {
+                <button type="button" class="btn btn-sm btn-modern-danger" data-bs-toggle="modal" data-bs-target="#deleteAllQuestionsModal" title="Удалить все вопросы">
+                    <i class="fas fa-trash-alt"></i> <span class="d-none d-md-inline">Удалить все</span>
+                </button>
+            }
         </div>
     </div>
     <div class="card-body modern-card-body">
@@ -156,4 +162,39 @@
         }
     </div>
 </div>
+
+@if (questions.Any())
+{
+    <div class="modal fade" id="deleteAllQuestionsModal" tabindex="-1" aria-labelledby="deleteAllQuestionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content modern-modal-content">
+                <div class="modal-header modern-modal-header" style="border-left: 4px solid #dc3545;">
+                    <h5 class="modal-title modern-modal-title" id="deleteAllQuestionsModalLabel">
+                        <i class="fas fa-exclamation-triangle text-danger"></i> Подтверждение удаления
+                    </h5>
+                    <button type="button" class="btn-close modern-btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body modern-modal-body">
+                    <div class="alert alert-warning mb-3">
+                        <i class="fas fa-warning"></i>
+                        <strong>Внимание!</strong> Это действие нельзя отменить.
+                    </div>
+                    <p class="text-dark-modern">Вы действительно хотите удалить все вопросы теста <strong>"@Model.Title"</strong>?</p>
+                    <p class="text-muted-modern mb-0">Будет удалено вопросов: <strong>@questions.Count</strong></p>
+                </div>
+                <div class="modal-footer modern-modal-footer">
+                    <button type="button" class="btn btn-modern-outline-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Отмена
+                    </button>
+                    <form asp-action="DeleteAllQuestions" asp-route-id="@Model.Id" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-modern-danger">
+                            <i class="fas fa-trash-alt"></i> Удалить все вопросы
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 

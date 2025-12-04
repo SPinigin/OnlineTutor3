@@ -801,6 +801,54 @@ namespace OnlineTutor3.Web.Controllers
         }
 
         #endregion
+
+        // POST: RegularTest/DeleteAllQuestions/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAllQuestions(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var test = await _testService.GetByIdAsync(id);
+                if (test == null)
+                {
+                    TempData["ErrorMessage"] = "Тест не найден.";
+                    return RedirectToAction("Index", "Assignment");
+                }
+
+                // Проверяем доступ
+                var canAccess = await _testService.TeacherCanAccessTestAsync(currentUser.Id, id);
+                if (!canAccess)
+                {
+                    TempData["ErrorMessage"] = "У вас нет доступа к этому тесту.";
+                    return RedirectToAction("Index", "Assignment");
+                }
+
+                // Получаем все вопросы теста
+                var questions = await _questionRepository.GetByTestIdAsync(id);
+                
+                // Удаляем каждый вопрос (включая варианты ответов для RegularQuestion)
+                foreach (var question in questions)
+                {
+                    await _questionRepository.DeleteAsync(question.Id);
+                }
+
+                TempData["SuccessMessage"] = $"Все вопросы теста \"{test.Title}\" успешно удалены!";
+                return RedirectToAction("Details", new { id = id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка в RegularTest/DeleteAllQuestions для ID: {TestId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при удалении всех вопросов.";
+                return RedirectToAction("Details", new { id = id });
+            }
+        }
     }
 }
 

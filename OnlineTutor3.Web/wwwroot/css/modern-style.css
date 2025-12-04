@@ -652,6 +652,20 @@
     color: white;
 }
 
+.btn-modern-danger {
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    border: 0;
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-modern-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+    color: white;
+}
+
 /* ===== EMPTY STATE EXTENDED ===== */
 .empty-state-large {
     text-align: center;
