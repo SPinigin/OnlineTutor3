@@ -19,6 +19,11 @@ namespace OnlineTutor3.Web.ViewModels
 
         public int TotalStudentsInProgress { get; set; }
         public int TotalCompletedToday { get; set; }
+
+        /// <summary>
+        /// Статистика по тестам: ключ - "testType_testId", значение - (Completed, InProgress)
+        /// </summary>
+        public Dictionary<string, (int Completed, int InProgress)> TestStatistics { get; set; } = new();
     }
 
     /// <summary>

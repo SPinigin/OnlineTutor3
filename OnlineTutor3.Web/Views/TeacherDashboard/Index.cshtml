@@ -237,7 +237,7 @@
                                     <th>Название теста</th>
                                     <th class="d-none d-lg-table-cell">Тип</th>
                                     <th class="text-center">Завершено</th>
-                                    <th class="text-center">В процессе</th>
+                                    <th class="text-center test-header-nowrap">В процессе</th>
                                     <th class="text-center">Действия</th>
                                 </tr>
                             </thead>
@@ -256,8 +256,14 @@
                                                 <div class="flex-grow-1 min-w-0">
                                                     <strong class="d-block text-dark-modern">@test.Title</strong>
                                                     <small class="text-muted-modern">
-                                                        <i class="fas fa-calendar me-1"></i>
-                                                        @test.CreatedAt.ToString("dd.MM.yyyy")
+                                                        @if (!string.IsNullOrEmpty(test.Description))
+                                                        {
+                                                            @test.Description
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">—</span>
+                                                        }
                                                     </small>
                                                 </div>
                                             </div>
@@ -269,10 +275,14 @@
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge badge-modern-success test-count-completed" data-test-id="@test.Id" data-test-type="spelling">0</span>
+                                            @{
+                                                var spellingKey = $"spelling_{test.Id}";
+                                                var spellingStats = Model.TestStatistics.ContainsKey(spellingKey) ? Model.TestStatistics[spellingKey] : (Completed: 0, InProgress: 0);
+                                            }
+                                            <span class="badge badge-modern-success test-count-completed test-count-badge" data-test-id="@test.Id" data-test-type="spelling">@spellingStats.Completed</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge badge-modern-warning test-count-progress" data-test-id="@test.Id" data-test-type="spelling">0</span>
+                                            <span class="badge badge-modern-warning test-count-progress test-count-badge" data-test-id="@test.Id" data-test-type="spelling">@spellingStats.InProgress</span>
                                         </td>
                                         <td class="text-center">
                                             <a asp-controller="SpellingTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary">
@@ -297,8 +307,14 @@
                                                 <div class="flex-grow-1 min-w-0">
                                                     <strong class="d-block text-dark-modern">@test.Title</strong>
                                                     <small class="text-muted-modern">
-                                                        <i class="fas fa-calendar me-1"></i>
-                                                        @test.CreatedAt.ToString("dd.MM.yyyy")
+                                                        @if (!string.IsNullOrEmpty(test.Description))
+                                                        {
+                                                            @test.Description
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">—</span>
+                                                        }
                                                     </small>
                                                 </div>
                                             </div>
@@ -310,10 +326,14 @@
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge badge-modern-success test-count-completed" data-test-id="@test.Id" data-test-type="punctuation">0</span>
+                                            @{
+                                                var punctuationKey = $"punctuation_{test.Id}";
+                                                var punctuationStats = Model.TestStatistics.ContainsKey(punctuationKey) ? Model.TestStatistics[punctuationKey] : (Completed: 0, InProgress: 0);
+                                            }
+                                            <span class="badge badge-modern-success test-count-completed test-count-badge" data-test-id="@test.Id" data-test-type="punctuation">@punctuationStats.Completed</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge badge-modern-warning test-count-progress" data-test-id="@test.Id" data-test-type="punctuation">0</span>
+                                            <span class="badge badge-modern-warning test-count-progress test-count-badge" data-test-id="@test.Id" data-test-type="punctuation">@punctuationStats.InProgress</span>
                                         </td>
                                         <td class="text-center">
                                             <a asp-controller="PunctuationTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary">
@@ -338,8 +358,14 @@
                                                 <div class="flex-grow-1 min-w-0">
                                                     <strong class="d-block text-dark-modern">@test.Title</strong>
                                                     <small class="text-muted-modern">
-                                                        <i class="fas fa-calendar me-1"></i>
-                                                        @test.CreatedAt.ToString("dd.MM.yyyy")
+                                                        @if (!string.IsNullOrEmpty(test.Description))
+                                                        {
+                                                            @test.Description
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">—</span>
+                                                        }
                                                     </small>
                                                 </div>
                                             </div>
@@ -351,10 +377,14 @@
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge badge-modern-success test-count-completed" data-test-id="@test.Id" data-test-type="orthoeopy">0</span>
+                                            @{
+                                                var orthoeopyKey = $"orthoeopy_{test.Id}";
+                                                var orthoeopyStats = Model.TestStatistics.ContainsKey(orthoeopyKey) ? Model.TestStatistics[orthoeopyKey] : (Completed: 0, InProgress: 0);
+                                            }
+                                            <span class="badge badge-modern-success test-count-completed test-count-badge" data-test-id="@test.Id" data-test-type="orthoeopy">@orthoeopyStats.Completed</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge badge-modern-warning test-count-progress" data-test-id="@test.Id" data-test-type="orthoeopy">0</span>
+                                            <span class="badge badge-modern-warning test-count-progress test-count-badge" data-test-id="@test.Id" data-test-type="orthoeopy">@orthoeopyStats.InProgress</span>
                                         </td>
                                         <td class="text-center">
                                             <a asp-controller="OrthoeopyTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary">
@@ -379,8 +409,14 @@
                                                 <div class="flex-grow-1 min-w-0">
                                                     <strong class="d-block text-dark-modern">@test.Title</strong>
                                                     <small class="text-muted-modern">
-                                                        <i class="fas fa-calendar me-1"></i>
-                                                        @test.CreatedAt.ToString("dd.MM.yyyy")
+                                                        @if (!string.IsNullOrEmpty(test.Description))
+                                                        {
+                                                            @test.Description
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">—</span>
+                                                        }
                                                     </small>
                                                 </div>
                                             </div>
@@ -392,10 +428,14 @@
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge badge-modern-success test-count-completed" data-test-id="@test.Id" data-test-type="regular">0</span>
+                                            @{
+                                                var regularKey = $"regular_{test.Id}";
+                                                var regularStats = Model.TestStatistics.ContainsKey(regularKey) ? Model.TestStatistics[regularKey] : (Completed: 0, InProgress: 0);
+                                            }
+                                            <span class="badge badge-modern-success test-count-completed test-count-badge" data-test-id="@test.Id" data-test-type="regular">@regularStats.Completed</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge badge-modern-warning test-count-progress" data-test-id="@test.Id" data-test-type="regular">0</span>
+                                            <span class="badge badge-modern-warning test-count-progress test-count-badge" data-test-id="@test.Id" data-test-type="regular">@regularStats.InProgress</span>
                                         </td>
                                         <td class="text-center">
                                             <a asp-controller="RegularTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary">

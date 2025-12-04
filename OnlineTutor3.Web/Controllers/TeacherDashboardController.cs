@@ -92,6 +92,7 @@ namespace OnlineTutor3.Web.Controllers
                     RegularTests = regularTests.Take(20).ToList()
                 };
                 await CalculateStatisticsAsync(viewModel, currentUser.Id);
+                await CalculateTestStatisticsAsync(viewModel);
 
                 return View(viewModel);
             }
@@ -538,6 +539,55 @@ namespace OnlineTutor3.Web.Controllers
                 _logger.LogError(ex, "Ошибка при подсчете статистики");
                 viewModel.TotalStudentsInProgress = 0;
                 viewModel.TotalCompletedToday = 0;
+            }
+        }
+
+        /// <summary>
+        /// Подсчет статистики по каждому тесту (завершено и в процессе)
+        /// </summary>
+        private async Task CalculateTestStatisticsAsync(TeacherDashboardViewModel viewModel)
+        {
+            try
+            {
+                // Обрабатываем Spelling тесты
+                foreach (var test in viewModel.SpellingTests)
+                {
+                    var results = await _spellingTestResultRepository.GetByTestIdAsync(test.Id);
+                    var completed = results.Count(r => r.IsCompleted);
+                    var inProgress = results.Count(r => !r.IsCompleted);
+                    viewModel.TestStatistics[$"spelling_{test.Id}"] = (completed, inProgress);
+                }
+
+                // Обрабатываем Punctuation тесты
+                foreach (var test in viewModel.PunctuationTests)
+                {
+                    var results = await _punctuationTestResultRepository.GetByTestIdAsync(test.Id);
+                    var completed = results.Count(r => r.IsCompleted);
+                    var inProgress = results.Count(r => !r.IsCompleted);
+                    viewModel.TestStatistics[$"punctuation_{test.Id}"] = (completed, inProgress);
+                }
+
+                // Обрабатываем Orthoeopy тесты
+                foreach (var test in viewModel.OrthoeopyTests)
+                {
+                    var results = await _orthoeopyTestResultRepository.GetByTestIdAsync(test.Id);
+                    var completed = results.Count(r => r.IsCompleted);
+                    var inProgress = results.Count(r => !r.IsCompleted);
+                    viewModel.TestStatistics[$"orthoeopy_{test.Id}"] = (completed, inProgress);
+                }
+
+                // Обрабатываем Regular тесты
+                foreach (var test in viewModel.RegularTests)
+                {
+                    var results = await _regularTestResultRepository.GetByTestIdAsync(test.Id);
+                    var completed = results.Count(r => r.IsCompleted);
+                    var inProgress = results.Count(r => !r.IsCompleted);
+                    viewModel.TestStatistics[$"regular_{test.Id}"] = (completed, inProgress);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при подсчете статистики по тестам");
             }
         }
     }

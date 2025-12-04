@@ -229,9 +229,6 @@ class TeacherDashboardSignalR {
         }
     }
 
-    /**
-     * Обновить счетчики в таблице тестов
-     */
     updateTestCard(data) {
         var completedBadge = document.querySelector(
             '.test-count-completed[data-test-id="' + data.testId + '"][data-test-type="' + data.testType + '"]'
@@ -242,7 +239,6 @@ class TeacherDashboardSignalR {
         
         if (completedBadge && progressBadge) {
             if (data.action === 'completed') {
-                // Увеличиваем завершенных
                 var completed = parseInt(completedBadge.textContent) || 0;
                 completedBadge.textContent = completed + 1;
                 completedBadge.classList.add('badge-pulse');
@@ -250,14 +246,12 @@ class TeacherDashboardSignalR {
                     completedBadge.classList.remove('badge-pulse');
                 }, 600);
                 
-                // Уменьшаем в процессе
                 var inProgress = parseInt(progressBadge.textContent) || 0;
                 if (inProgress > 0) {
                     progressBadge.textContent = inProgress - 1;
                 }
                 
             } else if (data.action === 'started') {
-                // Увеличиваем в процессе
                 var inProgress = parseInt(progressBadge.textContent) || 0;
                 progressBadge.textContent = inProgress + 1;
                 progressBadge.classList.add('badge-pulse');

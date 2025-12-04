@@ -99,6 +99,14 @@
     padding: 0.25rem 0.5rem;
 }
 
+.test-count-badge {
+    font-size: 1rem;
+}
+
+.test-header-nowrap {
+    white-space: nowrap;
+}
+
 /* Анимация пульсации для бейджей */
 @keyframes badgePulse {
     0%, 100% {
