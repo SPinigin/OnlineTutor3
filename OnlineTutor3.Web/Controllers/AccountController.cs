@@ -300,6 +300,84 @@ namespace OnlineTutor3.Web.Controllers
             return View(user);
         }
 
+        // GET: Account/EditProfile
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> EditProfile()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return NotFound($"Невозможно загрузить пользователя с ID '{_userManager.GetUserId(User)}'.");
+                }
+
+                var model = new EditProfileViewModel
+                {
+                    FirstName = user.FirstName ?? string.Empty,
+                    LastName = user.LastName ?? string.Empty,
+                    PhoneNumber = user.PhoneNumber,
+                    DateOfBirth = user.DateOfBirth
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке профиля для редактирования");
+                TempData["ErrorMessage"] = "Произошла ошибка при загрузке формы редактирования.";
+                return RedirectToAction(nameof(Profile));
+            }
+        }
+
+        // POST: Account/EditProfile
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProfile(EditProfileViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return NotFound($"Невозможно загрузить пользователя с ID '{_userManager.GetUserId(User)}'.");
+                }
+
+                // Обновляем данные пользователя
+                user.FirstName = model.FirstName;
+                user.LastName = model.LastName;
+                user.PhoneNumber = model.PhoneNumber;
+                user.DateOfBirth = model.DateOfBirth;
+
+                var result = await _userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    TempData["SuccessMessage"] = "Профиль успешно обновлен!";
+                    return RedirectToAction(nameof(Profile));
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при обновлении профиля");
+                TempData["ErrorMessage"] = "Произошла ошибка при обновлении профиля.";
+                return View(model);
+            }
+        }
+
         #endregion
 
         #region Change Password
