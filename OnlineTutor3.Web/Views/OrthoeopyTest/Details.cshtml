@@ -32,10 +32,10 @@
     </div>
 </div>
 
-<div class="row mb-3 g-3">
-    <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm stat-card">
-            <div class="card-body text-center py-1 px-2">
+<div class="d-flex gap-2 mb-3 stat-cards-row">
+    <div class="flex-fill">
+        <div class="card modern-card stat-card h-100">
+            <div class="card-body text-center py-2 px-2">
                 <div class="stat-card-icon">
                     <i class="fas fa-question-circle"></i>
                 </div>
@@ -44,9 +44,9 @@
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm stat-card stat-card-blue">
-            <div class="card-body text-center py-1 px-2">
+    <div class="flex-fill">
+        <div class="card modern-card stat-card stat-card-blue h-100">
+            <div class="card-body text-center py-2 px-2">
                 <div class="stat-card-icon stat-icon-blue">
                     <i class="fas fa-clock"></i>
                 </div>
@@ -55,9 +55,9 @@
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm stat-card stat-card-green">
-            <div class="card-body text-center py-1 px-2">
+    <div class="flex-fill">
+        <div class="card modern-card stat-card stat-card-green h-100">
+            <div class="card-body text-center py-2 px-2">
                 <div class="stat-card-icon stat-icon-green">
                     <i class="fas fa-redo"></i>
                 </div>
@@ -66,13 +66,13 @@
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm stat-card stat-card-yellow">
-            <div class="card-body text-center py-1 px-2">
+    <div class="flex-fill">
+        <div class="card modern-card stat-card stat-card-yellow h-100">
+            <div class="card-body text-center py-2 px-2">
                 <div class="stat-card-icon stat-icon-yellow">
                     <i class="fas fa-calendar-plus"></i>
                 </div>
-                <div class="stat-card-value" style="font-size: 1rem;">@Model.CreatedAt.ToString("dd.MM.yyyy")</div>
+                <div class="stat-card-value stat-card-value-small">@Model.CreatedAt.ToString("dd.MM.yyyy")</div>
                 <small class="stat-card-label">Создан</small>
             </div>
         </div>
