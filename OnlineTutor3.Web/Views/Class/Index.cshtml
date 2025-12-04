@@ -12,7 +12,7 @@
     </h4>
     <div>
         <a asp-action="Create" class="btn btn-modern-success">
-            <i class="fas fa-plus"></i> Создать класс
+            <i class="fas fa-plus"></i> <span class="d-none d-md-inline">Создать класс</span>
         </a>
     </div>
 </div>
@@ -76,11 +76,11 @@ else
                                 <i class="fas fa-check-circle"></i>
                             </th>
                             <th style="min-width: 120px;">Название</th>
-                            <th style="min-width: 100px;">Описание</th>
+                            <th style="min-width: 100px;" class="d-none d-md-table-cell">Описание</th>
                             <th style="min-width: 70px;" class="text-center">
                                 Ученики
                             </th>
-                            <th style="min-width: 90px;">Создан</th>
+                            <th style="min-width: 90px;" class="d-none d-md-table-cell">Создан</th>
                             <th style="min-width: 140px;" class="text-center">Действия</th>
                         </tr>
                     </thead>
@@ -104,7 +104,7 @@ else
                                 </div>
                             </div>
                         </td>
-                        <td>
+                        <td class="d-none d-md-table-cell">
                             @if (!string.IsNullOrEmpty(item.Description))
                             {
                                 <small class="text-muted-modern">@item.Description</small>
@@ -119,9 +119,9 @@ else
                                 var studentsCountDict = ViewBag.StudentsCountDict as Dictionary<int, int> ?? new Dictionary<int, int>();
                                 var studentsCount = studentsCountDict.ContainsKey(item.Id) ? studentsCountDict[item.Id] : 0;
                             }
-                            <span class="badge badge-modern-primary rounded-pill">@studentsCount</span>
+                            <span class="badge badge-modern-primary" style="display: inline-flex; align-items: center; justify-content: center; min-width: 1.75rem; height: 1.75rem; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">@studentsCount</span>
                         </td>
-                        <td>
+                        <td class="d-none d-md-table-cell">
                             <small class="text-muted-modern">
                                 <i class="fas fa-calendar"></i>
                                 @item.CreatedAt.ToString("dd.MM.yyyy")
