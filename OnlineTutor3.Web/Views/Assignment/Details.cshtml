@@ -36,20 +36,20 @@
     </div>
 </div>
 
-<div class="row mb-3 g-1 g-md-2">
-    <div class="col-6 col-md-3">
-        <div class="card modern-card stat-card">
+<div class="d-flex gap-2 mb-3 stat-cards-row">
+    <div class="flex-fill">
+        <div class="card modern-card stat-card h-100">
             <div class="card-body text-center py-2 px-2">
                 <div class="stat-card-icon">
                     <i class="fas fa-book"></i>
                 </div>
-                <div class="stat-card-value" style="font-size: 0.9rem; line-height: 1.2;">@(subject?.Name ?? "Неизвестно")</div>
+                <div class="stat-card-value stat-card-value-small-line">@(subject?.Name ?? "Неизвестно")</div>
                 <small class="stat-card-label">Предмет</small>
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card modern-card stat-card">
+    <div class="flex-fill">
+        <div class="card modern-card stat-card h-100">
             <div class="card-body text-center py-2 px-2">
                 <div class="stat-card-icon">
                     <i class="fas fa-graduation-cap"></i>
@@ -59,26 +59,26 @@
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card modern-card stat-card">
+    <div class="flex-fill">
+        <div class="card modern-card stat-card h-100">
             <div class="card-body text-center py-2 px-2">
                 <div class="stat-card-icon">
                     <i class="fas fa-calendar-plus"></i>
                 </div>
-                <div class="stat-card-value" style="font-size: 0.9rem;">@Model.CreatedAt.ToString("dd.MM.yyyy")</div>
+                <div class="stat-card-value stat-card-value-small">@Model.CreatedAt.ToString("dd.MM.yyyy")</div>
                 <small class="stat-card-label">Создано</small>
             </div>
         </div>
     </div>
     @if (Model.DueDate.HasValue)
     {
-        <div class="col-6 col-md-3">
-            <div class="card modern-card stat-card">
+        <div class="flex-fill">
+            <div class="card modern-card stat-card h-100">
                 <div class="card-body text-center py-2 px-2">
                     <div class="stat-card-icon">
                         <i class="fas fa-calendar-alt"></i>
                     </div>
-                    <div class="stat-card-value" style="font-size: 0.9rem;">@Model.DueDate.Value.ToString("dd.MM.yyyy")</div>
+                    <div class="stat-card-value stat-card-value-small">@Model.DueDate.Value.ToString("dd.MM.yyyy")</div>
                     <small class="stat-card-label">Срок выполнения</small>
                 </div>
             </div>
@@ -86,53 +86,59 @@
     }
 </div>
 
-<div class="card modern-card mb-3">
-    <div class="card-header modern-card-header">
-        <h6 class="mb-0 modern-card-title">
-            <i class="fas fa-graduation-cap gradient-icon-purple"></i> Назначено классам (@classes.Count)
+<div class="card modern-card modern-card-with-header collapsible-card mb-3">
+    <div class="card-header modern-card-header collapse-header" data-bs-toggle="collapse" data-bs-target="#classesCollapse" aria-expanded="false" aria-controls="classesCollapse">
+        <h6 class="mb-0 modern-card-title d-flex justify-content-between align-items-center">
+            <span>
+                <i class="fas fa-graduation-cap gradient-icon-purple"></i> Назначено классам (@classes.Count)
+            </span>
+            <i class="fas fa-chevron-down collapse-icon" id="classesCollapseIcon"></i>
         </h6>
     </div>
-    <div class="card-body modern-card-body p-2">
-        @if (classes.Any())
-        {
-            <div class="table-responsive">
-                <table class="table modern-table table-sm mb-0">
-                    <thead>
-                        <tr>
-                            <th style="width: 40%;">Название</th>
-                            <th style="width: 40%;">Описание</th>
-                            <th style="width: 10%;">Статус</th>
-                            <th style="width: 10%;" class="text-center">Действия</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var classItem in classes)
-                        {
+    <div id="classesCollapse" class="collapse" aria-labelledby="classesHeading">
+        <div class="card-body modern-card-body p-2">
+            @if (classes.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table modern-table table-sm mb-0">
+                        <thead>
                             <tr>
-                                <td><small><strong class="text-dark-modern">@classItem.Name</strong></small></td>
-                                <td><small class="text-muted-modern">@(string.IsNullOrEmpty(classItem.Description) ? "-" : (classItem.Description.Length > 50 ? classItem.Description.Substring(0, 50) + "..." : classItem.Description))</small></td>
-                                <td>
-                                    <span class="badge badge-modern-@(classItem.IsActive ? "success" : "secondary") badge-sm">
-                                        @(classItem.IsActive ? "Активен" : "Неактивен")
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <a asp-controller="Class" asp-action="Details" asp-route-id="@classItem.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
+                                <th class="table-col-width-40">Название</th>
+                                <th class="table-col-width-40">Описание</th>
+                                <th class="table-col-width-10">Статус</th>
+                                <th class="table-col-width-10 text-center">Действия</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-        else
-        {
-            <div class="empty-state-small">
-                <small class="empty-state-text">Задание пока не назначено ни одному классу</small>
-            </div>
-        }
+                        </thead>
+                        <tbody>
+                            @foreach (var classItem in classes)
+                            {
+                                <tr>
+                                    <td><small><strong class="text-dark-modern">@classItem.Name</strong></small></td>
+                                    <td><small class="text-muted-modern">@(string.IsNullOrEmpty(classItem.Description) ? "-" : (classItem.Description.Length > 50 ? classItem.Description.Substring(0, 50) + "..." : classItem.Description))</small></td>
+                                    <td>
+                                        <span class="badge badge-modern-@(classItem.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
+                                            @(classItem.IsActive ? "Активен" : "Неактивен")
+                                        </span>
+                                        <i class="fas @(classItem.IsActive ? "fa-check-circle" : "fa-pause-circle") test-status-icon-@(classItem.IsActive ? "active" : "inactive") d-md-none" title="@(classItem.IsActive ? "Активен" : "Неактивен")"></i>
+                                    </td>
+                                    <td class="text-center">
+                                        <a asp-controller="Class" asp-action="Details" asp-route-id="@classItem.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state-small">
+                    <small class="empty-state-text">Задание пока не назначено ни одному классу</small>
+                </div>
+            }
+        </div>
     </div>
 </div>
 
@@ -166,12 +172,12 @@
                 <table class="table modern-table table-sm mb-0">
                     <thead>
                         <tr>
-                            <th style="min-width: 40px;">Тип</th>
+                            <th class="table-col-min-width-40">Тип</th>
                             <th>Название</th>
-                            <th style="min-width: 60px;" class="text-center">Вопросов</th>
-                            <th style="min-width: 50px;" class="text-center">Время</th>
-                            <th style="min-width: 50px;" class="text-center">Статус</th>
-                            <th style="min-width: 120px;" class="text-center">Действия</th>
+                            <th class="table-col-min-width-60 text-center">Вопросов</th>
+                            <th class="table-col-min-width-50 text-center">Время</th>
+                            <th class="table-col-min-width-50 text-center">Статус</th>
+                            <th class="table-col-min-width-120 text-center">Действия</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -194,12 +200,12 @@
                                 <td class="text-center">
                                     <small class="text-muted-modern">@(spellingQuestionCounts.ContainsKey(test.Id) ? spellingQuestionCounts[test.Id] : 0)</small>
                                 </td>
-                                <td class="text-center"><small class="text-muted-modern">@test.TimeLimit мин</small></td>
+                                <td class="text-center"><small class="text-muted-modern">@test.TimeLimit</small></td>
                                 <td class="text-center">
                                     <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
                                         @(test.IsActive ? "Активен" : "Неактивен")
                                     </span>
-                                    <i class="fas @(test.IsActive ? "fa-check-circle text-success" : "fa-pause-circle text-secondary") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
+                                    <i class="fas @(test.IsActive ? "fa-check-circle" : "fa-pause-circle") test-status-icon-@(test.IsActive ? "active" : "inactive") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex gap-1 justify-content-center">
@@ -236,12 +242,12 @@
                                 <td class="text-center">
                                     <small class="text-muted-modern">@(punctuationQuestionCounts.ContainsKey(test.Id) ? punctuationQuestionCounts[test.Id] : 0)</small>
                                 </td>
-                                <td class="text-center"><small class="text-muted-modern">@test.TimeLimit мин</small></td>
+                                <td class="text-center"><small class="text-muted-modern">@test.TimeLimit</small></td>
                                 <td class="text-center">
                                     <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
                                         @(test.IsActive ? "Активен" : "Неактивен")
                                     </span>
-                                    <i class="fas @(test.IsActive ? "fa-check-circle text-success" : "fa-pause-circle text-secondary") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
+                                    <i class="fas @(test.IsActive ? "fa-check-circle" : "fa-pause-circle") test-status-icon-@(test.IsActive ? "active" : "inactive") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex gap-1 justify-content-center">
@@ -278,12 +284,12 @@
                                 <td class="text-center">
                                     <small class="text-muted-modern">@(orthoeopyQuestionCounts.ContainsKey(test.Id) ? orthoeopyQuestionCounts[test.Id] : 0)</small>
                                 </td>
-                                <td class="text-center"><small class="text-muted-modern">@test.TimeLimit мин</small></td>
+                                <td class="text-center"><small class="text-muted-modern">@test.TimeLimit</small></td>
                                 <td class="text-center">
                                     <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
                                         @(test.IsActive ? "Активен" : "Неактивен")
                                     </span>
-                                    <i class="fas @(test.IsActive ? "fa-check-circle text-success" : "fa-pause-circle text-secondary") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
+                                    <i class="fas @(test.IsActive ? "fa-check-circle" : "fa-pause-circle") test-status-icon-@(test.IsActive ? "active" : "inactive") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex gap-1 justify-content-center">
@@ -320,12 +326,12 @@
                                 <td class="text-center">
                                     <small class="text-muted-modern">@(regularQuestionCounts.ContainsKey(test.Id) ? regularQuestionCounts[test.Id] : 0)</small>
                                 </td>
-                                <td class="text-center"><small class="text-muted-modern">@test.TimeLimit мин</small></td>
+                                <td class="text-center"><small class="text-muted-modern">@test.TimeLimit</small></td>
                                 <td class="text-center">
                                     <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
                                         @(test.IsActive ? "Активен" : "Неактивен")
                                     </span>
-                                    <i class="fas @(test.IsActive ? "fa-check-circle text-success" : "fa-pause-circle text-secondary") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
+                                    <i class="fas @(test.IsActive ? "fa-check-circle" : "fa-pause-circle") test-status-icon-@(test.IsActive ? "active" : "inactive") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex gap-1 justify-content-center">
@@ -354,4 +360,5 @@
         }
     </div>
 </div>
+
 
