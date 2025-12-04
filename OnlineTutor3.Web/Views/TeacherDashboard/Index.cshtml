@@ -611,13 +611,13 @@
                 percentageBadge = '<span class="badge badge-modern-' + percentColor + '">' + 
                                activity.percentage.toFixed(1) + '%</span>';
 
-                var grade = activity.percentage >= 91 ? 5 :
-                           activity.percentage >= 80 ? 4 :
-                           activity.percentage >= 60 ? 3 : 2;
+                var grade = activity.percentage >= 100.0 ? 5 :
+                           activity.percentage >= 91.0 ? 4 :
+                           activity.percentage >= 80.0 ? 3 : 2;
                 var gradeColor = grade === 5 ? 'success' :
                                 grade === 4 ? 'info' :
                                 grade === 3 ? 'warning' : 'danger';
-                gradeBadge = '<span class="badge badge-modern-' + gradeColor + '">' + grade + '</span>';
+                gradeBadge = '<span class="badge badge-modern-' + gradeColor + '" style="font-size: 0.875rem; padding: 0.25rem 0.5rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; min-width: 1.5rem;">' + grade + '</span>';
             } else {
                 percentageBadge = '<span class="text-muted-modern">—</span>';
                 gradeBadge = '<span class="text-muted-modern">—</span>';

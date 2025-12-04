@@ -6,8 +6,8 @@
 @if (Model.Any())
 {
     <div class="table-responsive">
-        <table class="table table-hover table-striped align-middle">
-            <thead class="table-light">
+        <table class="table modern-table table-sm mb-0">
+            <thead>
                 <tr>
                     <th style="width: 30%;">Название</th>
                     <th class="d-none d-md-table-cell" style="width: 25%;">Описание</th>
@@ -33,13 +33,12 @@
                     <tr class="test-row" data-test-title="@test.Title.ToLower()">
                         <td>
                             <div class="d-flex align-items-center">
-                                <i class="fas fa-@(testType == "Spelling" ? "spell-check text-primary" : testType == "Punctuation" ? "quote-right text-warning" : testType == "Orthoeopy" ? "volume-up text-success" : "list-ul text-info") me-2 d-none d-md-inline"></i>
                                 <div>
-                                    <strong class="d-block">@test.Title</strong>
+                                    <small><strong class="text-dark-modern">@test.Title</strong></small>
                                     @if (test.BestPercentage.HasValue)
                                     {
                                         <small class="d-md-none">
-                                            <span class="badge bg-@(test.BestPercentage >= 80 ? "success" : test.BestPercentage >= 60 ? "warning" : "danger")">
+                                            <span class="badge @(test.BestPercentage >= 80 ? "badge-modern-success" : test.BestPercentage >= 60 ? "badge-modern-warning" : "badge-modern-danger") badge-sm">
                                                 @test.BestPercentage.Value.ToString("F1")%
                                             </span>
                                         </small>
@@ -51,28 +50,24 @@
                         <td class="d-none d-md-table-cell">
                             @if (!string.IsNullOrEmpty(test.Description))
                             {
-                                <small class="text-muted">@test.Description</small>
+                                <small class="text-muted-modern">@test.Description</small>
                             }
                             else
                             {
-                                <span class="text-muted">—</span>
+                                <small class="text-muted-modern">—</small>
                             }
                         </td>
 
                         <td class="text-center">
-                            <span class="badge bg-@(testType == "Spelling" ? "primary" : testType == "Punctuation" ? "warning" : testType == "Orthoeopy" ? "success" : "info") rounded-pill">
-                                @test.QuestionsCount
-                            </span>
+                            <small class="text-muted-modern">@test.QuestionsCount</small>
                         </td>
 
                         <td class="text-center d-none d-md-table-cell">
-                            <span class="badge bg-info rounded-pill">
-                                @test.TimeLimit мин
-                            </span>
+                            <small class="text-muted-modern">@test.TimeLimit мин</small>
                         </td>
 
                         <td class="text-center">
-                            <span class="badge bg-@(test.AttemptsUsed >= test.MaxAttempts ? "danger" : "warning") rounded-pill">
+                            <span class="badge @(test.AttemptsUsed >= test.MaxAttempts ? "badge-modern-danger" : "badge-modern-warning") badge-sm">
                                 @test.AttemptsUsed/@test.MaxAttempts
                             </span>
                         </td>
@@ -80,13 +75,13 @@
                         <td class="text-center d-none d-md-table-cell">
                             @if (test.BestPercentage.HasValue)
                             {
-                                <span class="badge bg-@(test.BestPercentage >= 80 ? "success" : test.BestPercentage >= 60 ? "warning" : "danger") rounded-pill">
+                                <span class="badge @(test.BestPercentage >= 80 ? "badge-modern-success" : test.BestPercentage >= 60 ? "badge-modern-warning" : "badge-modern-danger") badge-sm">
                                     @test.BestPercentage.Value.ToString("F1")%
                                 </span>
                             }
                             else
                             {
-                                <span class="text-muted">—</span>
+                                <small class="text-muted-modern">—</small>
                             }
                         </td>
 
@@ -96,7 +91,7 @@
                                 @if (testType == "Spelling")
                                 {
                                     <a asp-action="TakeSpelling" asp-route-id="@test.OngoingTestResultId.Value" 
-                                       class="btn btn-warning btn-sm">
+                                       class="btn btn-sm btn-modern-outline-warning">
                                         <i class="fas fa-play"></i>
                                         <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                     </a>
@@ -104,7 +99,7 @@
                                 else if (testType == "Punctuation")
                                 {
                                     <a asp-action="TakePunctuation" asp-route-id="@test.OngoingTestResultId.Value" 
-                                       class="btn btn-warning btn-sm">
+                                       class="btn btn-sm btn-modern-outline-warning">
                                         <i class="fas fa-play"></i>
                                         <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                     </a>
@@ -112,7 +107,7 @@
                                 else if (testType == "Orthoeopy")
                                 {
                                     <a asp-action="TakeOrthoeopy" asp-route-id="@test.OngoingTestResultId.Value" 
-                                       class="btn btn-warning btn-sm">
+                                       class="btn btn-sm btn-modern-outline-warning">
                                         <i class="fas fa-play"></i>
                                         <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                     </a>
@@ -120,7 +115,7 @@
                                 else if (testType == "Regular")
                                 {
                                     <a asp-action="TakeRegular" asp-route-id="@test.OngoingTestResultId.Value" 
-                                       class="btn btn-warning btn-sm">
+                                       class="btn btn-sm btn-modern-outline-warning">
                                         <i class="fas fa-play"></i>
                                         <span class="d-none d-lg-inline ms-1">Продолжить</span>
                                     </a>
@@ -128,7 +123,7 @@
                             }
                             else if (test.Status == TestStatus.CanStart)
                             {
-                                <button type="button" class="btn btn-success btn-sm"
+                                <button type="button" class="btn btn-sm btn-modern-success"
                                         onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, '@testType.ToLower()')">
                                     <i class="fas fa-play"></i>
                                     <span class="d-none d-lg-inline ms-1">Начать</span>
@@ -136,7 +131,7 @@
                             }
                             else if (test.Status == TestStatus.Exhausted)
                             {
-                                <button type="button" class="btn btn-secondary btn-sm" disabled>
+                                <button type="button" class="btn btn-sm btn-modern-outline-secondary" disabled>
                                     <i class="fas fa-ban"></i>
                                     <span class="d-none d-lg-inline ms-1">Исчерпано</span>
                                 </button>
