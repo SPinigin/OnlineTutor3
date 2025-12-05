@@ -166,9 +166,9 @@
                                 <thead>
                                     <tr>
                                         <th>Ученик</th>
-                                        <th class="d-none d-md-table-cell">Класс</th>
-                                        <th>Тест</th>
-                                        <th class="d-none d-md-table-cell">Предмет</th>
+                                        <th class="text-center d-none d-md-table-cell">Класс</th>
+                                        <th class="text-center">Тест</th>
+                                        <th class="text-center d-none d-md-table-cell">Предмет</th>
                                         <th class="text-center">Оценка</th>
                                         <th class="text-center d-none d-md-table-cell">Дата</th>
                                         <th class="text-center">Действия</th>
@@ -205,14 +205,30 @@
                                             <td>
                                                 <div>
                                                     <span class="fw-bold text-dark-modern">@completion.StudentName</span>
-                                                    <small class="text-muted-modern d-md-none d-block">@(completion.ClassName ?? "—")</small>
+                                                    @if (!string.IsNullOrEmpty(completion.ClassName))
+                                                    {
+                                                        <small class="d-md-none d-block mt-1">
+                                                            <span class="badge badge-modern-primary badge-compact">@completion.ClassName</span>
+                                                        </small>
+                                                    }
+                                                    else
+                                                    {
+                                                        <small class="text-muted-modern d-md-none d-block">Не назначен</small>
+                                                    }
                                                 </div>
                                             </td>
-                                            <td class="d-none d-md-table-cell">
-                                                <span class="text-muted-modern">@(completion.ClassName ?? "—")</span>
+                                            <td class="d-none d-md-table-cell text-center">
+                                                @if (!string.IsNullOrEmpty(completion.ClassName))
+                                                {
+                                                    <span class="badge badge-modern-primary badge-compact">@completion.ClassName</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted-modern">Не назначен</span>
+                                                }
                                             </td>
-                                            <td>
-                                                <div class="d-flex align-items-center gap-2">
+                                            <td class="text-center">
+                                                <div class="d-flex align-items-center justify-content-center gap-2">
                                                     <i class="fas @testTypeIcon" style="color: #667eea;"></i>
                                                     <div>
                                                         <span class="fw-bold text-dark-modern">@completion.TestTitle</span>
@@ -220,7 +236,7 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="d-none d-md-table-cell">
+                                            <td class="text-center d-none d-md-table-cell">
                                                 <span class="badge modern-badge">@completion.SubjectName</span>
                                             </td>
                                             <td class="text-center">

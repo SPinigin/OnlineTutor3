@@ -123,7 +123,7 @@ namespace OnlineTutor3.Web.Controllers
 
         /// <summary>
         /// Получает последние 10 завершенных прохождений тестов учениками учителя
-        /// Оптимизированная версия с ограничением количества запросов
+        /// Собирает все завершенные результаты всех тестов учителя и возвращает последние 10 по дате завершения
         /// </summary>
         private async Task<List<RecentTestCompletionViewModel>> GetRecentTestCompletionsAsync(
             string teacherId, 
@@ -146,15 +146,16 @@ namespace OnlineTutor3.Web.Controllers
 
                 var allClasses = await _classService.GetActiveByTeacherIdAsync(teacherId);
                 var classesDict = allClasses.ToDictionary(c => c.Id);
-                foreach (var test in spellingTests.Take(20)) // Ограничиваем до 20 тестов
+
+                // Обрабатываем все тесты по орфографии (без ограничения количества)
+                foreach (var test in spellingTests)
                 {
                     try
                     {
                         var testResults = await _spellingTestResultRepository.GetByTestIdAsync(test.Id);
+                        // Берем все завершенные результаты (без ограничения Take(5))
                         var completedResults = testResults
                             .Where(r => r.IsCompleted && r.CompletedAt.HasValue)
-                            .OrderByDescending(r => r.CompletedAt)
-                            .Take(5) // Берем только последние 5 завершенных
                             .ToList();
 
                         var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
@@ -203,15 +204,15 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                foreach (var test in punctuationTests.Take(20)) // Ограничиваем до 20 тестов
+                // Обрабатываем все тесты по пунктуации (без ограничения количества)
+                foreach (var test in punctuationTests)
                 {
                     try
                     {
                         var testResults = await _punctuationTestResultRepository.GetByTestIdAsync(test.Id);
+                        // Берем все завершенные результаты (без ограничения Take(5))
                         var completedResults = testResults
                             .Where(r => r.IsCompleted && r.CompletedAt.HasValue)
-                            .OrderByDescending(r => r.CompletedAt)
-                            .Take(5) // Берем только последние 5 завершенных
                             .ToList();
 
                         var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
@@ -260,15 +261,15 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                foreach (var test in orthoeopyTests.Take(20)) // Ограничиваем до 20 тестов
+                // Обрабатываем все тесты по орфоэпии (без ограничения количества)
+                foreach (var test in orthoeopyTests)
                 {
                     try
                     {
                         var testResults = await _orthoeopyTestResultRepository.GetByTestIdAsync(test.Id);
+                        // Берем все завершенные результаты (без ограничения Take(5))
                         var completedResults = testResults
                             .Where(r => r.IsCompleted && r.CompletedAt.HasValue)
-                            .OrderByDescending(r => r.CompletedAt)
-                            .Take(5) // Берем только последние 5 завершенных
                             .ToList();
 
                         var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
@@ -317,15 +318,15 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
-                foreach (var test in regularTests.Take(20)) // Ограничиваем до 20 тестов
+                // Обрабатываем все классические тесты (без ограничения количества)
+                foreach (var test in regularTests)
                 {
                     try
                     {
                         var testResults = await _regularTestResultRepository.GetByTestIdAsync(test.Id);
+                        // Берем все завершенные результаты (без ограничения Take(5))
                         var completedResults = testResults
                             .Where(r => r.IsCompleted && r.CompletedAt.HasValue)
-                            .OrderByDescending(r => r.CompletedAt)
-                            .Take(5) // Берем только последние 5 завершенных
                             .ToList();
 
                         var assignment = assignmentsDict.ContainsKey(test.AssignmentId) 
@@ -378,6 +379,8 @@ namespace OnlineTutor3.Web.Controllers
             {
                 _logger.LogError(ex, "Критическая ошибка в GetRecentTestCompletionsAsync");
             }
+
+            // Сортируем все результаты по дате завершения по убыванию и берем последние 10
             return completions
                 .OrderByDescending(c => c.CompletedAt)
                 .Take(10)
