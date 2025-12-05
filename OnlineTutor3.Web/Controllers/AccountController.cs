@@ -190,12 +190,15 @@ namespace OnlineTutor3.Web.Controllers
                 return View(model);
             }
 
+            var normalizedFirstName = CapitalizeFirstLetter(model.FirstName?.Trim() ?? string.Empty);
+            var normalizedLastName = CapitalizeFirstLetter(model.LastName?.Trim() ?? string.Empty);
+
             var user = new ApplicationUser
             {
                 UserName = model.Email,
                 Email = model.Email,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
+                FirstName = normalizedFirstName,
+                LastName = normalizedLastName,
                 DateOfBirth = model.DateOfBirth,
                 PhoneNumber = model.PhoneNumber,
                 EmailConfirmed = false, // В продакшене нужно подтверждение email
@@ -497,6 +500,20 @@ namespace OnlineTutor3.Web.Controllers
             }
 
             return RedirectToAction("Index", "Home");
+        }
+
+        private static string CapitalizeFirstLetter(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+
+            value = value.Trim();
+            var firstChar = value[0];
+            var restOfString = value.Substring(1);
+
+            return char.ToUpperInvariant(firstChar) + restOfString.ToLowerInvariant();
         }
 
         #endregion

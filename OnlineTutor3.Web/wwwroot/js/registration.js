@@ -25,6 +25,8 @@ $(document).ready(function() {
     
     // Инициализация маски телефона
     initializePhoneMask();
+    
+    initializeNameCapitalization();
 });
 
 function updateRoleSelection() {
@@ -203,5 +205,32 @@ function formatPhoneNumber(input) {
     }
     
     input.value = formattedValue;
+}
+
+function initializeNameCapitalization() {
+    $('#FirstName, #LastName').on('blur', function() {
+        capitalizeFirstLetter(this);
+    });
+    
+    $('#registrationForm').on('submit', function() {
+        $('#FirstName, #LastName').each(function() {
+            capitalizeFirstLetter(this);
+        });
+    });
+}
+
+function capitalizeFirstLetter(input) {
+    var value = input.value.trim();
+    if (!value) {
+        return;
+    }
+    
+    var firstChar = value.charAt(0);
+    var restOfString = value.slice(1);
+    var capitalized = firstChar.toUpperCase() + restOfString.toLowerCase();
+    
+    if (input.value !== capitalized) {
+        input.value = capitalized;
+    }
 }
 
