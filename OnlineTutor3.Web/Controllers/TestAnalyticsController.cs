@@ -1148,6 +1148,114 @@ namespace OnlineTutor3.Web.Controllers
 
             return questionAnalytics;
         }
+
+        // GET: TestAnalytics/StudentDetails/Spelling?testId=1&studentId=1
+        public async Task<IActionResult> StudentDetails(string testType, int testId, int studentId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
+
+            try
+            {
+                var student = await _studentRepository.GetByIdAsync(studentId);
+                if (student == null) return NotFound();
+
+                var user = await _userManager.FindByIdAsync(student.UserId);
+                ViewBag.StudentName = user?.FullName ?? "Неизвестно";
+                ViewBag.TestType = testType;
+
+                switch (testType.ToLower())
+                {
+                    case "spelling":
+                        var spellingTest = await _spellingTestRepository.GetByIdAsync(testId);
+                        if (spellingTest == null || spellingTest.TeacherId != currentUser.Id) return NotFound();
+                        
+                        var spellingResults = await _spellingTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId);
+                        var spellingQuestions = await _spellingQuestionRepository.GetByTestIdOrderedAsync(testId);
+                        var spellingAnswers = new List<SpellingAnswer>();
+                        
+                        foreach (var result in spellingResults)
+                        {
+                            var resultAnswers = await _spellingAnswerRepository.GetByTestResultIdAsync(result.Id);
+                            spellingAnswers.AddRange(resultAnswers);
+                        }
+
+                        ViewBag.Test = spellingTest;
+                        ViewBag.Results = spellingResults.OrderByDescending(r => r.StartedAt).ToList();
+                        ViewBag.Questions = spellingQuestions;
+                        ViewBag.Answers = spellingAnswers;
+                        return PartialView("_StudentDetailsSpelling");
+
+                    case "regular":
+                        var regularTest = await _regularTestRepository.GetByIdAsync(testId);
+                        if (regularTest == null || regularTest.TeacherId != currentUser.Id) return NotFound();
+                        
+                        var regularResults = await _regularTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId);
+                        var regularQuestions = await _regularQuestionRepository.GetByTestIdOrderedAsync(testId);
+                        var regularAnswers = new List<RegularAnswer>();
+                        
+                        foreach (var result in regularResults)
+                        {
+                            var resultAnswers = await _regularAnswerRepository.GetByTestResultIdAsync(result.Id);
+                            regularAnswers.AddRange(resultAnswers);
+                        }
+
+                        ViewBag.Test = regularTest;
+                        ViewBag.Results = regularResults.OrderByDescending(r => r.StartedAt).ToList();
+                        ViewBag.Questions = regularQuestions;
+                        ViewBag.Answers = regularAnswers;
+                        return PartialView("_StudentDetailsRegular");
+
+                    case "punctuation":
+                        var punctuationTest = await _punctuationTestRepository.GetByIdAsync(testId);
+                        if (punctuationTest == null || punctuationTest.TeacherId != currentUser.Id) return NotFound();
+                        
+                        var punctuationResults = await _punctuationTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId);
+                        var punctuationQuestions = await _punctuationQuestionRepository.GetByTestIdOrderedAsync(testId);
+                        var punctuationAnswers = new List<PunctuationAnswer>();
+                        
+                        foreach (var result in punctuationResults)
+                        {
+                            var resultAnswers = await _punctuationAnswerRepository.GetByTestResultIdAsync(result.Id);
+                            punctuationAnswers.AddRange(resultAnswers);
+                        }
+
+                        ViewBag.Test = punctuationTest;
+                        ViewBag.Results = punctuationResults.OrderByDescending(r => r.StartedAt).ToList();
+                        ViewBag.Questions = punctuationQuestions;
+                        ViewBag.Answers = punctuationAnswers;
+                        return PartialView("_StudentDetailsPunctuation");
+
+                    case "orthoeopy":
+                        var orthoeopyTest = await _orthoeopyTestRepository.GetByIdAsync(testId);
+                        if (orthoeopyTest == null || orthoeopyTest.TeacherId != currentUser.Id) return NotFound();
+                        
+                        var orthoeopyResults = await _orthoeopyTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId);
+                        var orthoeopyQuestions = await _orthoeopyQuestionRepository.GetByTestIdOrderedAsync(testId);
+                        var orthoeopyAnswers = new List<OrthoeopyAnswer>();
+                        
+                        foreach (var result in orthoeopyResults)
+                        {
+                            var resultAnswers = await _orthoeopyAnswerRepository.GetByTestResultIdAsync(result.Id);
+                            orthoeopyAnswers.AddRange(resultAnswers);
+                        }
+
+                        ViewBag.Test = orthoeopyTest;
+                        ViewBag.Results = orthoeopyResults.OrderByDescending(r => r.StartedAt).ToList();
+                        ViewBag.Questions = orthoeopyQuestions;
+                        ViewBag.Answers = orthoeopyAnswers;
+                        return PartialView("_StudentDetailsOrthoeopy");
+
+                    default:
+                        return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении детальной аналитики студента. TestType: {TestType}, TestId: {TestId}, StudentId: {StudentId}", testType, testId, studentId);
+                return StatusCode(500, "Произошла ошибка при загрузке данных.");
+            }
+        }
     }
 }
 

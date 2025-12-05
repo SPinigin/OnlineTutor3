@@ -1,0 +1,173 @@
+@using OnlineTutor3.Domain.Entities
+@{
+    var test = ViewBag.Test as RegularTest;
+    var results = ViewBag.Results as List<RegularTestResult> ?? new List<RegularTestResult>();
+    var questions = ViewBag.Questions as List<RegularQuestion> ?? new List<RegularQuestion>();
+    var answers = ViewBag.Answers as List<RegularAnswer> ?? new List<RegularAnswer>();
+    var studentName = ViewBag.StudentName as string ?? "Неизвестно";
+}
+
+<div class="mb-3">
+    <h6 class="mb-2">
+        <i class="fas fa-user text-primary"></i> @studentName
+    </h6>
+    <p class="text-muted mb-0 small">
+        <i class="fas fa-clipboard-list"></i> Тест: <strong>@test?.Title</strong>
+    </p>
+</div>
+
+@if (results.Any())
+{
+    <div class="mb-4">
+        <h6 class="mb-3">Все попытки (@results.Count)</h6>
+        <div class="table-responsive">
+            <table class="table table-sm modern-table">
+                <thead>
+                    <tr>
+                        <th>Попытка</th>
+                        <th class="text-center">Результат</th>
+                        <th class="text-center">Оценка</th>
+                        <th class="text-center">Начало</th>
+                        <th class="text-center">Завершение</th>
+                        <th class="text-center">Время</th>
+                        <th class="text-center">Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var result in results)
+                    {
+                        var duration = result.CompletedAt.HasValue && result.IsCompleted
+                            ? result.CompletedAt.Value - result.StartedAt
+                            : (TimeSpan?)null;
+                        var grade = result.Grade ?? (result.Percentage >= 91 ? 5 : result.Percentage >= 76 ? 4 : result.Percentage >= 61 ? 3 : 2);
+                        var gradeColor = grade == 5 ? "success" : grade == 4 ? "info" : grade == 3 ? "warning" : "danger";
+                        
+                        <tr>
+                            <td>@result.AttemptNumber</td>
+                            <td class="text-center">
+                                <span class="badge bg-@(result.Percentage >= 80 ? "success" : result.Percentage >= 60 ? "warning" : "danger") badge-sm">
+                                    @result.Percentage.ToString("F1")%
+                                </span>
+                                <br>
+                                <small class="text-muted">@result.Score/@result.MaxScore</small>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-@gradeColor badge-sm">@grade</span>
+                            </td>
+                            <td class="text-center">
+                                <small>@result.StartedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                            </td>
+                            <td class="text-center">
+                                @if (result.CompletedAt.HasValue)
+                                {
+                                    <small>@result.CompletedAt.Value.ToString("dd.MM.yyyy HH:mm")</small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (duration.HasValue)
+                                {
+                                    <small>@($"{duration.Value.Hours:D2}:{duration.Value.Minutes:D2}:{duration.Value.Seconds:D2}")</small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (result.IsCompleted)
+                                {
+                                    <span class="badge bg-success badge-sm">Завершен</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning badge-sm">В процессе</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        <h6 class="mb-3">Детали по вопросам</h6>
+        @foreach (var question in questions)
+        {
+            var questionAnswers = answers.Where(a => a.RegularQuestionId == question.Id).ToList();
+            var correctAnswers = questionAnswers.Count(a => a.IsCorrect);
+            var totalAnswers = questionAnswers.Count;
+            var hasError = questionAnswers.Any(a => !a.IsCorrect);
+            
+            <div class="card modern-card mb-2 question-result" data-has-error="@hasError.ToString().ToLower()">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-info">@(questions.IndexOf(question) + 1)</span>
+                                <strong>@question.Text</strong>
+                                <small class="text-muted">
+                                    (@(question.Type == QuestionType.SingleChoice ? "Одиночный выбор" : question.Type == QuestionType.MultipleChoice ? "Множественный выбор" : "Верно/Неверно"))
+                                </small>
+                            </div>
+                        </div>
+                        <div>
+                            @if (totalAnswers > 0)
+                            {
+                                var successRate = (double)correctAnswers / totalAnswers * 100;
+                                <span class="badge bg-@(successRate >= 80 ? "success" : successRate >= 60 ? "warning" : "danger") badge-sm">
+                                    @successRate.ToString("F0")% (@correctAnswers/@totalAnswers)
+                                </span>
+                            }
+                        </div>
+                    </div>
+                    
+                    @if (questionAnswers.Any())
+                    {
+                        <div class="mt-2">
+                            @foreach (var answer in questionAnswers.OrderByDescending(a => a.TestResultId))
+                            {
+                                var result = results.FirstOrDefault(r => r.Id == answer.TestResultId);
+                                <div class="d-flex align-items-center gap-2 mb-1 small">
+                                    <span class="badge @(answer.IsCorrect ? "bg-success" : "bg-danger") badge-xs">
+                                        @(answer.IsCorrect ? "✓" : "✗")
+                                    </span>
+                                    <span class="@(answer.IsCorrect ? "text-success" : "text-danger")">
+                                        <strong>@(answer.StudentAnswer ?? "—")</strong>
+                                    </span>
+                                    <span class="text-muted">(@answer.Points балл.)</span>
+                                    @if (result != null)
+                                    {
+                                        <span class="text-muted">(Попытка @result.AttemptNumber, @result.StartedAt.ToString("dd.MM HH:mm"))</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0 small">Нет ответов</p>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+    
+    <div id="studentDetailsNoQuestionsMessage" class="card modern-card" style="display: none;">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-filter text-muted mb-3" style="font-size: 3rem;"></i>
+            <h5 class="text-muted mb-2">Вопросов не найдено</h5>
+            <p class="text-muted mb-3">Нет вопросов с ошибками</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> Ученик еще не проходил этот тест.
+    </div>
+}

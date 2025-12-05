@@ -296,7 +296,7 @@
                                             @if (studentResult.Results.Any())
                                             {
                                                 <button type="button" class="btn btn-sm btn-modern-outline-info"
-                                                        onclick="showStudentDetails(@studentResult.Student.Id, '@(studentResult.Student.User?.FullName ?? "Неизвестно")')"
+                                                        onclick="showStudentDetails(@studentResult.Student.Id, '@Html.Raw(studentResult.Student.User?.FullName?.Replace("'", "\\'") ?? "Неизвестно")')"
                                                         title="Детали">
                                                     <i class="fas fa-eye"></i>
                                                 </button>
@@ -445,6 +445,37 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для детальной аналитики студента -->
+<div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-labelledby="studentDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="studentDetailsModalTitle">Детальная аналитика</h5>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="studentDetailsShowErrorsOnly" checked style="font-size: 0.8rem;">
+                        <label class="form-check-label text-dark-modern" for="studentDetailsShowErrorsOnly" style="font-size: 0.75rem;">
+                            Только ошибки
+                        </label>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+            </div>
+            <div class="modal-body" id="studentDetailsModalBody">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
+                    </div>
+                    <p class="text-muted mt-3">Загрузка данных...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn modern-btn-outline" data-bs-dismiss="modal">Закрыть</button>
             </div>
         </div>
     </div>
@@ -600,7 +631,31 @@
 
     <script>
         function showStudentDetails(studentId, studentName) {
-            showNotification(`Детальная информация для ${studentName} (ID: ${studentId})`, 'info');
+            const modal = new bootstrap.Modal(document.getElementById('studentDetailsModal'));
+            const modalTitle = document.getElementById('studentDetailsModalTitle');
+            const modalBody = document.getElementById('studentDetailsModalBody');
+            
+            modalTitle.textContent = `Детальная аналитика: ${studentName}`;
+            modalBody.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Загрузка...</span></div><p class="text-muted mt-3">Загрузка данных...</p></div>';
+            
+            modal.show();
+            
+            // Загружаем данные через AJAX
+            fetch(`/TestAnalytics/StudentDetails?testType=spelling&testId=@Model.SpellingTest.Id&studentId=${studentId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка загрузки данных');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    modalBody.innerHTML = html;
+                    initializeStudentDetailsFilter();
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    modalBody.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Произошла ошибка при загрузке данных.</div>';
+                });
         }
 
         function filterQuestions() {
@@ -662,6 +717,42 @@
                 });
             }
         });
+
+        function initializeStudentDetailsFilter() {
+            const filterCheckbox = document.getElementById('studentDetailsShowErrorsOnly');
+            if (!filterCheckbox) return;
+
+            function applyFilter() {
+                const questionCards = document.querySelectorAll('#studentDetailsModal .question-result');
+                let visibleCount = 0;
+
+                questionCards.forEach(card => {
+                    const hasError = card.getAttribute('data-has-error') === 'true';
+                    
+                    if (filterCheckbox.checked) {
+                        card.style.display = hasError ? 'block' : 'none';
+                        if (hasError) visibleCount++;
+                    } else {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    }
+                });
+
+                // Показываем сообщение, если нет видимых вопросов
+                const noQuestionsMessage = document.getElementById('studentDetailsNoQuestionsMessage');
+                if (noQuestionsMessage) {
+                    noQuestionsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+                }
+            }
+
+            // Удаляем старый обработчик, если есть
+            filterCheckbox.removeEventListener('change', applyFilter);
+            // Добавляем новый обработчик
+            filterCheckbox.addEventListener('change', applyFilter);
+            
+            // Применяем фильтр сразу, если он включен
+            applyFilter();
+        }
     </script>
 }
 
