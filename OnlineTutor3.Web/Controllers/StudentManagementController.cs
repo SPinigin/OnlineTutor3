@@ -123,11 +123,12 @@ namespace OnlineTutor3.Web.Controllers
                     return NotFound();
                 }
 
-                // Проверяем доступ
+                // Проверяем доступ и загружаем класс
+                Class? studentClass = null;
                 if (student.ClassId.HasValue)
                 {
-                    var @class = await _classService.GetByIdAsync(student.ClassId.Value);
-                    if (@class != null && @class.TeacherId != currentUser.Id)
+                    studentClass = await _classService.GetByIdAsync(student.ClassId.Value);
+                    if (studentClass != null && studentClass.TeacherId != currentUser.Id)
                     {
                         return Forbid();
                     }
@@ -135,6 +136,7 @@ namespace OnlineTutor3.Web.Controllers
 
                 var user = await _userManager.FindByIdAsync(student.UserId);
                 ViewBag.User = user;
+                ViewBag.StudentClass = studentClass;
 
                 // Загружаем классы для модального окна
                 var classes = await _classService.GetByTeacherIdAsync(currentUser.Id);

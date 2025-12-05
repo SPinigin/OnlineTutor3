@@ -89,9 +89,12 @@
 
                     <dt class="col-sm-4 text-dark-modern">Онлайн-класс:</dt>
                     <dd class="col-sm-8">
-                        @if (Model.ClassId.HasValue)
+                        @{
+                            var studentClass = ViewBag.StudentClass as OnlineTutor3.Domain.Entities.Class;
+                        }
+                        @if (studentClass != null)
                         {
-                            <span class="badge badge-modern-primary">Класс #@Model.ClassId</span>
+                            <span class="badge badge-modern-primary">@studentClass.Name</span>
                         }
                         else
                         {
