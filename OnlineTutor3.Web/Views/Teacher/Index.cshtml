@@ -243,6 +243,7 @@
                                                    class="btn btn-sm btn-modern-outline-info view-test-result"
                                                    data-test-result-id="@completion.TestResultId"
                                                    data-test-type="@completion.TestType"
+                                                   data-student-name="@completion.StudentName"
                                                    title="Детали">
                                                     <i class="fas fa-eye"></i>
                                                     <span class="d-none d-xl-inline ms-1">Детали</span>
@@ -298,6 +299,10 @@
                 e.preventDefault();
                 var testResultId = $(this).data('test-result-id');
                 var testType = $(this).data('test-type');
+                var studentName = $(this).data('student-name');
+                
+                // Обновляем заголовок модального окна
+                $('#testResultModalTitle').text('Результат тест: ' + studentName);
                 
                 var modal = new bootstrap.Modal(document.getElementById('testResultModal'));
                 modal.show();
