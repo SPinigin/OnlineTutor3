@@ -158,8 +158,20 @@
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
 }
 
+.welcome-card.welcome-card-home {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+}
+
+.welcome-card-home hr {
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
 .welcome-icon {
     font-size: 2.5rem;
+}
+
+.welcome-icon.welcome-icon-home {
+    font-size: 4rem;
 }
 
 .welcome-title {
@@ -169,9 +181,21 @@
     margin-bottom: 0.25rem;
 }
 
+.welcome-title.welcome-title-home {
+    font-size: 2.5rem;
+}
+
 .welcome-subtitle {
     color: #6c757d;
     font-size: 0.9rem;
+}
+
+.welcome-subtitle.welcome-subtitle-home {
+    font-size: 1.2rem;
+}
+
+.welcome-subtitle.welcome-subtitle-home {
+    font-size: 1.2rem;
 }
 
 /* ===== MODERN CARDS ===== */
@@ -279,6 +303,10 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
     color: #667eea;
+}
+
+.modern-btn-outline.btn-lg {
+    border-width: 2px;
 }
 
 /* ===== EMPTY STATES ===== */
