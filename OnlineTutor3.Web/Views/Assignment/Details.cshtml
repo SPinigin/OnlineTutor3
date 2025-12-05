@@ -105,7 +105,7 @@
                             <tr>
                                 <th class="table-col-width-40">Название</th>
                                 <th class="table-col-width-40">Описание</th>
-                                <th class="table-col-width-10">Статус</th>
+                                <th class="table-col-width-10 text-center">Статус</th>
                                 <th class="table-col-width-10 text-center">Действия</th>
                             </tr>
                         </thead>
@@ -115,7 +115,7 @@
                                 <tr>
                                     <td><small><strong class="text-dark-modern">@classItem.Name</strong></small></td>
                                     <td><small class="text-muted-modern">@(string.IsNullOrEmpty(classItem.Description) ? "-" : (classItem.Description.Length > 50 ? classItem.Description.Substring(0, 50) + "..." : classItem.Description))</small></td>
-                                    <td>
+                                    <td class="text-center">
                                         <span class="badge badge-modern-@(classItem.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
                                             @(classItem.IsActive ? "Активен" : "Неактивен")
                                         </span>
@@ -169,7 +169,7 @@
         @if (totalTests > 0)
         {
             <div class="table-responsive">
-                <table class="table modern-table table-sm mb-0">
+                <table class="table table-hover modern-table table-sm mb-0">
                     <thead>
                         <tr>
                             <th class="table-col-min-width-40">Тип</th>
@@ -183,7 +183,7 @@
                     <tbody>
                         @foreach (var test in spellingTests)
                         {
-                            <tr>
+                            <tr class="test-row" data-details-url="@Url.Action("Details", "SpellingTest", new { id = test.Id })">
                                 <td>
                                     <span class="badge badge-modern-success">
                                         <i class="fas fa-spell-check"></i>
@@ -207,7 +207,7 @@
                                     </span>
                                     <i class="fas @(test.IsActive ? "fa-check-circle" : "fa-pause-circle") test-status-icon-@(test.IsActive ? "active" : "inactive") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center" onclick="event.stopPropagation();" style="white-space: nowrap;">
                                     <div class="d-flex gap-1 justify-content-center">
                                         <a asp-controller="SpellingTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                             <i class="fas fa-eye"></i>
@@ -225,7 +225,7 @@
 
                         @foreach (var test in punctuationTests)
                         {
-                            <tr>
+                            <tr class="test-row" data-details-url="@Url.Action("Details", "PunctuationTest", new { id = test.Id })">
                                 <td>
                                     <span class="badge badge-modern-info">
                                         <i class="fas fa-quote-right"></i>
@@ -249,7 +249,7 @@
                                     </span>
                                     <i class="fas @(test.IsActive ? "fa-check-circle" : "fa-pause-circle") test-status-icon-@(test.IsActive ? "active" : "inactive") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center" onclick="event.stopPropagation();" style="white-space: nowrap;">
                                     <div class="d-flex gap-1 justify-content-center">
                                         <a asp-controller="PunctuationTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                             <i class="fas fa-eye"></i>
@@ -267,7 +267,7 @@
 
                         @foreach (var test in orthoeopyTests)
                         {
-                            <tr>
+                            <tr class="test-row" data-details-url="@Url.Action("Details", "OrthoeopyTest", new { id = test.Id })">
                                 <td>
                                     <span class="badge badge-modern-warning">
                                         <i class="fas fa-volume-up"></i>
@@ -291,7 +291,7 @@
                                     </span>
                                     <i class="fas @(test.IsActive ? "fa-check-circle" : "fa-pause-circle") test-status-icon-@(test.IsActive ? "active" : "inactive") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center" onclick="event.stopPropagation();" style="white-space: nowrap;">
                                     <div class="d-flex gap-1 justify-content-center">
                                         <a asp-controller="OrthoeopyTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                             <i class="fas fa-eye"></i>
@@ -309,7 +309,7 @@
 
                         @foreach (var test in regularTests)
                         {
-                            <tr>
+                            <tr class="test-row" data-details-url="@Url.Action("Details", "RegularTest", new { id = test.Id })">
                                 <td>
                                     <span class="badge badge-modern-primary">
                                         <i class="fas fa-clipboard-check"></i>
@@ -333,7 +333,7 @@
                                     </span>
                                     <i class="fas @(test.IsActive ? "fa-check-circle" : "fa-pause-circle") test-status-icon-@(test.IsActive ? "active" : "inactive") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center" onclick="event.stopPropagation();" style="white-space: nowrap;">
                                     <div class="d-flex gap-1 justify-content-center">
                                         <a asp-controller="RegularTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
                                             <i class="fas fa-eye"></i>
@@ -361,4 +361,20 @@
     </div>
 </div>
 
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.test-row').on('click', function(e) {
+                if ($(e.target).closest('a, button').length > 0) {
+                    return;
+                }
+                
+                var detailsUrl = $(this).data('details-url');
+                if (detailsUrl) {
+                    window.location.href = detailsUrl;
+                }
+            });
+        });
+    </script>
+}
 

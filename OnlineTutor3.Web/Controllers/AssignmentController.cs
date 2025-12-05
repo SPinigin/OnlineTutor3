@@ -293,9 +293,12 @@ namespace OnlineTutor3.Web.Controllers
                 List<OrthoeopyTest> orthoeopyTests = new List<OrthoeopyTest>();
                 List<RegularTest> regularTests = new List<RegularTest>();
 
+                var naturalComparer = new NaturalStringComparer();
+
                 try
                 {
                     spellingTests = await _spellingTestService.GetByAssignmentIdAsync(id);
+                    spellingTests = spellingTests.OrderBy(t => t.Title, naturalComparer).ToList();
                 }
                 catch (Exception ex)
                 {
@@ -304,6 +307,7 @@ namespace OnlineTutor3.Web.Controllers
                 try
                 {
                     punctuationTests = await _punctuationTestService.GetByAssignmentIdAsync(id);
+                    punctuationTests = punctuationTests.OrderBy(t => t.Title, naturalComparer).ToList();
                 }
                 catch (Exception ex)
                 {
@@ -312,6 +316,7 @@ namespace OnlineTutor3.Web.Controllers
                 try
                 {
                     orthoeopyTests = await _orthoeopyTestService.GetByAssignmentIdAsync(id);
+                    orthoeopyTests = orthoeopyTests.OrderBy(t => t.Title, naturalComparer).ToList();
                 }
                 catch (Exception ex)
                 {
@@ -320,6 +325,7 @@ namespace OnlineTutor3.Web.Controllers
                 try
                 {
                     regularTests = await _regularTestService.GetByAssignmentIdAsync(id);
+                    regularTests = regularTests.OrderBy(t => t.Title, naturalComparer).ToList();
                 }
                 catch (Exception ex)
                 {

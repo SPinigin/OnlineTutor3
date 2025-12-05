@@ -1,13 +1,13 @@
 @model IEnumerable<OnlineTutor3.Domain.Entities.Assignment>
 @{
-    ViewData["Title"] = "Управление заданиями и тестами";
+    ViewData["Title"] = "Управление заданиями";
     var assignmentsWithTests = ViewBag.AssignmentsWithTests as Dictionary<int, OnlineTutor3.Web.ViewModels.AssignmentTestsViewModel> ?? new Dictionary<int, OnlineTutor3.Web.ViewModels.AssignmentTestsViewModel>();
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 page-header">
     <h4 class="mb-0 d-flex align-items-center gap-2 page-header-title">
         <i class="fas fa-tasks gradient-icon-blue"></i>
-        <span>Управление заданиями и тестами</span>
+        <span>Управление заданиями</span>
     </h4>
     <div>
         <a asp-action="Create" class="btn btn-modern-success" title="Создать задание">
@@ -208,13 +208,13 @@ else
                                                         <small class="text-muted-modern">@(assignmentData?.SpellingTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.SpellingTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
                                                     <td class="text-center d-none d-md-table-cell">
-                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit</small>
                                                     </td>
                                                     <td class="text-center">
                                                         <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
-                                                        <i class="fas @(test.IsActive ? "fa-check-circle text-success" : "fa-pause-circle text-secondary") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
+                                                        <i class="fas @(test.IsActive ? "fa-check-circle" : "fa-pause-circle") d-md-none" style="color: @(test.IsActive ? "#43e97b" : "#6c757d");" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();" style="white-space: nowrap;">
                                                         <div class="d-flex gap-0 gap-sm-1 justify-content-center" style="flex-wrap: nowrap;">
@@ -263,13 +263,13 @@ else
                                                         <small class="text-muted-modern">@(assignmentData?.PunctuationTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.PunctuationTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
                                                     <td class="text-center d-none d-md-table-cell">
-                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit</small>
                                                     </td>
                                                     <td class="text-center">
                                                         <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
-                                                        <i class="fas @(test.IsActive ? "fa-check-circle text-success" : "fa-pause-circle text-secondary") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
+                                                        <i class="fas @(test.IsActive ? "fa-check-circle" : "fa-pause-circle") d-md-none" style="color: @(test.IsActive ? "#43e97b" : "#6c757d");" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();" style="white-space: nowrap;">
                                                         <div class="d-flex gap-0 gap-sm-1 justify-content-center" style="flex-wrap: nowrap;">
@@ -318,13 +318,13 @@ else
                                                         <small class="text-muted-modern">@(assignmentData?.OrthoeopyTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.OrthoeopyTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
                                                     <td class="text-center d-none d-md-table-cell">
-                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit</small>
                                                     </td>
                                                     <td class="text-center">
                                                         <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
-                                                        <i class="fas @(test.IsActive ? "fa-check-circle text-success" : "fa-pause-circle text-secondary") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
+                                                        <i class="fas @(test.IsActive ? "fa-check-circle" : "fa-pause-circle") d-md-none" style="color: @(test.IsActive ? "#43e97b" : "#6c757d");" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();" style="white-space: nowrap;">
                                                         <div class="d-flex gap-0 gap-sm-1 justify-content-center" style="flex-wrap: nowrap;">
@@ -373,13 +373,13 @@ else
                                                         <small class="text-muted-modern">@(assignmentData?.RegularTestQuestionCounts?.ContainsKey(test.Id) == true ? assignmentData.RegularTestQuestionCounts[test.Id] : 0)</small>
                                                     </td>
                                                     <td class="text-center d-none d-md-table-cell">
-                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit</small>
                                                     </td>
                                                     <td class="text-center">
                                                         <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
                                                             @(test.IsActive ? "Активен" : "Неактивен")
                                                         </span>
-                                                        <i class="fas @(test.IsActive ? "fa-check-circle text-success" : "fa-pause-circle text-secondary") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
+                                                        <i class="fas @(test.IsActive ? "fa-check-circle" : "fa-pause-circle") d-md-none" style="color: @(test.IsActive ? "#43e97b" : "#6c757d");" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
                                                     </td>
                                                     <td class="text-center" onclick="event.stopPropagation();" style="white-space: nowrap;">
                                                         <div class="d-flex gap-0 gap-sm-1 justify-content-center" style="flex-wrap: nowrap;">
