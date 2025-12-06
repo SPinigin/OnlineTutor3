@@ -151,7 +151,7 @@
 
     <div class="card modern-card mt-3 navigation-card">
         <div class="card-body p-2 p-md-3">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                 <div class="d-flex gap-2">
                     <button type="button" 
                             class="btn btn-modern-outline-secondary btn-sm" 
@@ -170,7 +170,26 @@
                     </button>
                 </div>
                 
-                <div class="question-navigator d-flex gap-1 flex-wrap justify-content-center flex-grow-1 mx-2">
+                <button type="button" 
+                        class="btn btn-modern-outline-secondary btn-sm" 
+                        id="toggleNavigatorBtn"
+                        onclick="toggleQuestionNavigator()"
+                        title="Показать/скрыть навигацию по вопросам">
+                    <i class="fas fa-list" id="toggleNavigatorIcon"></i>
+                    <span class="ms-1">Навигация</span>
+                </button>
+                
+                <button type="button" 
+                        class="btn btn-modern-success btn-sm" 
+                        id="finishButton" 
+                        onclick="showFinishModal()">
+                    <i class="fas fa-check"></i>
+                    <span class="ms-1">Завершить тест</span>
+                </button>
+            </div>
+            
+            <div class="question-navigator-collapse" id="questionNavigatorCollapse" style="display: none;">
+                <div class="question-navigator d-flex gap-1 flex-wrap justify-content-center mx-2">
                     @for (int i = 0; i < Model.Questions.Count; i++)
                     {
                         <button type="button" 
@@ -182,14 +201,6 @@
                         </button>
                     }
                 </div>
-                
-                <button type="button" 
-                        class="btn btn-modern-success btn-sm" 
-                        id="finishButton" 
-                        onclick="showFinishModal()">
-                    <i class="fas fa-check"></i>
-                    <span class="ms-1">Завершить тест</span>
-                </button>
             </div>
         </div>
     </div>
@@ -584,9 +595,22 @@
         function showFinishModal() {
             $('#currentQuestionModal').text(currentQuestionIndex + 1);
             $('#answeredCountModal').text(Object.keys(answers).length);
-            
+
             const modal = new bootstrap.Modal(document.getElementById('finishTestModal'));
             modal.show();
+        }
+
+        function toggleQuestionNavigator() {
+            const collapse = $('#questionNavigatorCollapse');
+            const icon = $('#toggleNavigatorIcon');
+            
+            if (collapse.is(':visible')) {
+                collapse.slideUp(300);
+                icon.removeClass('fa-chevron-up').addClass('fa-list');
+            } else {
+                collapse.slideDown(300);
+                icon.removeClass('fa-list').addClass('fa-chevron-up');
+            }
         }
 
         function autoSubmitTest() {

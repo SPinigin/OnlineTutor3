@@ -147,13 +147,17 @@
 }
 
 /* Минималистичная панель навигации по вопросам */
+.question-navigator-collapse {
+    overflow: hidden;
+}
+
 .question-navigator {
     display: flex;
     flex-wrap: wrap;
     gap: 0.25rem;
     justify-content: flex-start;
     align-items: flex-start;
-    padding: 0.125rem 0;
+    padding: 0.5rem 0;
     width: 100%;
 }
 
