@@ -160,8 +160,8 @@ else
                                             <th style="width: 30%;">Название</th>
                                             <th style="width: 8%;" class="text-center">Вопросов</th>
                                             <th style="width: 8%;" class="text-center">Время</th>
-                                            <th style="width: 10%;" class="text-center">Попытки</th>
-                                            <th style="width: 10%;" class="text-center">Лучший результат</th>
+                                            <th style="width: 10%;" class="text-center d-none d-md-table-cell">Попытки</th>
+                                            <th style="width: 10%;" class="text-center d-none d-md-table-cell">Лучший результат</th>
                                             <th style="width: 29%;" class="text-center">Действия</th>
                                         </tr>
                                     </thead>
@@ -188,14 +188,14 @@ else
                                                         <small class="text-muted-modern">@test.QuestionsCount</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit</small>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center d-none d-md-table-cell">
                                                         <span class="badge @(test.AttemptsUsed >= test.MaxAttempts ? "badge-modern-danger" : "badge-modern-warning") badge-sm">
                                                             @test.AttemptsUsed/@test.MaxAttempts
                                                         </span>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center d-none d-md-table-cell">
                                                         @if (test.BestPercentage.HasValue)
                                                         {
                                                             <span class="badge @(test.BestPercentage >= 80 ? "badge-modern-success" : test.BestPercentage >= 60 ? "badge-modern-warning" : "badge-modern-danger") badge-sm">
@@ -259,14 +259,14 @@ else
                                                         <small class="text-muted-modern">@test.QuestionsCount</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit</small>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center d-none d-md-table-cell">
                                                         <span class="badge @(test.AttemptsUsed >= test.MaxAttempts ? "badge-modern-danger" : "badge-modern-warning") badge-sm">
                                                             @test.AttemptsUsed/@test.MaxAttempts
                                                         </span>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center d-none d-md-table-cell">
                                                         @if (test.BestPercentage.HasValue)
                                                         {
                                                             <span class="badge @(test.BestPercentage >= 80 ? "badge-modern-success" : test.BestPercentage >= 60 ? "badge-modern-warning" : "badge-modern-danger") badge-sm">
@@ -330,14 +330,14 @@ else
                                                         <small class="text-muted-modern">@test.QuestionsCount</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit</small>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center d-none d-md-table-cell">
                                                         <span class="badge @(test.AttemptsUsed >= test.MaxAttempts ? "badge-modern-danger" : "badge-modern-warning") badge-sm">
                                                             @test.AttemptsUsed/@test.MaxAttempts
                                                         </span>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center d-none d-md-table-cell">
                                                         @if (test.BestPercentage.HasValue)
                                                         {
                                                             <span class="badge @(test.BestPercentage >= 80 ? "badge-modern-success" : test.BestPercentage >= 60 ? "badge-modern-warning" : "badge-modern-danger") badge-sm">
@@ -401,14 +401,14 @@ else
                                                         <small class="text-muted-modern">@test.QuestionsCount</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
+                                                        <small class="text-muted-modern">@test.TimeLimit</small>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center d-none d-md-table-cell">
                                                         <span class="badge @(test.AttemptsUsed >= test.MaxAttempts ? "badge-modern-danger" : "badge-modern-warning") badge-sm">
                                                             @test.AttemptsUsed/@test.MaxAttempts
                                                         </span>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center d-none d-md-table-cell">
                                                         @if (test.BestPercentage.HasValue)
                                                         {
                                                             <span class="badge @(test.BestPercentage >= 80 ? "badge-modern-success" : test.BestPercentage >= 60 ? "badge-modern-warning" : "badge-modern-danger") badge-sm">
