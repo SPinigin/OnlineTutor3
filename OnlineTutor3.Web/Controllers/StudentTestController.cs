@@ -579,6 +579,13 @@ namespace OnlineTutor3.Web.Controllers
 
                 var answers = await _answerService.GetSpellingAnswersAsync(testResult.Id);
 
+                // Перемешиваем вопросы при первом открытии теста (если еще нет сохраненных ответов)
+                if (!answers.Any())
+                {
+                    var random = new Random();
+                    questions = questions.OrderBy(x => random.Next()).ToList();
+                }
+
                 TimeSpan timeRemaining;
                 if (testResult.TimeRemainingSeconds.HasValue && testResult.TimeRemainingSeconds.Value > 0)
                 {
@@ -908,6 +915,13 @@ namespace OnlineTutor3.Web.Controllers
                 // Загружаем ответы
                 var answers = await _answerService.GetPunctuationAnswersAsync(testResult.Id);
 
+                // Перемешиваем вопросы при первом открытии теста (если еще нет сохраненных ответов)
+                if (!answers.Any())
+                {
+                    var random = new Random();
+                    questions = questions.OrderBy(x => random.Next()).ToList();
+                }
+
                 // Вычисляем оставшееся время
                 // Если есть сохраненное время (пауза), используем его, иначе вычисляем на основе StartedAt
                 TimeSpan timeRemaining;
@@ -1187,6 +1201,13 @@ namespace OnlineTutor3.Web.Controllers
                 // Загружаем ответы
                 var answers = await _answerService.GetOrthoeopyAnswersAsync(testResult.Id);
 
+                // Перемешиваем вопросы при первом открытии теста (если еще нет сохраненных ответов)
+                if (!answers.Any())
+                {
+                    var random = new Random();
+                    questions = questions.OrderBy(x => random.Next()).ToList();
+                }
+
                 // Вычисляем оставшееся время
                 // Если есть сохраненное время (пауза), используем его, иначе вычисляем на основе StartedAt
                 TimeSpan timeRemaining;
@@ -1463,6 +1484,16 @@ namespace OnlineTutor3.Web.Controllers
                     return RedirectToAction("Index");
                 }
 
+                // Загружаем ответы
+                var answers = await _answerService.GetRegularAnswersAsync(testResult.Id);
+
+                // Перемешиваем вопросы при первом открытии теста (если еще нет сохраненных ответов)
+                if (!answers.Any())
+                {
+                    var random = new Random();
+                    questions = questions.OrderBy(x => random.Next()).ToList();
+                }
+
                 // Загружаем опции для всех вопросов
                 var options = new List<RegularQuestionOption>();
                 foreach (var question in questions)
@@ -1470,9 +1501,6 @@ namespace OnlineTutor3.Web.Controllers
                     var questionOptions = await _regularQuestionOptionRepository.GetByQuestionIdOrderedAsync(question.Id);
                     options.AddRange(questionOptions);
                 }
-
-                // Загружаем ответы
-                var answers = await _answerService.GetRegularAnswersAsync(testResult.Id);
 
                 // Вычисляем оставшееся время
                 // Если есть сохраненное время (пауза), используем его, иначе вычисляем на основе StartedAt
