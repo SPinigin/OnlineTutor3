@@ -165,13 +165,13 @@
                             <table class="table table-hover mb-0 modern-table">
                                 <thead>
                                     <tr>
-                                        <th>Ученик</th>
-                                        <th class="text-center d-none d-md-table-cell">Класс</th>
-                                        <th class="text-center">Тест</th>
-                                        <th class="text-center d-none d-md-table-cell">Предмет</th>
-                                        <th class="text-center">Оценка</th>
-                                        <th class="text-center d-none d-md-table-cell">Дата</th>
-                                        <th class="text-center">Действия</th>
+                                        <th style="min-width: 120px;">Ученик</th>
+                                        <th class="text-center d-none d-md-table-cell" style="min-width: 100px;">Класс</th>
+                                        <th class="text-center" style="min-width: 150px;">Тест</th>
+                                        <th class="text-center d-none d-md-table-cell" style="min-width: 100px;">Предмет</th>
+                                        <th class="text-center" style="min-width: 80px;">Оценка</th>
+                                        <th class="text-center d-none d-md-table-cell" style="min-width: 140px;">Дата</th>
+                                        <th class="text-center" style="min-width: 90px;">Действия</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -202,7 +202,7 @@
                                             _ => "secondary"
                                         } : "secondary";
                                         <tr>
-                                            <td>
+                                            <td style="word-break: break-word; max-width: 150px;">
                                                 <div>
                                                     <span class="fw-bold text-dark-modern">@completion.StudentName</span>
                                                     @if (!string.IsNullOrEmpty(completion.ClassName))
@@ -227,12 +227,12 @@
                                                     <span class="text-muted-modern">Не назначен</span>
                                                 }
                                             </td>
-                                            <td class="text-center">
-                                                <div class="d-flex align-items-center justify-content-center gap-2">
-                                                    <i class="fas @testTypeIcon" style="color: #667eea;"></i>
-                                                    <div>
-                                                        <span class="fw-bold text-dark-modern">@completion.TestTitle</span>
-                                                        <small class="badge modern-badge d-md-none ms-1">@completion.SubjectName</small>
+                                            <td class="text-center" style="word-break: break-word; max-width: 200px;">
+                                                <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
+                                                    <i class="fas @testTypeIcon" style="color: #667eea; flex-shrink: 0;"></i>
+                                                    <div style="min-width: 0; flex: 1;">
+                                                        <span class="fw-bold text-dark-modern d-block" style="word-break: break-word;">@completion.TestTitle</span>
+                                                        <small class="badge modern-badge d-md-none ms-1 mt-1 d-inline-block">@completion.SubjectName</small>
                                                     </div>
                                                 </div>
                                             </td>
@@ -260,7 +260,8 @@
                                                    data-test-result-id="@completion.TestResultId"
                                                    data-test-type="@completion.TestType"
                                                    data-student-name="@completion.StudentName"
-                                                   title="Детали">
+                                                   title="Детали"
+                                                   style="white-space: nowrap;">
                                                     <i class="fas fa-eye"></i>
                                                     <span class="d-none d-xl-inline ms-1">Детали</span>
                                                 </a>
