@@ -36,11 +36,13 @@ namespace OnlineTutor3.Application.Services
                 var existingAnswers = await _spellingAnswerRepository.GetByTestResultIdAsync(testResultId);
                 var existingAnswer = existingAnswers.FirstOrDefault(a => a.SpellingQuestionId == questionId);
 
+                SpellingAnswer savedAnswer;
+
                 if (existingAnswer != null)
                 {
                     existingAnswer.StudentAnswer = studentAnswer;
                     await _spellingAnswerRepository.UpdateAsync(existingAnswer);
-                    return existingAnswer;
+                    savedAnswer = existingAnswer;
                 }
                 else
                 {
@@ -55,8 +57,21 @@ namespace OnlineTutor3.Application.Services
 
                     var id = await _spellingAnswerRepository.CreateAsync(answer);
                     answer.Id = id;
-                    return answer;
+                    savedAnswer = answer;
                 }
+
+                // Переполучаем все ответы и удаляем старые дубликаты для этого вопроса (кроме только что сохраненного ответа)
+                var allAnswers = await _spellingAnswerRepository.GetByTestResultIdAsync(testResultId);
+                var duplicates = allAnswers
+                    .Where(a => a.SpellingQuestionId == questionId && a.Id != savedAnswer.Id)
+                    .ToList();
+
+                foreach (var duplicate in duplicates)
+                {
+                    await _spellingAnswerRepository.DeleteAsync(duplicate.Id);
+                }
+
+                return savedAnswer;
             }
             catch (Exception ex)
             {
@@ -72,11 +87,13 @@ namespace OnlineTutor3.Application.Services
                 var existingAnswers = await _punctuationAnswerRepository.GetByTestResultIdAsync(testResultId);
                 var existingAnswer = existingAnswers.FirstOrDefault(a => a.PunctuationQuestionId == questionId);
 
+                PunctuationAnswer savedAnswer;
+
                 if (existingAnswer != null)
                 {
                     existingAnswer.StudentAnswer = studentAnswer;
                     await _punctuationAnswerRepository.UpdateAsync(existingAnswer);
-                    return existingAnswer;
+                    savedAnswer = existingAnswer;
                 }
                 else
                 {
@@ -91,8 +108,21 @@ namespace OnlineTutor3.Application.Services
 
                     var id = await _punctuationAnswerRepository.CreateAsync(answer);
                     answer.Id = id;
-                    return answer;
+                    savedAnswer = answer;
                 }
+
+                // Переполучаем все ответы и удаляем старые дубликаты для этого вопроса (кроме только что сохраненного ответа)
+                var allAnswers = await _punctuationAnswerRepository.GetByTestResultIdAsync(testResultId);
+                var duplicates = allAnswers
+                    .Where(a => a.PunctuationQuestionId == questionId && a.Id != savedAnswer.Id)
+                    .ToList();
+
+                foreach (var duplicate in duplicates)
+                {
+                    await _punctuationAnswerRepository.DeleteAsync(duplicate.Id);
+                }
+
+                return savedAnswer;
             }
             catch (Exception ex)
             {
@@ -108,11 +138,13 @@ namespace OnlineTutor3.Application.Services
                 var existingAnswers = await _orthoeopyAnswerRepository.GetByTestResultIdAsync(testResultId);
                 var existingAnswer = existingAnswers.FirstOrDefault(a => a.OrthoeopyQuestionId == questionId);
 
+                OrthoeopyAnswer savedAnswer;
+
                 if (existingAnswer != null)
                 {
                     existingAnswer.StudentAnswer = studentAnswer;
                     await _orthoeopyAnswerRepository.UpdateAsync(existingAnswer);
-                    return existingAnswer;
+                    savedAnswer = existingAnswer;
                 }
                 else
                 {
@@ -127,8 +159,21 @@ namespace OnlineTutor3.Application.Services
 
                     var id = await _orthoeopyAnswerRepository.CreateAsync(answer);
                     answer.Id = id;
-                    return answer;
+                    savedAnswer = answer;
                 }
+
+                // Переполучаем все ответы и удаляем старые дубликаты для этого вопроса (кроме только что сохраненного ответа)
+                var allAnswers = await _orthoeopyAnswerRepository.GetByTestResultIdAsync(testResultId);
+                var duplicates = allAnswers
+                    .Where(a => a.OrthoeopyQuestionId == questionId && a.Id != savedAnswer.Id)
+                    .ToList();
+
+                foreach (var duplicate in duplicates)
+                {
+                    await _orthoeopyAnswerRepository.DeleteAsync(duplicate.Id);
+                }
+
+                return savedAnswer;
             }
             catch (Exception ex)
             {
@@ -144,12 +189,14 @@ namespace OnlineTutor3.Application.Services
                 var existingAnswers = await _regularAnswerRepository.GetByTestResultIdAsync(testResultId);
                 var existingAnswer = existingAnswers.FirstOrDefault(a => a.RegularQuestionId == questionId);
 
+                RegularAnswer savedAnswer;
+
                 if (existingAnswer != null)
                 {
                     existingAnswer.StudentAnswer = studentAnswer;
                     existingAnswer.SelectedOptionId = selectedOptionId;
                     await _regularAnswerRepository.UpdateAsync(existingAnswer);
-                    return existingAnswer;
+                    savedAnswer = existingAnswer;
                 }
                 else
                 {
@@ -165,8 +212,21 @@ namespace OnlineTutor3.Application.Services
 
                     var id = await _regularAnswerRepository.CreateAsync(answer);
                     answer.Id = id;
-                    return answer;
+                    savedAnswer = answer;
                 }
+
+                // Переполучаем все ответы и удаляем старые дубликаты для этого вопроса (кроме только что сохраненного ответа)
+                var allAnswers = await _regularAnswerRepository.GetByTestResultIdAsync(testResultId);
+                var duplicates = allAnswers
+                    .Where(a => a.RegularQuestionId == questionId && a.Id != savedAnswer.Id)
+                    .ToList();
+
+                foreach (var duplicate in duplicates)
+                {
+                    await _regularAnswerRepository.DeleteAsync(duplicate.Id);
+                }
+
+                return savedAnswer;
             }
             catch (Exception ex)
             {

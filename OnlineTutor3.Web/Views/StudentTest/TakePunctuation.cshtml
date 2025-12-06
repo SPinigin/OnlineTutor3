@@ -140,31 +140,44 @@
     <div class="card modern-card mt-3 navigation-card">
         <div class="card-body p-2 p-md-3">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <button type="button" 
-                        class="btn btn-modern-outline-secondary btn-sm" 
-                        id="prevButton" 
-                        onclick="previousQuestion()" 
-                        disabled>
-                    <i class="fas fa-arrow-left"></i>
-                    <span class="d-none d-sm-inline ms-1">Предыдущий</span>
-                </button>
-                
                 <div class="d-flex gap-2">
                     <button type="button" 
-                            class="btn btn-warning btn-sm" 
-                            id="nextButton" 
-                            onclick="nextQuestion()">
-                        <span class="d-none d-sm-inline me-1">Следующий</span>
-                        <i class="fas fa-arrow-right"></i>
+                            class="btn btn-modern-outline-secondary btn-sm" 
+                            id="prevButton" 
+                            onclick="previousQuestion()" 
+                            disabled>
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="ms-1">Предыдущий</span>
                     </button>
                     <button type="button" 
-                            class="btn btn-modern-success btn-sm" 
-                            id="finishButton" 
-                            onclick="showFinishModal()">
-                        <i class="fas fa-check"></i>
-                        <span class="d-none d-sm-inline ms-1">Завершить тест</span>
+                            class="btn btn-modern-outline-secondary btn-sm" 
+                            id="nextButton" 
+                            onclick="nextQuestion()">
+                        <span class="me-1">Следующий</span>
+                        <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
+                
+                <div class="question-navigator d-flex gap-1 flex-wrap justify-content-center flex-grow-1 mx-2">
+                    @for (int i = 0; i < Model.Questions.Count; i++)
+                    {
+                        <button type="button" 
+                                class="btn btn-sm btn-modern-outline-secondary question-nav-btn" 
+                                data-question-index="@i"
+                                onclick="goToQuestion(@i)"
+                                title="Вопрос @(i + 1)">
+                            @(i + 1)
+                        </button>
+                    }
+                </div>
+                
+                <button type="button" 
+                        class="btn btn-modern-success btn-sm" 
+                        id="finishButton" 
+                        onclick="showFinishModal()">
+                    <i class="fas fa-check"></i>
+                    <span class="ms-1">Завершить тест</span>
+                </button>
             </div>
         </div>
     </div>
@@ -266,6 +279,7 @@
         let timerInterval;
         let timeSaveInterval;
         let testCompleting = false;
+        let isTransitioning = false; // Флаг для предотвращения множественных кликов
 
         $(document).ready(function() {
             initializeTest();
@@ -419,33 +433,65 @@
         }
 
         function nextQuestion() {
+            if (isTransitioning) return; // Предотвращаем множественные клики
             if (currentQuestionIndex < totalQuestions - 1) {
                 showQuestion(currentQuestionIndex + 1);
             }
         }
 
         function previousQuestion() {
+            if (isTransitioning) return; // Предотвращаем множественные клики
             if (currentQuestionIndex > 0) {
                 showQuestion(currentQuestionIndex - 1);
             }
         }
 
+        function goToQuestion(index) {
+            if (isTransitioning) return; // Предотвращаем множественные клики
+            if (index >= 0 && index < totalQuestions) {
+                showQuestion(index);
+            }
+        }
+
         function showQuestion(index) {
+            // Предотвращаем множественные вызовы
+            if (isTransitioning) return;
+            if (index === currentQuestionIndex) return; // Уже на этом вопросе
+            
+            isTransitioning = true; // Устанавливаем флаг
+            
+            const nextCard = $(`.question-card[data-question-index="${index}"]`);
+            
+            // Проверяем, что карточка существует
+            if (nextCard.length === 0) {
+                console.error('Question card not found for index:', index);
+                isTransitioning = false;
+                return;
+            }
+            
             $('.question-card').addClass('d-none').removeClass('active');
-            $(`.question-card[data-question-index="${index}"]`).removeClass('d-none').addClass('active');
+            nextCard.removeClass('d-none').addClass('active');
+
+            // Принудительная перерисовка для надежности
+            nextCard[0].offsetHeight;
 
             currentQuestionIndex = index;
             updateProgress();
             updateNavigation();
+            
+            // Сбрасываем флаг после небольшой задержки
+            setTimeout(function() {
+                isTransitioning = false;
+            }, 100);
 
             // Фокус на поле ввода
             setTimeout(function() {
-                $(`.question-card[data-question-index="${index}"] .answer-input`).focus();
+                nextCard.find('.answer-input').focus();
             }, 100);
 
             if ($(window).width() < 768) {
                 $('html, body').animate({
-                    scrollTop: $('.question-card.active').offset().top - 100
+                    scrollTop: nextCard.offset().top - 100
                 }, 300);
             }
         }
@@ -457,6 +503,26 @@
             $('#progressBar').css('width', percentage + '%');
             $('#currentQuestion').text(currentQuestionIndex + 1);
             $('#answeredCount, #answeredCountModal').text(answeredCount);
+
+            // Обновляем панель навигации
+            $('.question-nav-btn').each(function() {
+                const idx = $(this).data('question-index');
+                const questionId = $(`.question-card[data-question-index="${idx}"]`).data('question-id');
+                const answerValue = answers[questionId];
+                const isAnswered = answerValue && answerValue.trim() !== '';
+                
+                // Убираем все классы статуса
+                $(this).removeClass('btn-modern-success btn-modern-primary active');
+                
+                // Добавляем класс в зависимости от статуса
+                if (idx === currentQuestionIndex) {
+                    $(this).addClass('btn-modern-primary active');
+                } else if (isAnswered) {
+                    $(this).addClass('btn-modern-success');
+                } else {
+                    $(this).addClass('btn-modern-outline-secondary');
+                }
+            });
         }
 
         function updateNavigation() {

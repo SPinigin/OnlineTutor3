@@ -164,7 +164,13 @@ namespace OnlineTutor3.Application.Services
                 int score = 0;
                 int maxScore = questions.Sum(q => q.Points); // Сумма баллов всех вопросов
 
-                foreach (var answer in answers)
+                // Группируем ответы по вопросу и берем только последний ответ на каждый вопрос (по Id)
+                var uniqueAnswers = answers
+                    .GroupBy(a => a.SpellingQuestionId)
+                    .Select(g => g.OrderByDescending(a => a.Id).First())
+                    .ToList();
+
+                foreach (var answer in uniqueAnswers)
                 {
                     var question = questions.FirstOrDefault(q => q.Id == answer.SpellingQuestionId);
                     if (question != null)
@@ -213,7 +219,13 @@ namespace OnlineTutor3.Application.Services
                 int score = 0;
                 int maxScore = questions.Count;
 
-                foreach (var answer in answers)
+                // Группируем ответы по вопросу и берем только последний ответ на каждый вопрос (по Id)
+                var uniqueAnswers = answers
+                    .GroupBy(a => a.PunctuationQuestionId)
+                    .Select(g => g.OrderByDescending(a => a.Id).First())
+                    .ToList();
+
+                foreach (var answer in uniqueAnswers)
                 {
                     var question = questions.FirstOrDefault(q => q.Id == answer.PunctuationQuestionId);
                     if (question != null)
@@ -246,7 +258,13 @@ namespace OnlineTutor3.Application.Services
                 int score = 0;
                 int maxScore = questions.Count;
 
-                foreach (var answer in answers)
+                // Группируем ответы по вопросу и берем только последний ответ на каждый вопрос (по Id)
+                var uniqueAnswers = answers
+                    .GroupBy(a => a.OrthoeopyQuestionId)
+                    .Select(g => g.OrderByDescending(a => a.Id).First())
+                    .ToList();
+
+                foreach (var answer in uniqueAnswers)
                 {
                     var question = questions.FirstOrDefault(q => q.Id == answer.OrthoeopyQuestionId);
                     if (question != null)
@@ -279,7 +297,13 @@ namespace OnlineTutor3.Application.Services
                 int score = 0;
                 int maxScore = questions.Count;
 
-                foreach (var answer in answers)
+                // Группируем ответы по вопросу и берем только последний ответ на каждый вопрос (по Id)
+                var uniqueAnswers = answers
+                    .GroupBy(a => a.RegularQuestionId)
+                    .Select(g => g.OrderByDescending(a => a.Id).First())
+                    .ToList();
+
+                foreach (var answer in uniqueAnswers)
                 {
                     var question = questions.FirstOrDefault(q => q.Id == answer.RegularQuestionId);
                     if (question != null)
