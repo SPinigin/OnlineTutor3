@@ -11,14 +11,20 @@
 @if (!(ViewBag.IsModal as bool? ?? false))
 {
     <div class="mb-3">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb breadcrumb-compact">
-                <li class="breadcrumb-item">
-                    <a asp-controller="StudentTest" asp-action="History">История прохождения</a>
-                </li>
-                <li class="breadcrumb-item active text-truncate">@Model.TestTitle</li>
-            </ol>
-        </nav>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <nav aria-label="breadcrumb" class="flex-grow-1">
+                <ol class="breadcrumb breadcrumb-compact mb-0">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="StudentTest" asp-action="History">История прохождения</a>
+                    </li>
+                    <li class="breadcrumb-item active text-truncate">@Model.TestTitle</li>
+                </ol>
+            </nav>
+            <a asp-controller="StudentTest" asp-action="Index" class="btn btn-modern-outline-primary btn-sm">
+                <i class="fas fa-list"></i>
+                <span>К тестам</span>
+            </a>
+        </div>
     </div>
 }
 
