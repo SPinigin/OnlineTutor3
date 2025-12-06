@@ -271,56 +271,6 @@
 
 @section Scripts {
     <script src="~/js/student-test-enhancements.js" asp-append-version="true"></script>
-    <style>
-        .timer-warning {
-            color: #ffc107 !important;
-        }
-        .timer-danger {
-            color: #dc3545 !important;
-            animation: pulse 1s infinite;
-        }
-        @@keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .option-item {
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .option-item:hover {
-            border-color: #007bff !important;
-            background-color: #f8f9fa;
-        }
-        .option-item .form-check-input:checked ~ .form-check-label {
-            font-weight: 600;
-        }
-        .option-item .form-check-input:checked ~ .form-check-label .option-text {
-            color: #007bff;
-        }
-        .option-text {
-            font-size: 1.1rem;
-        }
-        .question-nav-btn {
-            min-width: 40px;
-        }
-        .trueFalseBtn {
-            height: 80px;
-            font-size: 1.2rem;
-            border-width: 2px;
-        }
-        .trueFalseBtn.active {
-            transform: scale(1.05);
-        }
-        .trueFalseBtn.btn-outline-success.active {
-            background-color: #28a745;
-            color: white;
-        }
-        .trueFalseBtn.btn-outline-danger.active {
-            background-color: #dc3545;
-            color: white;
-        }
-    </style>
-    
     <script>
         let currentQuestionIndex = 0;
         let totalQuestions = @Model.Questions.Count;
