@@ -587,21 +587,25 @@ namespace OnlineTutor3.Web.Controllers
                 }
 
                 TimeSpan timeRemaining;
-                if (testResult.TimeRemainingSeconds.HasValue && testResult.TimeRemainingSeconds.Value > 0)
+                if (testResult.TimeRemainingSeconds.HasValue)
                 {
+                    // Используем сохраненное время (тест был на паузе)
+                    // Используем сохраненное значение даже если оно 0 или отрицательное,
+                    // чтобы не пересчитывать на основе StartedAt (которое продолжает тикать)
                     timeRemaining = TimeSpan.FromSeconds(testResult.TimeRemainingSeconds.Value);
                 }
                 else
                 {
+                    // Первый раз открываем тест - вычисляем время на основе StartedAt
                     var timeElapsed = DateTime.Now - testResult.StartedAt;
                     var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
                     timeRemaining = timeLimit - timeElapsed;
                     
-                    if (timeRemaining > TimeSpan.Zero)
-                    {
-                        testResult.TimeRemainingSeconds = (int)timeRemaining.TotalSeconds;
-                        await _spellingTestResultRepository.UpdateAsync(testResult);
-                    }
+                    // Сохраняем вычисленное время для будущих пауз
+                    // Сохраняем даже если время отрицательное, чтобы при следующем открытии
+                    // не пересчитывать на основе StartedAt
+                    testResult.TimeRemainingSeconds = (int)timeRemaining.TotalSeconds;
+                    await _spellingTestResultRepository.UpdateAsync(testResult);
                 }
 
                 if (timeRemaining <= TimeSpan.Zero)
@@ -671,7 +675,8 @@ namespace OnlineTutor3.Web.Controllers
                     return Json(new { success = false, message = "Тест не найден" });
                 }
 
-                if (!_securityValidation.ValidateTimeLimit(testResult.StartedAt, test.TimeLimit, 30))
+                // Проверяем время с учетом сохраненного оставшегося времени (если тест был на паузе)
+                if (!_securityValidation.ValidateTimeLimitWithRemaining(testResult.StartedAt, test.TimeLimit, testResult.TimeRemainingSeconds, 30))
                 {
                     return Json(new { success = false, message = "Время теста истекло" });
                 }
@@ -925,24 +930,25 @@ namespace OnlineTutor3.Web.Controllers
                 // Вычисляем оставшееся время
                 // Если есть сохраненное время (пауза), используем его, иначе вычисляем на основе StartedAt
                 TimeSpan timeRemaining;
-                if (testResult.TimeRemainingSeconds.HasValue && testResult.TimeRemainingSeconds.Value > 0)
+                if (testResult.TimeRemainingSeconds.HasValue)
                 {
                     // Используем сохраненное время (тест был на паузе)
+                    // Используем сохраненное значение даже если оно 0 или отрицательное,
+                    // чтобы не пересчитывать на основе StartedAt (которое продолжает тикать)
                     timeRemaining = TimeSpan.FromSeconds(testResult.TimeRemainingSeconds.Value);
                 }
                 else
                 {
-                    // Вычисляем время на основе StartedAt
+                    // Первый раз открываем тест - вычисляем время на основе StartedAt
                     var timeElapsed = DateTime.Now - testResult.StartedAt;
                     var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
                     timeRemaining = timeLimit - timeElapsed;
                     
                     // Сохраняем вычисленное время для будущих пауз
-                    if (timeRemaining > TimeSpan.Zero)
-                    {
-                        testResult.TimeRemainingSeconds = (int)timeRemaining.TotalSeconds;
-                        await _punctuationTestResultRepository.UpdateAsync(testResult);
-                    }
+                    // Сохраняем даже если время отрицательное, чтобы при следующем открытии
+                    // не пересчитывать на основе StartedAt
+                    testResult.TimeRemainingSeconds = (int)timeRemaining.TotalSeconds;
+                    await _punctuationTestResultRepository.UpdateAsync(testResult);
                 }
 
                 // Если время истекло, завершаем тест автоматически
@@ -1010,6 +1016,19 @@ namespace OnlineTutor3.Web.Controllers
                 if (testResult == null || testResult.StudentId != student.Id || testResult.IsCompleted)
                 {
                     return Json(new { success = false, message = "Тест не найден или уже завершен" });
+                }
+
+                // Получаем тест для проверки времени
+                var test = await _punctuationTestRepository.GetByIdAsync(testResult.PunctuationTestId);
+                if (test == null)
+                {
+                    return Json(new { success = false, message = "Тест не найден" });
+                }
+
+                // Проверяем время с учетом сохраненного оставшегося времени (если тест был на паузе)
+                if (!_securityValidation.ValidateTimeLimitWithRemaining(testResult.StartedAt, test.TimeLimit, testResult.TimeRemainingSeconds, 30))
+                {
+                    return Json(new { success = false, message = "Время теста истекло" });
                 }
 
                 // Получаем вопрос
@@ -1211,24 +1230,25 @@ namespace OnlineTutor3.Web.Controllers
                 // Вычисляем оставшееся время
                 // Если есть сохраненное время (пауза), используем его, иначе вычисляем на основе StartedAt
                 TimeSpan timeRemaining;
-                if (testResult.TimeRemainingSeconds.HasValue && testResult.TimeRemainingSeconds.Value > 0)
+                if (testResult.TimeRemainingSeconds.HasValue)
                 {
                     // Используем сохраненное время (тест был на паузе)
+                    // Используем сохраненное значение даже если оно 0 или отрицательное,
+                    // чтобы не пересчитывать на основе StartedAt (которое продолжает тикать)
                     timeRemaining = TimeSpan.FromSeconds(testResult.TimeRemainingSeconds.Value);
                 }
                 else
                 {
-                    // Вычисляем время на основе StartedAt
+                    // Первый раз открываем тест - вычисляем время на основе StartedAt
                     var timeElapsed = DateTime.Now - testResult.StartedAt;
                     var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
                     timeRemaining = timeLimit - timeElapsed;
                     
                     // Сохраняем вычисленное время для будущих пауз
-                    if (timeRemaining > TimeSpan.Zero)
-                    {
-                        testResult.TimeRemainingSeconds = (int)timeRemaining.TotalSeconds;
-                        await _orthoeopyTestResultRepository.UpdateAsync(testResult);
-                    }
+                    // Сохраняем даже если время отрицательное, чтобы при следующем открытии
+                    // не пересчитывать на основе StartedAt
+                    testResult.TimeRemainingSeconds = (int)timeRemaining.TotalSeconds;
+                    await _orthoeopyTestResultRepository.UpdateAsync(testResult);
                 }
 
                 // Если время истекло, завершаем тест автоматически
@@ -1296,6 +1316,19 @@ namespace OnlineTutor3.Web.Controllers
                 if (testResult == null || testResult.StudentId != student.Id || testResult.IsCompleted)
                 {
                     return Json(new { success = false, message = "Тест не найден или уже завершен" });
+                }
+
+                // Получаем тест для проверки времени
+                var test = await _orthoeopyTestRepository.GetByIdAsync(testResult.OrthoeopyTestId);
+                if (test == null)
+                {
+                    return Json(new { success = false, message = "Тест не найден" });
+                }
+
+                // Проверяем время с учетом сохраненного оставшегося времени (если тест был на паузе)
+                if (!_securityValidation.ValidateTimeLimitWithRemaining(testResult.StartedAt, test.TimeLimit, testResult.TimeRemainingSeconds, 30))
+                {
+                    return Json(new { success = false, message = "Время теста истекло" });
                 }
 
                 // Получаем вопрос
@@ -1505,24 +1538,25 @@ namespace OnlineTutor3.Web.Controllers
                 // Вычисляем оставшееся время
                 // Если есть сохраненное время (пауза), используем его, иначе вычисляем на основе StartedAt
                 TimeSpan timeRemaining;
-                if (testResult.TimeRemainingSeconds.HasValue && testResult.TimeRemainingSeconds.Value > 0)
+                if (testResult.TimeRemainingSeconds.HasValue)
                 {
                     // Используем сохраненное время (тест был на паузе)
+                    // Используем сохраненное значение даже если оно 0 или отрицательное,
+                    // чтобы не пересчитывать на основе StartedAt (которое продолжает тикать)
                     timeRemaining = TimeSpan.FromSeconds(testResult.TimeRemainingSeconds.Value);
                 }
                 else
                 {
-                    // Вычисляем время на основе StartedAt
+                    // Первый раз открываем тест - вычисляем время на основе StartedAt
                     var timeElapsed = DateTime.Now - testResult.StartedAt;
                     var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
                     timeRemaining = timeLimit - timeElapsed;
                     
                     // Сохраняем вычисленное время для будущих пауз
-                    if (timeRemaining > TimeSpan.Zero)
-                    {
-                        testResult.TimeRemainingSeconds = (int)timeRemaining.TotalSeconds;
-                        await _regularTestResultRepository.UpdateAsync(testResult);
-                    }
+                    // Сохраняем даже если время отрицательное, чтобы при следующем открытии
+                    // не пересчитывать на основе StartedAt
+                    testResult.TimeRemainingSeconds = (int)timeRemaining.TotalSeconds;
+                    await _regularTestResultRepository.UpdateAsync(testResult);
                 }
 
                 // Если время истекло, завершаем тест автоматически
@@ -1591,6 +1625,19 @@ namespace OnlineTutor3.Web.Controllers
                 if (testResult == null || testResult.StudentId != student.Id || testResult.IsCompleted)
                 {
                     return Json(new { success = false, message = "Тест не найден или уже завершен" });
+                }
+
+                // Получаем тест для проверки времени
+                var test = await _regularTestRepository.GetByIdAsync(testResult.RegularTestId);
+                if (test == null)
+                {
+                    return Json(new { success = false, message = "Тест не найден" });
+                }
+
+                // Проверяем время с учетом сохраненного оставшегося времени (если тест был на паузе)
+                if (!_securityValidation.ValidateTimeLimitWithRemaining(testResult.StartedAt, test.TimeLimit, testResult.TimeRemainingSeconds, 30))
+                {
+                    return Json(new { success = false, message = "Время теста истекло" });
                 }
 
                 // Получаем вопрос

@@ -76,6 +76,28 @@ namespace OnlineTutor3.Application.Services
         }
 
         /// <summary>
+        /// Проверяет, что время теста не истекло, используя сохраненное оставшееся время если оно есть
+        /// </summary>
+        public bool ValidateTimeLimitWithRemaining(DateTime startedAt, int timeLimitMinutes, int? timeRemainingSeconds, int bufferSeconds = 30)
+        {
+            // Если есть сохраненное оставшееся время (тест был на паузе), используем его
+            if (timeRemainingSeconds.HasValue)
+            {
+                // Проверяем, что оставшееся время больше буфера
+                if (timeRemainingSeconds.Value <= bufferSeconds)
+                {
+                    _logger.LogWarning("Попытка продолжить тест после истечения времени. TimeRemaining: {TimeRemaining} секунд",
+                        timeRemainingSeconds.Value);
+                    return false;
+                }
+                return true;
+            }
+
+            // Если сохраненного времени нет, используем стандартную проверку на основе StartedAt
+            return ValidateTimeLimit(startedAt, timeLimitMinutes, bufferSeconds);
+        }
+
+        /// <summary>
         /// Валидирует ответ студента (защита от инъекций и слишком длинных ответов)
         /// </summary>
         public bool ValidateAnswer(string? answer, int maxLength = 1000)
