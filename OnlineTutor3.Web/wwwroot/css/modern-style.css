@@ -253,16 +253,6 @@
     background-color: rgba(102, 126, 234, 0.05) !important;
 }
 
-.modern-table tbody tr.clickable-row {
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-.modern-table tbody tr.clickable-row:hover {
-    background-color: rgba(102, 126, 234, 0.08) !important;
-    transform: scale(1.001);
-}
-
 /* ===== STUDENT MANAGEMENT TABLE HEADERS ===== */
 .modern-table thead th.th-school-class {
     min-width: 120px;

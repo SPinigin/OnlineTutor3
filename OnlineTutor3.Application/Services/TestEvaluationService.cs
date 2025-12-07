@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using OnlineTutor3.Application.Interfaces;
 using OnlineTutor3.Domain.Entities;
+using System.Text.RegularExpressions;
 
 namespace OnlineTutor3.Application.Services
 {
@@ -48,7 +49,11 @@ namespace OnlineTutor3.Application.Services
         {
             try
             {
-                var isCorrect = question.CorrectLetter.Equals(studentAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
+                // Нормализуем ответы: убираем пробелы в начале и конце, а также пробелы после запятых
+                var normalizedCorrect = NormalizeSpellingAnswer(question.CorrectLetter);
+                var normalizedStudent = NormalizeSpellingAnswer(studentAnswer);
+                
+                var isCorrect = normalizedCorrect.Equals(normalizedStudent, StringComparison.OrdinalIgnoreCase);
                 return (isCorrect, isCorrect ? pointsPerQuestion : 0);
             }
             catch (Exception ex)
@@ -56,6 +61,26 @@ namespace OnlineTutor3.Application.Services
                 _logger.LogError(ex, "Ошибка при оценке ответа по орфографии. QuestionId: {QuestionId}", question.Id);
                 return (false, 0);
             }
+        }
+
+        /// <summary>
+        /// Нормализует ответ по орфографии: убирает пробелы в начале и конце, а также пробелы после запятых
+        /// </summary>
+        private static string NormalizeSpellingAnswer(string answer)
+        {
+            if (string.IsNullOrWhiteSpace(answer))
+                return string.Empty;
+
+            // Убираем пробелы в начале и конце
+            var normalized = answer.Trim();
+            
+            // Убираем пробелы после запятых (заменяем ", " на "," и множественные пробелы после запятой)
+            normalized = Regex.Replace(normalized, @",\s+", ",");
+            
+            // Убираем пробелы перед запятыми (на случай, если пользователь ввел "и ,и")
+            normalized = Regex.Replace(normalized, @"\s+,", ",");
+            
+            return normalized;
         }
 
         public async Task<(bool IsCorrect, int Points)> EvaluatePunctuationAnswerAsync(PunctuationQuestion question, string studentAnswer, int pointsPerQuestion)

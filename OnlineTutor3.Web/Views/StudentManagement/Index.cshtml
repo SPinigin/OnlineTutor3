@@ -94,7 +94,7 @@ else
                         {
                             var userInfo = studentsWithUsers.FirstOrDefault(s => s.Student.Id == item.Id);
                             var user = userInfo.User;
-                            <tr class="clickable-row" data-student-id="@item.Id">
+                            <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <i class="fas fa-user-graduate me-2" style="color: #667eea;"></i>
@@ -206,23 +206,8 @@ else
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Обработчик для кликабельных строк таблицы
-            $('.clickable-row').on('click', function(e) {
-                // Игнорируем клики на кнопки, ссылки и другие интерактивные элементы
-                if ($(e.target).closest('a, button, .btn').length > 0) {
-                    return;
-                }
-                
-                var studentId = $(this).data('student-id');
-                if (studentId) {
-                    window.location.href = '@Url.Action("Details", "StudentManagement")/' + studentId;
-                }
-            });
-
-            // Обработчик для кнопки назначения в класс
             $('.assign-to-class-btn').on('click', function(e) {
                 e.preventDefault();
-                e.stopPropagation(); // Предотвращаем всплытие события на строку
                 var studentId = $(this).data('student-id');
                 
                 var modal = new bootstrap.Modal(document.getElementById('assignToClassModal'));
@@ -237,11 +222,6 @@ else
                     .fail(function() {
                         $('#assignToClassModalBody').html('<div class="alert alert-danger">Ошибка при загрузке данных.</div>');
                     });
-            });
-
-            // Предотвращаем всплытие события для всех ссылок и кнопок в колонке действий
-            $('.clickable-row td:last-child a, .clickable-row td:last-child button').on('click', function(e) {
-                e.stopPropagation();
             });
         });
     </script>
