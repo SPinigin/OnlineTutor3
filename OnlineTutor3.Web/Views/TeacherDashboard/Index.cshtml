@@ -476,6 +476,9 @@
                 </div>
                 <div class="modal-body modern-modal-body" id="testResultModalBody">
                 </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
             </div>
         </div>
     </div>
@@ -686,7 +689,7 @@
 
             var actionButton = activity.status === 'completed' && activity.testResultId
                 ? '<button class="btn btn-sm btn-modern-outline-info" onclick="showTestResult(\'' + activity.testType + '\', ' + activity.testResultId + ', \'' + activity.studentName + '\')">' +
-                  '<i class="fas fa-eye"></i> <span class="d-none d-md-inline">Подробно</span></button>'
+                  '<i class="fas fa-eye"></i> <span class="d-none d-md-inline">Детали</span></button>'
                 : '';
 
             var displayStyle = isVisible ? '' : 'display: none;';
