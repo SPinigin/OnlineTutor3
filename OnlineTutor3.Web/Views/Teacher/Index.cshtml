@@ -318,8 +318,7 @@
                 var testType = $(this).data('test-type');
                 var studentName = $(this).data('student-name');
                 
-                // Обновляем заголовок модального окна
-                $('#testResultModalTitle').text('Результат тест: ' + studentName);
+                $('#testResultModalTitle').text('Результат: ' + studentName);
                 
                 var modal = new bootstrap.Modal(document.getElementById('testResultModal'));
                 modal.show();
@@ -356,16 +355,12 @@
                         });
                     }
 
-                    // Удаляем старый обработчик, если есть
                     filterCheckbox.removeEventListener('change', applyFilter);
-                    // Добавляем новый обработчик
                     filterCheckbox.addEventListener('change', applyFilter);
                     
-                    // Применяем фильтр сразу, если он включен
                     applyFilter();
                 }
             }
         });
     </script>
 }
-
