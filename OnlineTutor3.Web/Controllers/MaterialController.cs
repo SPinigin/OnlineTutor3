@@ -114,6 +114,22 @@ namespace OnlineTutor3.Web.Controllers
                 typeFilterEnum,
                 sortOrder);
 
+            // Создаем компаратор для натуральной сортировки
+            var naturalComparer = new NaturalStringComparer();
+            
+            // Применяем натуральную сортировку по названию, если не указана другая сортировка
+            if (string.IsNullOrEmpty(sortOrder) || sortOrder == "title_desc")
+            {
+                if (sortOrder == "title_desc")
+                {
+                    materialsList = materialsList.OrderByDescending(m => m.Title, naturalComparer).ToList();
+                }
+                else
+                {
+                    materialsList = materialsList.OrderBy(m => m.Title, naturalComparer).ToList();
+                }
+            }
+
             // Группируем материалы по заданиям
             var materialsByAssignment = new Dictionary<int, List<Material>>();
             var assignmentsDict = new Dictionary<int, Assignment>();
