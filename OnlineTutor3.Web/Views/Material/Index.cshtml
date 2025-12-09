@@ -1,6 +1,10 @@
 @model IEnumerable<OnlineTutor3.Domain.Entities.Material>
 @{
     ViewData["Title"] = "Управление материалами";
+    var materialsByAssignment = ViewBag.MaterialsByAssignment as Dictionary<int, List<OnlineTutor3.Domain.Entities.Material>> ?? new Dictionary<int, List<OnlineTutor3.Domain.Entities.Material>>();
+    var assignmentsDict = ViewBag.AssignmentsDict as Dictionary<int, OnlineTutor3.Domain.Entities.Assignment> ?? new Dictionary<int, OnlineTutor3.Domain.Entities.Assignment>();
+    var materialsWithoutAssignment = ViewBag.MaterialsWithoutAssignment as List<OnlineTutor3.Domain.Entities.Material> ?? new List<OnlineTutor3.Domain.Entities.Material>();
+    var subjectsDict = ViewBag.SubjectsDict as Dictionary<int, string> ?? new Dictionary<int, string>();
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 page-header">
@@ -10,12 +14,12 @@
     </h4>
     <div>
         <a asp-action="Create" class="btn btn-modern-success">
-            <i class="fas fa-plus"></i> Загрузить материал
+            <i class="fas fa-plus"></i> <span class="d-none d-md-inline">Загрузить материал</span>
         </a>
     </div>
 </div>
 
-@if (!Model.Any())
+@if (!materialsByAssignment.Any() && !materialsWithoutAssignment.Any())
 {
     <div class="empty-state-large">
         <div class="empty-state-large-icon">
@@ -33,7 +37,7 @@ else
     <div class="card shadow-sm border-0 mb-3 search-filter-card">
         <div class="card-body py-2 px-3">
             <form method="get" class="row g-2">
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-md-4">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white">
                             <i class="fas fa-search text-muted"></i>
@@ -45,19 +49,7 @@ else
                                placeholder="Поиск...">
                     </div>
                 </div>
-                <div class="col-12 col-md-2">
-                    <select class="form-select form-control-modern form-select-sm" name="classFilter">
-                        <option value="">Все классы</option>
-                        @if (ViewBag.Classes != null)
-                        {
-                            @foreach (var item in (SelectList)ViewBag.Classes)
-                            {
-                                <option value="@item.Value" selected="@(item.Value == ViewBag.ClassFilter?.ToString())">@item.Text</option>
-                            }
-                        }
-                    </select>
-                </div>
-                <div class="col-12 col-md-2">
+                <div class="col-12 col-md-3">
                     <select class="form-select form-control-modern form-select-sm" name="assignmentFilter">
                         <option value="">Все задания</option>
                         @if (ViewBag.Assignments != null)
@@ -99,129 +91,314 @@ else
         </div>
     </div>
 
-    <div class="card modern-card">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table modern-table mb-0">
-                    <thead>
-                <tr>
-                    <th>Название</th>
-                    <th class="text-center">Тип</th>
-                    <th class="text-center">Класс</th>
-                    <th class="text-center">Задание</th>
-                    <th class="text-center">Размер</th>
-                    <th class="text-center">Дата</th>
-                    <th class="text-center">Статус</th>
-                    <th class="text-center">Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var material in Model)
-                {
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                @switch (material.Type)
-                                {
-                                    case MaterialType.Document:
-                                        <i class="fas fa-file-alt nav-link-icon-danger me-2"></i>
-                                        break;
-                                    case MaterialType.Presentation:
-                                        <i class="fas fa-file-powerpoint nav-link-icon-yellow me-2"></i>
-                                        break;
-                                    case MaterialType.Image:
-                                        <i class="fas fa-file-image text-info me-2"></i>
-                                        break;
-                                    case MaterialType.Audio:
-                                        <i class="fas fa-file-audio text-success me-2"></i>
-                                        break;
-                                    case MaterialType.Video:
-                                        <i class="fas fa-file-video text-primary me-2"></i>
-                                        break;
-                                    default:
-                                        <i class="fas fa-file text-secondary me-2"></i>
-                                        break;
-                                }
-                                <div>
-                                    <strong class="text-dark-modern">@material.Title</strong>
-                                    @if (!string.IsNullOrEmpty(material.Description))
-                                    {
-                                        <br>
-                                        <small class="text-muted-modern">@material.Description</small>
-                                    }
+    <div class="accordion accordion-modern" id="materialsAccordion">
+        @foreach (var kvp in materialsByAssignment.OrderBy(a => assignmentsDict.ContainsKey(a.Key) ? assignmentsDict[a.Key].Title : "").ThenBy(a => a.Key))
+        {
+            var assignmentId = kvp.Key;
+            var materials = kvp.Value;
+            var assignment = assignmentsDict.ContainsKey(assignmentId) ? assignmentsDict[assignmentId] : null;
+            
+            if (assignment == null) continue;
+
+            var collapseId = $"collapseAssignment{assignmentId}";
+            var headingId = $"headingAssignment{assignmentId}";
+            
+            var subjectName = subjectsDict.ContainsKey(assignment.SubjectId) 
+                ? subjectsDict[assignment.SubjectId] 
+                : $"Предмет #{assignment.SubjectId}";
+
+            <div class="accordion-item mb-1 assignment-item" data-assignment-id="@assignmentId" data-subject-id="@assignment.SubjectId">
+                <h2 class="accordion-header" id="@headingId">
+                    <button class="accordion-button collapsed accordion-button-modern py-2" 
+                            type="button" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#@collapseId" 
+                            aria-expanded="false" 
+                            aria-controls="@collapseId">
+                        <div class="d-flex justify-content-between align-items-center w-100 me-2">
+                            <div class="d-flex align-items-center flex-grow-1">
+                                <div class="me-2">
+                                    <strong class="small text-dark-modern">@assignment.Title</strong>
                                 </div>
+                                <span class="badge badge-modern-info badge-sm me-1">@subjectName</span>
+                                <span class="badge badge-modern-@(assignment.IsActive ? "success" : "secondary") badge-sm me-1">
+                                    @(assignment.IsActive ? "Активно" : "Неактивно")
+                                </span>
+                                <span class="badge badge-modern-primary badge-sm">
+                                    <i class="fas fa-book"></i> @materials.Count
+                                </span>
                             </div>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge badge-modern-secondary">@GetMaterialTypeDisplayName(material.Type)</span>
-                        </td>
-                        <td class="text-center">
-                            @if (material.ClassId.HasValue)
-                            {
-                                <span class="badge badge-modern-info">Класс #@material.ClassId</span>
-                            }
-                            else
-                            {
-                                <span class="text-muted-modern">—</span>
-                            }
-                        </td>
-                        <td class="text-center">
-                            @if (material.AssignmentId.HasValue)
-                            {
-                                <span class="badge badge-modern-primary">Задание #@material.AssignmentId</span>
-                            }
-                            else
-                            {
-                                <span class="text-muted-modern">—</span>
-                            }
-                        </td>
-                        <td class="text-center">
-                            <small class="text-muted-modern">@FormatFileSize(material.FileSize)</small>
-                        </td>
-                        <td class="text-center">
-                            <small class="text-muted-modern">@material.UploadedAt.ToString("dd.MM.yyyy")</small>
-                        </td>
-                        <td class="text-center">
-                            @if (material.IsActive)
-                            {
-                                <span class="badge badge-modern-success">Активно</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-modern-secondary">Неактивно</span>
-                            }
-                        </td>
-                        <td class="text-center">
-                            <div class="d-flex gap-1 justify-content-center">
-                                <a asp-action="Details" asp-route-id="@material.Id" class="btn btn-sm btn-modern-outline-info" title="Детали">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a asp-action="Download" asp-route-id="@material.Id" class="btn btn-sm btn-modern-outline-success" title="Скачать">
-                                    <i class="fas fa-download"></i>
-                                </a>
-                                <a asp-action="Edit" asp-route-id="@material.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form asp-action="ToggleStatus" asp-route-id="@material.Id" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-modern-outline-@(material.IsActive ? "secondary" : "success")" title="@(material.IsActive ? "Деактивировать" : "Активировать")">
-                                        <i class="fas fa-@(material.IsActive ? "eye-slash" : "eye")"></i>
-                                    </button>
-                                </form>
-                                <form asp-action="Delete" asp-route-id="@material.Id" method="get" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-modern-outline-danger" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить этот материал?');">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                        </div>
+                    </button>
+                </h2>
+                <div id="@collapseId" 
+                     class="accordion-collapse collapse" 
+                     aria-labelledby="@headingId" 
+                     data-bs-parent="#materialsAccordion">
+                    <div class="accordion-body accordion-body-modern p-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <small class="text-muted-modern">
+                                    <i class="fas fa-book text-muted-modern"></i> @subjectName
+                                    @if (assignment.DueDate.HasValue)
+                                    {
+                                        <span class="ms-2">
+                                            <i class="fas fa-calendar text-muted-modern"></i> До: @assignment.DueDate.Value.ToString("dd.MM.yyyy HH:mm")
+                                        </span>
+                                    }
+                                </small>
                             </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                        </div>
+
+                        @if (materials.Count == 0)
+                        {
+                            <div class="empty-state-small">
+                                <small class="empty-state-text">В этом задании пока нет материалов</small>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover modern-table table-sm mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Название</th>
+                                            <th class="text-center d-none d-sm-table-cell">Тип</th>
+                                            <th class="text-center d-none d-md-table-cell">Размер</th>
+                                            <th class="text-center d-none d-lg-table-cell">Дата</th>
+                                            <th class="text-center">Статус</th>
+                                            <th class="text-center">Действия</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var material in materials)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        @switch (material.Type)
+                                                        {
+                                                            case MaterialType.Document:
+                                                                <i class="fas fa-file-alt nav-link-icon-danger me-2"></i>
+                                                                break;
+                                                            case MaterialType.Presentation:
+                                                                <i class="fas fa-file-powerpoint nav-link-icon-yellow me-2"></i>
+                                                                break;
+                                                            case MaterialType.Image:
+                                                                <i class="fas fa-file-image text-info me-2"></i>
+                                                                break;
+                                                            case MaterialType.Audio:
+                                                                <i class="fas fa-file-audio text-success me-2"></i>
+                                                                break;
+                                                            case MaterialType.Video:
+                                                                <i class="fas fa-file-video text-primary me-2"></i>
+                                                                break;
+                                                            default:
+                                                                <i class="fas fa-file text-secondary me-2"></i>
+                                                                break;
+                                                        }
+                                                        <div>
+                                                            <small><strong class="text-dark-modern">@material.Title</strong></small>
+                                                            @if (!string.IsNullOrEmpty(material.Description))
+                                                            {
+                                                                <br>
+                                                                <small class="text-muted-modern">@(material.Description.Length > 50 ? material.Description.Substring(0, 50) + "..." : material.Description)</small>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center d-none d-sm-table-cell">
+                                                    <span class="badge badge-modern-secondary">@GetMaterialTypeDisplayName(material.Type)</span>
+                                                </td>
+                                                <td class="text-center d-none d-md-table-cell">
+                                                    <small class="text-muted-modern">@FormatFileSize(material.FileSize)</small>
+                                                </td>
+                                                <td class="text-center d-none d-lg-table-cell">
+                                                    <small class="text-muted-modern">@material.UploadedAt.ToString("dd.MM.yyyy")</small>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-modern-@(material.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
+                                                        @(material.IsActive ? "Активен" : "Неактивен")
+                                                    </span>
+                                                    <i class="fas @(material.IsActive ? "fa-check-circle" : "fa-pause-circle") d-md-none" style="color: @(material.IsActive ? "#43e97b" : "#6c757d");" title="@(material.IsActive ? "Активен" : "Неактивен")"></i>
+                                                </td>
+                                                <td class="text-center" onclick="event.stopPropagation();">
+                                                    <div class="d-flex gap-1 justify-content-center flex-wrap">
+                                                        <a asp-action="Details" asp-route-id="@material.Id" class="btn btn-sm btn-modern-outline-info" title="Детали" style="padding: 0.2rem 0.4rem;">
+                                                            <i class="fas fa-eye" style="font-size: 0.75rem;"></i>
+                                                        </a>
+                                                        <a asp-action="Download" asp-route-id="@material.Id" class="btn btn-sm btn-modern-outline-success" title="Скачать" style="padding: 0.2rem 0.4rem;">
+                                                            <i class="fas fa-download" style="font-size: 0.75rem;"></i>
+                                                        </a>
+                                                        <a asp-action="Edit" asp-route-id="@material.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать" style="padding: 0.2rem 0.4rem;">
+                                                            <i class="fas fa-edit" style="font-size: 0.75rem;"></i>
+                                                        </a>
+                                                        <form asp-action="ToggleStatus" asp-route-id="@material.Id" method="post" class="d-inline" style="margin: 0;">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="submit" class="btn btn-sm btn-modern-outline-@(material.IsActive ? "warning" : "success")" title="@(material.IsActive ? "Деактивировать" : "Активировать")" style="padding: 0.2rem 0.4rem;">
+                                                                <i class="fas fa-@(material.IsActive ? "toggle-on" : "toggle-off")" style="font-size: 0.75rem;"></i>
+                                                            </button>
+                                                        </form>
+                                                        <a asp-action="Delete" asp-route-id="@material.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить" style="padding: 0.2rem 0.4rem;" onclick="return confirm('Вы уверены, что хотите удалить этот материал?');">
+                                                            <i class="fas fa-trash" style="font-size: 0.75rem;"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
-        </div>
+        }
+
+        @if (materialsWithoutAssignment.Any())
+        {
+            var collapseId = "collapseWithoutAssignment";
+            var headingId = "headingWithoutAssignment";
+
+            <div class="accordion-item mb-1">
+                <h2 class="accordion-header" id="@headingId">
+                    <button class="accordion-button collapsed accordion-button-modern py-2" 
+                            type="button" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#@collapseId" 
+                            aria-expanded="false" 
+                            aria-controls="@collapseId">
+                        <div class="d-flex justify-content-between align-items-center w-100 me-2">
+                            <div class="d-flex align-items-center flex-grow-1">
+                                <div class="me-2">
+                                    <strong class="small text-dark-modern">Материалы без задания</strong>
+                                </div>
+                                <span class="badge badge-modern-primary badge-sm">
+                                    <i class="fas fa-book"></i> @materialsWithoutAssignment.Count
+                                </span>
+                            </div>
+                        </div>
+                    </button>
+                </h2>
+                <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@headingId" data-bs-parent="#materialsAccordion">
+                    <div class="accordion-body accordion-body-modern p-2">
+                        <div class="table-responsive">
+                            <table class="table table-hover modern-table table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Название</th>
+                                        <th class="text-center d-none d-sm-table-cell">Тип</th>
+                                        <th class="text-center d-none d-md-table-cell">Размер</th>
+                                        <th class="text-center d-none d-lg-table-cell">Дата</th>
+                                        <th class="text-center">Статус</th>
+                                        <th class="text-center">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var material in materialsWithoutAssignment)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @switch (material.Type)
+                                                    {
+                                                        case MaterialType.Document:
+                                                            <i class="fas fa-file-alt nav-link-icon-danger me-2"></i>
+                                                            break;
+                                                        case MaterialType.Presentation:
+                                                            <i class="fas fa-file-powerpoint nav-link-icon-yellow me-2"></i>
+                                                            break;
+                                                        case MaterialType.Image:
+                                                            <i class="fas fa-file-image text-info me-2"></i>
+                                                            break;
+                                                        case MaterialType.Audio:
+                                                            <i class="fas fa-file-audio text-success me-2"></i>
+                                                            break;
+                                                        case MaterialType.Video:
+                                                            <i class="fas fa-file-video text-primary me-2"></i>
+                                                            break;
+                                                        default:
+                                                            <i class="fas fa-file text-secondary me-2"></i>
+                                                            break;
+                                                    }
+                                                    <div>
+                                                        <small><strong class="text-dark-modern">@material.Title</strong></small>
+                                                        @if (!string.IsNullOrEmpty(material.Description))
+                                                        {
+                                                            <br>
+                                                            <small class="text-muted-modern">@(material.Description.Length > 50 ? material.Description.Substring(0, 50) + "..." : material.Description)</small>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center d-none d-sm-table-cell">
+                                                <span class="badge badge-modern-secondary">@GetMaterialTypeDisplayName(material.Type)</span>
+                                            </td>
+                                            <td class="text-center d-none d-md-table-cell">
+                                                <small class="text-muted-modern">@FormatFileSize(material.FileSize)</small>
+                                            </td>
+                                            <td class="text-center d-none d-lg-table-cell">
+                                                <small class="text-muted-modern">@material.UploadedAt.ToString("dd.MM.yyyy")</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge badge-modern-@(material.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
+                                                    @(material.IsActive ? "Активен" : "Неактивен")
+                                                </span>
+                                                <i class="fas @(material.IsActive ? "fa-check-circle" : "fa-pause-circle") d-md-none" style="color: @(material.IsActive ? "#43e97b" : "#6c757d");" title="@(material.IsActive ? "Активен" : "Неактивен")"></i>
+                                            </td>
+                                            <td class="text-center" onclick="event.stopPropagation();">
+                                                <div class="d-flex gap-1 justify-content-center flex-wrap">
+                                                    <a asp-action="Details" asp-route-id="@material.Id" class="btn btn-sm btn-modern-outline-info" title="Детали" style="padding: 0.2rem 0.4rem;">
+                                                        <i class="fas fa-eye" style="font-size: 0.75rem;"></i>
+                                                    </a>
+                                                    <a asp-action="Download" asp-route-id="@material.Id" class="btn btn-sm btn-modern-outline-success" title="Скачать" style="padding: 0.2rem 0.4rem;">
+                                                        <i class="fas fa-download" style="font-size: 0.75rem;"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@material.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать" style="padding: 0.2rem 0.4rem;">
+                                                        <i class="fas fa-edit" style="font-size: 0.75rem;"></i>
+                                                    </a>
+                                                    <form asp-action="ToggleStatus" asp-route-id="@material.Id" method="post" class="d-inline" style="margin: 0;">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-sm btn-modern-outline-@(material.IsActive ? "warning" : "success")" title="@(material.IsActive ? "Деактивировать" : "Активировать")" style="padding: 0.2rem 0.4rem;">
+                                                            <i class="fas fa-@(material.IsActive ? "toggle-on" : "toggle-off")" style="font-size: 0.75rem;"></i>
+                                                        </button>
+                                                    </form>
+                                                    <a asp-action="Delete" asp-route-id="@material.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить" style="padding: 0.2rem 0.4rem;" onclick="return confirm('Вы уверены, что хотите удалить этот материал?');">
+                                                        <i class="fas fa-trash" style="font-size: 0.75rem;"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Автоматическая отправка формы при изменении фильтров и сортировки
+            $('select[name="assignmentFilter"], select[name="typeFilter"], select[name="sortOrder"]').on('change', function() {
+                $(this).closest('form').submit();
+            });
+
+            // Поиск с задержкой (debounce)
+            var searchTimeout;
+            $('input[name="searchString"]').on('keyup', function() {
+                clearTimeout(searchTimeout);
+                var $form = $(this).closest('form');
+                searchTimeout = setTimeout(function() {
+                    $form.submit();
+                }, 500); // Отправка через 500мс после последнего нажатия
+            });
+        });
+    </script>
 }
 
 @functions {
@@ -252,4 +429,3 @@ else
         return $"{len:0.##} {sizes[order]}";
     }
 }
-

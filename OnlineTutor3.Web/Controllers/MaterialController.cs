@@ -14,6 +14,7 @@ namespace OnlineTutor3.Web.Controllers
         private readonly IMaterialService _materialService;
         private readonly IClassService _classService;
         private readonly IAssignmentService _assignmentService;
+        private readonly ISubjectService _subjectService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<MaterialController> _logger;
@@ -60,6 +61,7 @@ namespace OnlineTutor3.Web.Controllers
             IMaterialService materialService,
             IClassService classService,
             IAssignmentService assignmentService,
+            ISubjectService subjectService,
             UserManager<ApplicationUser> userManager,
             IWebHostEnvironment environment,
             ILogger<MaterialController> logger)
@@ -67,6 +69,7 @@ namespace OnlineTutor3.Web.Controllers
             _materialService = materialService;
             _classService = classService;
             _assignmentService = assignmentService;
+            _subjectService = subjectService;
             _userManager = userManager;
             _environment = environment;
             _logger = logger;
@@ -110,6 +113,48 @@ namespace OnlineTutor3.Web.Controllers
                 typeFilterEnum,
                 sortOrder);
 
+            // Группируем материалы по заданиям (материалы уже отсортированы из GetFilteredAsync)
+            var materialsByAssignment = new Dictionary<int, List<Material>>();
+            var assignmentsDict = new Dictionary<int, Assignment>();
+            var materialsWithoutAssignment = new List<Material>();
+
+            foreach (var material in materialsList)
+            {
+                if (material.AssignmentId.HasValue)
+                {
+                    if (!materialsByAssignment.ContainsKey(material.AssignmentId.Value))
+                    {
+                        materialsByAssignment[material.AssignmentId.Value] = new List<Material>();
+                    }
+                    materialsByAssignment[material.AssignmentId.Value].Add(material);
+
+                    if (!assignmentsDict.ContainsKey(material.AssignmentId.Value))
+                    {
+                        var assignment = await _assignmentService.GetByIdAsync(material.AssignmentId.Value);
+                        if (assignment != null)
+                        {
+                            assignmentsDict[material.AssignmentId.Value] = assignment;
+                        }
+                    }
+                }
+                else
+                {
+                    materialsWithoutAssignment.Add(material);
+                }
+            }
+
+            // Материалы уже отсортированы из GetFilteredAsync, но для уверенности можем отсортировать внутри групп
+            // (хотя они должны быть уже в правильном порядке)
+
+            // Загружаем предметы для отображения
+            var allSubjects = await _subjectService.GetAllAsync();
+            var subjectsDict = allSubjects.ToDictionary(s => s.Id, s => s.Name);
+
+            ViewBag.MaterialsByAssignment = materialsByAssignment;
+            ViewBag.AssignmentsDict = assignmentsDict;
+            ViewBag.MaterialsWithoutAssignment = materialsWithoutAssignment;
+            ViewBag.SubjectsDict = subjectsDict;
+
             // Добавляем типы материалов для фильтра
             ViewBag.MaterialTypes = Enum.GetValues<MaterialType>()
                 .Select(mt => new SelectListItem
@@ -139,6 +184,16 @@ namespace OnlineTutor3.Web.Controllers
                 return Forbid();
             }
 
+            // Загружаем название задания, если оно привязано
+            if (material.AssignmentId.HasValue)
+            {
+                var assignment = await _assignmentService.GetByIdAsync(material.AssignmentId.Value);
+                if (assignment != null)
+                {
+                    ViewBag.AssignmentTitle = assignment.Title;
+                }
+            }
+
             return View(material);
         }
 
@@ -159,10 +214,10 @@ namespace OnlineTutor3.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                // Валидация: должен быть выбран класс или задание
-                if (!model.ClassId.HasValue && !model.AssignmentId.HasValue)
+                // Валидация: должно быть выбрано задание
+                if (!model.AssignmentId.HasValue)
                 {
-                    ModelState.AddModelError("", "Выберите класс или задание для привязки материала");
+                    ModelState.AddModelError("AssignmentId", "Выберите задание для привязки материала");
                     await LoadClassesAndAssignments();
                     return View(model);
                 }
@@ -191,7 +246,7 @@ namespace OnlineTutor3.Web.Controllers
                         FileSize = model.File.Length,
                         ContentType = model.File.ContentType,
                         Type = DetermineMaterialType(model.File.FileName),
-                        ClassId = model.ClassId,
+                        ClassId = null, // Не привязываем к классу
                         AssignmentId = model.AssignmentId,
                         UploadedById = currentUser.Id,
                         UploadedAt = DateTime.Now,
@@ -240,7 +295,7 @@ namespace OnlineTutor3.Web.Controllers
                 Id = material.Id,
                 Title = material.Title,
                 Description = material.Description,
-                ClassId = material.ClassId,
+                ClassId = null, // Не показываем класс
                 AssignmentId = material.AssignmentId,
                 IsActive = material.IsActive,
                 CurrentFileName = material.FileName
@@ -262,10 +317,10 @@ namespace OnlineTutor3.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                // Валидация: должен быть выбран класс или задание
-                if (!model.ClassId.HasValue && !model.AssignmentId.HasValue)
+                // Валидация: должно быть выбрано задание
+                if (!model.AssignmentId.HasValue)
                 {
-                    ModelState.AddModelError("", "Выберите класс или задание для привязки материала");
+                    ModelState.AddModelError("AssignmentId", "Выберите задание для привязки материала");
                     await LoadClassesAndAssignments();
                     return View(model);
                 }
@@ -284,7 +339,7 @@ namespace OnlineTutor3.Web.Controllers
                     // Обновляем основные поля
                     material.Title = model.Title;
                     material.Description = model.Description;
-                    material.ClassId = model.ClassId;
+                    material.ClassId = null; // Убираем привязку к классу
                     material.AssignmentId = model.AssignmentId;
                     material.IsActive = model.IsActive;
 

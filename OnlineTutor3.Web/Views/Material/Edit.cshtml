@@ -4,115 +4,81 @@
 }
 
 <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-12 col-md-8 col-lg-6">
         <div class="card shadow modern-card">
-            <div class="card-header auth-card-header">
-                <h4 class="mb-0">
+            <div class="card-header auth-card-header py-2">
+                <h5 class="mb-0">
                     <i class="fas fa-edit"></i> Редактирование материала
-                </h4>
+                </h5>
             </div>
-            <div class="card-body auth-card-body">
+            <div class="card-body auth-card-body py-3">
                 <form asp-action="Edit" method="post" enctype="multipart/form-data">
                     <input asp-for="Id" type="hidden" />
-                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                    <div asp-validation-summary="All" class="text-danger mb-2 small"></div>
 
-                    <fieldset class="mb-4">
-                        <legend class="fs-6 text-primary border-bottom pb-1 mb-3">
-                            <i class="fas fa-info-circle"></i> Основная информация
-                        </legend>
+                    <div class="mb-2">
+                        <label asp-for="Title" class="form-label form-label-modern small mb-1">
+                            Название материала <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Title" class="form-control form-control-sm form-control-modern" />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Title" class="form-label form-label-modern">
-                                <i class="fas fa-heading"></i> Название материала <span class="text-danger">*</span>
+                    <div class="mb-2">
+                        <label asp-for="Description" class="form-label form-label-modern small mb-1">
+                            Описание
+                        </label>
+                        <textarea asp-for="Description" class="form-control form-control-sm form-control-modern" rows="2"></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-2">
+                        <div class="small text-muted-modern mb-1">Текущий файл</div>
+                        <div class="small text-dark-modern">
+                            <i class="fas fa-file text-muted-modern me-1"></i> @Model.CurrentFileName
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label asp-for="NewFile" class="form-label form-label-modern small mb-1">
+                            Заменить файл (необязательно)
+                        </label>
+                        <input asp-for="NewFile" class="form-control form-control-sm form-control-modern" type="file"
+                               accept=".pdf,.doc,.docx,.txt,.rtf,.ppt,.pptx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.gif,.bmp,.mp3,.wav,.m4a,.mp4,.avi,.mov,.wmv" />
+                        <span asp-validation-for="NewFile" class="text-danger small"></span>
+                        <div class="form-text text-muted-modern small">
+                            Оставьте пустым, если не хотите менять файл
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label asp-for="AssignmentId" class="form-label form-label-modern small mb-1">
+                            Задание <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="AssignmentId" asp-items="@ViewBag.Assignments" class="form-select form-select-sm form-control-modern">
+                            <option value="">Не выбрано</option>
+                        </select>
+                        <span asp-validation-for="AssignmentId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <label asp-for="IsActive" class="form-check-label text-dark-modern small">
+                                Материал активен
                             </label>
-                            <input asp-for="Title" class="form-control form-control-modern" />
-                            <span asp-validation-for="Title" class="text-danger"></span>
                         </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Description" class="form-label form-label-modern">
-                                <i class="fas fa-align-left"></i> Описание
-                            </label>
-                            <textarea asp-for="Description" class="form-control form-control-modern" rows="4"></textarea>
-                            <span asp-validation-for="Description" class="text-danger"></span>
-                        </div>
-                    </fieldset>
-
-                    <fieldset class="mb-4">
-                        <legend class="fs-6 text-success border-bottom pb-1 mb-3">
-                            <i class="fas fa-file"></i> Текущий файл
-                        </legend>
-
-                        <div class="alert alert-light">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-file fa-2x text-muted-modern me-3"></i>
-                                <div>
-                                    <div class="fw-bold text-dark-modern">@Model.CurrentFileName</div>
-                                    <small class="text-muted-modern">Текущий файл материала</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="NewFile" class="form-label form-label-modern">
-                                <i class="fas fa-upload"></i> Заменить файл (необязательно)
-                            </label>
-                            <input asp-for="NewFile" class="form-control form-control-modern" type="file"
-                                   accept=".pdf,.doc,.docx,.txt,.rtf,.ppt,.pptx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.gif,.bmp,.mp3,.wav,.m4a,.mp4,.avi,.mov,.wmv" />
-                            <span asp-validation-for="NewFile" class="text-danger"></span>
-                            <div class="form-text text-muted-modern">
-                                <i class="fas fa-info-circle"></i> Оставьте пустым, если не хотите менять файл
-                            </div>
-                        </div>
-                    </fieldset>
-
-                    <fieldset class="mb-4">
-                        <legend class="fs-6 text-primary border-bottom pb-1 mb-3">
-                            <i class="fas fa-users"></i> Назначение
-                        </legend>
-
-                        <div class="mb-3">
-                            <label asp-for="ClassId" class="form-label form-label-modern">
-                                <i class="fas fa-graduation-cap"></i> Класс
-                            </label>
-                            <select asp-for="ClassId" asp-items="@ViewBag.Classes" class="form-select form-control-modern">
-                                <option value="">Не выбран</option>
-                            </select>
-                            <span asp-validation-for="ClassId" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="AssignmentId" class="form-label form-label-modern">
-                                <i class="fas fa-tasks"></i> Задание
-                            </label>
-                            <select asp-for="AssignmentId" asp-items="@ViewBag.Assignments" class="form-select form-control-modern">
-                                <option value="">Не выбрано</option>
-                            </select>
-                            <span asp-validation-for="AssignmentId" class="text-danger"></span>
-                            <div class="form-text text-muted-modern">
-                                <i class="fas fa-lightbulb"></i> Выберите класс или задание (или оба) для привязки материала
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input asp-for="IsActive" class="form-check-input" />
-                                <label asp-for="IsActive" class="form-check-label text-dark-modern">
-                                    <i class="fas fa-toggle-on"></i> Материал активен
-                                </label>
-                            </div>
-                        </div>
-                    </fieldset>
-
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-modern-outline-info">
-                            <i class="fas fa-eye"></i> Просмотр
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-modern-outline-info btn-sm">
+                            <i class="fas fa-eye"></i> <span class="d-none d-sm-inline">Просмотр</span>
                         </a>
-                        <a asp-action="Index" class="btn btn-modern-outline-secondary">
-                            <i class="fas fa-arrow-left"></i> Отмена
+                        <a asp-action="Index" class="btn btn-modern-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> <span class="d-none d-sm-inline">Отмена</span>
                         </a>
-                        <button type="submit" class="btn btn-modern-primary">
-                            <i class="fas fa-save"></i> Сохранить изменения
+                        <button type="submit" class="btn btn-modern-primary btn-sm">
+                            <i class="fas fa-save"></i> <span class="d-none d-sm-inline">Сохранить</span>
                         </button>
                     </div>
                 </form>
@@ -124,4 +90,3 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-
