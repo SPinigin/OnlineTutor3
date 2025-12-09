@@ -92,7 +92,7 @@ else
     </div>
 
     <div class="accordion accordion-modern" id="materialsAccordion">
-        @foreach (var kvp in materialsByAssignment.OrderBy(a => assignmentsDict.ContainsKey(a.Key) ? assignmentsDict[a.Key].Title : "").ThenBy(a => a.Key))
+        @foreach (var kvp in materialsByAssignment)
         {
             var assignmentId = kvp.Key;
             var materials = kvp.Value;

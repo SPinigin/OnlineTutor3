@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using OnlineTutor3.Application.Interfaces;
 using OnlineTutor3.Domain.Entities;
 using OnlineTutor3.Web.ViewModels;
+using System.Text.RegularExpressions;
 
 namespace OnlineTutor3.Web.Controllers
 {
@@ -113,7 +114,7 @@ namespace OnlineTutor3.Web.Controllers
                 typeFilterEnum,
                 sortOrder);
 
-            // Группируем материалы по заданиям (материалы уже отсортированы из GetFilteredAsync)
+            // Группируем материалы по заданиям
             var materialsByAssignment = new Dictionary<int, List<Material>>();
             var assignmentsDict = new Dictionary<int, Assignment>();
             var materialsWithoutAssignment = new List<Material>();
@@ -143,14 +144,26 @@ namespace OnlineTutor3.Web.Controllers
                 }
             }
 
-            // Материалы уже отсортированы из GetFilteredAsync, но для уверенности можем отсортировать внутри групп
-            // (хотя они должны быть уже в правильном порядке)
+            // Сортируем материалы внутри каждого задания по названию с использованием натуральной сортировки
+            foreach (var kvp in materialsByAssignment)
+            {
+                materialsByAssignment[kvp.Key] = kvp.Value.OrderBy(m => m.Title, naturalComparer).ToList();
+            }
+
+            // Сортируем материалы без задания по названию с использованием натуральной сортировки
+            materialsWithoutAssignment = materialsWithoutAssignment.OrderBy(m => m.Title, naturalComparer).ToList();
 
             // Загружаем предметы для отображения
             var allSubjects = await _subjectService.GetAllAsync();
             var subjectsDict = allSubjects.ToDictionary(s => s.Id, s => s.Name);
 
-            ViewBag.MaterialsByAssignment = materialsByAssignment;
+            // Сортируем задания по названию с использованием натуральной сортировки
+            var sortedMaterialsByAssignment = materialsByAssignment
+                .OrderBy(kvp => assignmentsDict.ContainsKey(kvp.Key) ? assignmentsDict[kvp.Key].Title : "", naturalComparer)
+                .ThenBy(kvp => kvp.Key)
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            ViewBag.MaterialsByAssignment = sortedMaterialsByAssignment;
             ViewBag.AssignmentsDict = assignmentsDict;
             ViewBag.MaterialsWithoutAssignment = materialsWithoutAssignment;
             ViewBag.SubjectsDict = subjectsDict;
@@ -601,6 +614,44 @@ namespace OnlineTutor3.Web.Controllers
                 MaterialType.Other => "Другое",
                 _ => type.ToString()
             };
+        }
+
+        private class NaturalStringComparer : IComparer<string>
+        {
+            public int Compare(string? x, string? y)
+            {
+                if (x == null && y == null) return 0;
+                if (x == null) return -1;
+                if (y == null) return 1;
+
+                // Разбиваем строки на части (текст и числа)
+                var partsX = Regex.Split(x, @"(\d+)");
+                var partsY = Regex.Split(y, @"(\d+)");
+
+                int minLength = Math.Min(partsX.Length, partsY.Length);
+
+                for (int i = 0; i < minLength; i++)
+                {
+                    var partX = partsX[i];
+                    var partY = partsY[i];
+
+                    // Если обе части - числа, сравниваем как числа
+                    if (int.TryParse(partX, out int numX) && int.TryParse(partY, out int numY))
+                    {
+                        int comparison = numX.CompareTo(numY);
+                        if (comparison != 0) return comparison;
+                    }
+                    else
+                    {
+                        // Иначе сравниваем как строки
+                        int comparison = string.Compare(partX, partY, StringComparison.OrdinalIgnoreCase);
+                        if (comparison != 0) return comparison;
+                    }
+                }
+
+                // Если все части совпадают, сравниваем по длине
+                return partsX.Length.CompareTo(partsY.Length);
+            }
         }
 
         #endregion
