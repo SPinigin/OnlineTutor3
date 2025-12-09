@@ -1,0 +1,316 @@
+@model OnlineTutor3.Web.ViewModels.TestReportDetailViewModel
+@{
+    ViewData["Title"] = "Детальный отчет по тесту";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 page-header">
+    <div>
+        <h4 class="mb-0 d-flex align-items-center gap-2 page-header-title">
+            <i class="fas fa-file-alt gradient-icon"></i>
+            <span>Детальный отчет по тесту</span>
+        </h4>
+        <div class="mt-2">
+            <a asp-action="Index" class="btn btn-sm btn-modern-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Назад к списку отчетов
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 modern-card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">@Model.TestTitle</h5>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <small class="text-muted-modern">Предмет:</small>
+                        <div>
+                            <span class="badge badge-modern-secondary">@Model.SubjectName</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted-modern">Задание:</small>
+                        <div>
+                            <strong>@Model.AssignmentTitle</strong>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.TestDescription))
+                    {
+                        <div class="col-12">
+                            <small class="text-muted-modern">Описание:</small>
+                            <div>@Model.TestDescription</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 modern-card stat-card">
+            <div class="card-body text-center py-3">
+                <div class="stat-card-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-card-value">@Model.Statistics.TotalStudents</div>
+                <small class="stat-card-label">Всего учеников</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 modern-card stat-card">
+            <div class="card-body text-center py-3">
+                <div class="stat-card-icon" style="color: #28a745;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-card-value" style="color: #28a745;">@Model.Statistics.CompletedCount</div>
+                <small class="stat-card-label">Завершено</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 modern-card stat-card">
+            <div class="card-body text-center py-3">
+                <div class="stat-card-icon" style="color: #ffc107;">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-card-value" style="color: #ffc107;">@Model.Statistics.InProgressCount</div>
+                <small class="stat-card-label">В процессе</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 modern-card stat-card">
+            <div class="card-body text-center py-3">
+                <div class="stat-card-icon" style="color: #6c757d;">
+                    <i class="fas fa-minus-circle"></i>
+                </div>
+                <div class="stat-card-value" style="color: #6c757d;">@Model.Statistics.NotStartedCount</div>
+                <small class="stat-card-label">Не начато</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 modern-card">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-line"></i> Статистика
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <small class="text-muted-modern">Средний балл:</small>
+                        <div class="fw-bold">@Model.Statistics.AveragePercentage.ToString("F1")%</div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted-modern">Средняя оценка:</small>
+                        <div class="fw-bold">
+                            @if (Model.Statistics.AverageGrade.HasValue)
+                            {
+                                <span>@Model.Statistics.AverageGrade.Value</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted-modern">—</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted-modern">Максимальный балл:</small>
+                        <div class="fw-bold">@Model.Statistics.HighestScore / @Model.Statistics.MaxScore</div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted-modern">Минимальный балл:</small>
+                        <div class="fw-bold">@Model.Statistics.LowestScore / @Model.Statistics.MaxScore</div>
+                    </div>
+                    @if (Model.Statistics.FirstCompletionDate.HasValue)
+                    {
+                        <div class="col-6">
+                            <small class="text-muted-modern">Первое прохождение:</small>
+                            <div class="small">@Model.Statistics.FirstCompletionDate.Value.ToString("dd.MM.yyyy HH:mm")</div>
+                        </div>
+                    }
+                    @if (Model.Statistics.LastCompletionDate.HasValue)
+                    {
+                        <div class="col-6">
+                            <small class="text-muted-modern">Последнее прохождение:</small>
+                            <div class="small">@Model.Statistics.LastCompletionDate.Value.ToString("dd.MM.yyyy HH:mm")</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 modern-card">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-pie"></i> Распределение по оценкам
+                </h6>
+            </div>
+            <div class="card-body">
+                @if (Model.Statistics.GradeDistribution.Any())
+                {
+                    <div class="row g-2">
+                        @foreach (var gradeDist in Model.Statistics.GradeDistribution.OrderBy(g => g.Key))
+                        {
+                            var percentage = Model.Statistics.CompletedCount > 0
+                                ? (double)gradeDist.Value / Model.Statistics.CompletedCount * 100
+                                : 0;
+
+                            <div class="col-6">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Оценка @gradeDist.Key:</span>
+                                    <strong>@gradeDist.Value (@percentage.ToString("F1")%)</strong>
+                                </div>
+                                <div class="progress progress-sm mt-1" style="height: 8px;">
+                                    <div class="progress-bar" role="progressbar" style="width: @percentage%"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted-modern mb-0">Нет завершенных прохождений</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 modern-card">
+    <div class="card-header bg-white">
+        <h6 class="mb-0">
+            <i class="fas fa-users"></i> Результаты учеников (@Model.StudentReports.Count)
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-modern mb-0">
+                <thead class="table-header-modern">
+                    <tr>
+                        <th class="ps-3 text-nowrap">Ученик</th>
+                        <th class="text-nowrap">Класс</th>
+                        <th class="text-center text-nowrap">Попыток</th>
+                        <th class="text-center text-nowrap">Статус</th>
+                        <th class="text-center text-nowrap">Лучший результат</th>
+                        <th class="text-center text-nowrap">Последний результат</th>
+                        <th class="text-center text-nowrap">Дата последнего прохождения</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var studentReport in Model.StudentReports)
+                    {
+                        <tr>
+                            <td class="ps-3">
+                                <strong>@studentReport.StudentName</strong>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(studentReport.ClassName))
+                                {
+                                    <span class="badge badge-modern-secondary badge-sm">@studentReport.ClassName</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted-modern">—</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-modern-info badge-sm">@studentReport.AttemptsCount</span>
+                            </td>
+                            <td class="text-center">
+                                @if (studentReport.HasCompleted)
+                                {
+                                    <span class="badge badge-modern-success badge-sm">
+                                        <i class="fas fa-check"></i> Завершено
+                                    </span>
+                                }
+                                else if (studentReport.IsInProgress)
+                                {
+                                    <span class="badge badge-modern-warning badge-sm">
+                                        <i class="fas fa-clock"></i> В процессе
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-modern-secondary badge-sm">
+                                        <i class="fas fa-minus"></i> Не начато
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (studentReport.BestScore.HasValue)
+                                {
+                                    <div>
+                                        <strong>@studentReport.BestPercentage%</strong>
+                                        <br>
+                                        <small class="text-muted-modern">
+                                            @studentReport.BestScore баллов
+                                            @if (studentReport.BestGrade.HasValue)
+                                            {
+                                                <span>(@studentReport.BestGrade)</span>
+                                            }
+                                        </small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted-modern">—</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (studentReport.LatestScore.HasValue)
+                                {
+                                    <div>
+                                        <strong>@studentReport.LatestPercentage%</strong>
+                                        <br>
+                                        <small class="text-muted-modern">
+                                            @studentReport.LatestScore баллов
+                                            @if (studentReport.LatestGrade.HasValue)
+                                            {
+                                                <span>(@studentReport.LatestGrade)</span>
+                                            }
+                                        </small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted-modern">—</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (studentReport.LastCompletionDate.HasValue)
+                                {
+                                    <small class="text-muted-modern">
+                                        @studentReport.LastCompletionDate.Value.ToString("dd.MM.yyyy HH:mm")
+                                    </small>
+                                }
+                                else if (studentReport.LastAttemptDate.HasValue)
+                                {
+                                    <small class="text-muted-modern">
+                                        @studentReport.LastAttemptDate.Value.ToString("dd.MM.yyyy HH:mm")
+                                        <br>
+                                        <span class="text-warning">(не завершено)</span>
+                                    </small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted-modern">—</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
