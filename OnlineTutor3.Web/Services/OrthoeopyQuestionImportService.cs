@@ -17,13 +17,6 @@ namespace OnlineTutor3.Web.Services
             _logger = logger;
         }
 
-        private void ConfigureExcelPackage()
-        {
-            // Устанавливаем лицензию EPPlus (должна быть установлена в Program.cs, но на всякий случай устанавливаем здесь тоже)
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            _logger.LogDebug("EPPlus license context: {LicenseContext}", ExcelPackage.LicenseContext);
-        }
-
         public async Task<List<ImportOrthoeopyQuestionRow>> ParseExcelFileAsync(IFormFile file)
         {
             var questions = new List<ImportOrthoeopyQuestionRow>();
@@ -32,7 +25,6 @@ namespace OnlineTutor3.Web.Services
             {
                 _logger.LogInformation("Начало парсинга файла импорта вопросов по орфоэпии. Файл: {FileName}, Размер: {FileSize} байт",
                     file.FileName, file.Length);
-                ConfigureExcelPackage();
 
                 using var stream = new MemoryStream();
                 await file.CopyToAsync(stream);
@@ -119,7 +111,6 @@ namespace OnlineTutor3.Web.Services
             try
             {
                 _logger.LogInformation("Начало генерации шаблона импорта вопросов по орфоэпии");
-                ConfigureExcelPackage();
 
                 using var package = new ExcelPackage();
             var worksheet = package.Workbook.Worksheets.Add("Вопросы");
