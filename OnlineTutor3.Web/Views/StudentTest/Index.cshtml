@@ -79,7 +79,7 @@ else
     </div>
 
     <div class="accordion accordion-modern" id="assignmentsAccordion">
-        @foreach (var kvp in Model.AssignmentsWithTests.OrderBy(a => a.Value.Assignment.Title))
+        @foreach (var kvp in Model.AssignmentsWithTests)
         {
             var assignmentInfo = kvp.Value;
             var assignment = assignmentInfo.Assignment;
