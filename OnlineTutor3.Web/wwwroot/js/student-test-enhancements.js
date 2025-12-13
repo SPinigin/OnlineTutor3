@@ -171,12 +171,168 @@
         }
     }
 
+    // Защита от копирования текста в тестах
+    function preventCopying() {
+        // Проверяем, находимся ли мы на странице теста
+        const testContainer = document.querySelector('.test-container');
+        if (!testContainer) {
+            return; // Не на странице теста, выходим
+        }
+
+        // Блокируем контекстное меню (правый клик)
+        document.addEventListener('contextmenu', function(e) {
+            // Разрешаем контекстное меню только для полей ввода
+            const target = e.target;
+            const isInput = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' || 
+                          target.closest('.answer-input') ||
+                          target.closest('input') ||
+                          target.closest('textarea');
+            
+            if (!isInput) {
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+
+        // Блокируем горячие клавиши для копирования
+        document.addEventListener('keydown', function(e) {
+            // Разрешаем горячие клавиши только в полях ввода
+            const target = e.target;
+            const isInput = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' ||
+                          target.closest('.answer-input') ||
+                          target.closest('input') ||
+                          target.closest('textarea');
+            
+            // Если не в поле ввода, блокируем копирование
+            if (!isInput) {
+                // Ctrl+C, Ctrl+A, Ctrl+V, Ctrl+X
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || 
+                    e.key === 'a' || e.key === 'A' || 
+                    e.key === 'v' || e.key === 'V' || 
+                    e.key === 'x' || e.key === 'X')) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // F12 (открытие DevTools)
+                if (e.key === 'F12') {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // PrintScreen
+                if (e.key === 'PrintScreen') {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        }, false);
+
+        // Блокируем выделение текста через мышь (кроме полей ввода)
+        document.addEventListener('selectstart', function(e) {
+            const target = e.target;
+            const isInput = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' ||
+                          target.closest('.answer-input') ||
+                          target.closest('input') ||
+                          target.closest('textarea');
+            
+            if (!isInput) {
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+
+        // Блокируем перетаскивание (drag and drop)
+        document.addEventListener('dragstart', function(e) {
+            const target = e.target;
+            const isInput = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' ||
+                          target.closest('.answer-input') ||
+                          target.closest('input') ||
+                          target.closest('textarea');
+            
+            if (!isInput) {
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+
+        // Дополнительная защита: блокируем копирование через буфер обмена
+        document.addEventListener('copy', function(e) {
+            const target = e.target;
+            const isInput = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' ||
+                          target.closest('.answer-input') ||
+                          target.closest('input') ||
+                          target.closest('textarea');
+            
+            if (!isInput) {
+                e.clipboardData.setData('text/plain', '');
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+
+        // Блокируем вставку (кроме полей ввода)
+        document.addEventListener('paste', function(e) {
+            const target = e.target;
+            const isInput = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' ||
+                          target.closest('.answer-input') ||
+                          target.closest('input') ||
+                          target.closest('textarea');
+            
+            if (!isInput) {
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+
+        // Блокируем вырезание (кроме полей ввода)
+        document.addEventListener('cut', function(e) {
+            const target = e.target;
+            const isInput = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' ||
+                          target.closest('.answer-input') ||
+                          target.closest('input') ||
+                          target.closest('textarea');
+            
+            if (!isInput) {
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+
+        // Дополнительная защита: блокируем выделение через двойной клик
+        document.addEventListener('dblclick', function(e) {
+            const target = e.target;
+            const isInput = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' ||
+                          target.closest('.answer-input') ||
+                          target.closest('input') ||
+                          target.closest('textarea');
+            
+            if (!isInput) {
+                // Очищаем выделение после двойного клика
+                if (window.getSelection) {
+                    window.getSelection().removeAllRanges();
+                } else if (document.selection) {
+                    document.selection.empty();
+                }
+            }
+        }, false);
+    }
+
     // Инициализация улучшений
     function initializeEnhancements() {
         createSaveIndicator();
         preventAccidentalClose();
         enhanceClientValidation();
         optimizeForMobile();
+        preventCopying(); // Добавляем защиту от копирования
         
         // Оптимизация при изменении размера окна
         let resizeTimeout;
