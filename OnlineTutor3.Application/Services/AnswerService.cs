@@ -29,7 +29,7 @@ namespace OnlineTutor3.Application.Services
             _logger = logger;
         }
 
-        public async Task<SpellingAnswer> SaveSpellingAnswerAsync(int testResultId, int questionId, string studentAnswer)
+        public async Task<SpellingAnswer> SaveSpellingAnswerAsync(int testResultId, int questionId, string studentAnswer, bool noLetterNeeded = false)
         {
             try
             {
@@ -41,6 +41,7 @@ namespace OnlineTutor3.Application.Services
                 if (existingAnswer != null)
                 {
                     existingAnswer.StudentAnswer = studentAnswer;
+                    existingAnswer.NoLetterNeeded = noLetterNeeded;
                     await _spellingAnswerRepository.UpdateAsync(existingAnswer);
                     savedAnswer = existingAnswer;
                 }
@@ -51,6 +52,7 @@ namespace OnlineTutor3.Application.Services
                         TestResultId = testResultId,
                         SpellingQuestionId = questionId,
                         StudentAnswer = studentAnswer,
+                        NoLetterNeeded = noLetterNeeded,
                         IsCorrect = false,
                         Points = 0
                     };

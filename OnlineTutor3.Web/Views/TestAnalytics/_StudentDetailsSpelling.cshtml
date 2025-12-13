@@ -134,7 +134,18 @@
                                         @(answer.IsCorrect ? "✓" : "✗")
                                     </span>
                                     <span class="@(answer.IsCorrect ? "text-success" : "text-danger")">
-                                        <strong>@answer.StudentAnswer</strong>
+                                        @if (answer.NoLetterNeeded)
+                                        {
+                                            <strong class="text-info">Буква не нужна</strong>
+                                        }
+                                        else if (!string.IsNullOrEmpty(answer.StudentAnswer))
+                                        {
+                                            <strong>@answer.StudentAnswer</strong>
+                                        }
+                                        else
+                                        {
+                                            <strong class="text-muted">Не отвечено</strong>
+                                        }
                                     </span>
                                     @if (result != null)
                                     {

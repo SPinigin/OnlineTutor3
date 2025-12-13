@@ -93,9 +93,20 @@ namespace OnlineTutor3.Web.Controllers
                     return Challenge();
                 }
 
+                if (!model.RequiresAnswer)
+                {
+                    model.CorrectLetter = null;
+                    var keysToRemove = ModelState.Keys
+                        .Where(k => k.StartsWith(nameof(model.CorrectLetter), StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                    foreach (var key in keysToRemove)
+                    {
+                        ModelState.Remove(key);
+                    }
+                }
+
                 if (ModelState.IsValid)
                 {
-                    // Проверяем доступ к тесту
                     var canAccess = await _testService.TeacherCanAccessTestAsync(currentUser.Id, model.SpellingTestId);
                     if (!canAccess)
                     {
@@ -111,9 +122,10 @@ namespace OnlineTutor3.Web.Controllers
                         OrderIndex = model.OrderIndex,
                         Points = model.Points,
                         WordWithGap = model.WordWithGap,
-                        CorrectLetter = model.CorrectLetter,
+                        CorrectLetter = model.RequiresAnswer ? model.CorrectLetter : null,
                         FullWord = model.FullWord,
-                        Hint = model.Hint
+                        Hint = model.Hint,
+                        RequiresAnswer = model.RequiresAnswer
                     };
 
                     await _questionRepository.CreateAsync(question);
@@ -188,7 +200,8 @@ namespace OnlineTutor3.Web.Controllers
                     WordWithGap = question.WordWithGap,
                     CorrectLetter = question.CorrectLetter,
                     FullWord = question.FullWord,
-                    Hint = question.Hint
+                    Hint = question.Hint,
+                    RequiresAnswer = question.RequiresAnswer
                 };
 
                 return View(model);
@@ -220,6 +233,21 @@ namespace OnlineTutor3.Web.Controllers
                     return Challenge();
                 }
 
+                if (!model.RequiresAnswer)
+                {
+                    model.CorrectLetter = null;
+                    
+                    var allKeys = ModelState.Keys.ToList();
+                    foreach (var key in allKeys)
+                    {
+                        if (key.StartsWith(nameof(model.CorrectLetter), StringComparison.OrdinalIgnoreCase) ||
+                            key.Equals(nameof(model.CorrectLetter), StringComparison.OrdinalIgnoreCase))
+                        {
+                            ModelState.Remove(key);
+                        }
+                    }
+                }
+
                 if (ModelState.IsValid)
                 {
                     var question = await _questionRepository.GetByIdAsync(id);
@@ -229,11 +257,23 @@ namespace OnlineTutor3.Web.Controllers
                         return RedirectToAction("Index", "Assignment");
                     }
 
-                    // Проверяем доступ к тесту
                     var canAccess = await _testService.TeacherCanAccessTestAsync(currentUser.Id, question.SpellingTestId);
                     if (!canAccess)
                     {
                         ModelState.AddModelError(string.Empty, "У вас нет доступа к этому вопросу.");
+                    }
+                }
+
+                if (!model.RequiresAnswer)
+                {
+                    var allKeysAfter = ModelState.Keys.ToList();
+                    foreach (var key in allKeysAfter)
+                    {
+                        if (key.StartsWith(nameof(model.CorrectLetter), StringComparison.OrdinalIgnoreCase) ||
+                            key.Equals(nameof(model.CorrectLetter), StringComparison.OrdinalIgnoreCase))
+                        {
+                            ModelState.Remove(key);
+                        }
                     }
                 }
 
@@ -249,9 +289,10 @@ namespace OnlineTutor3.Web.Controllers
                     question.OrderIndex = model.OrderIndex;
                     question.Points = model.Points;
                     question.WordWithGap = model.WordWithGap;
-                    question.CorrectLetter = model.CorrectLetter;
+                    question.CorrectLetter = model.RequiresAnswer ? model.CorrectLetter : null;
                     question.FullWord = model.FullWord;
                     question.Hint = model.Hint;
+                    question.RequiresAnswer = model.RequiresAnswer;
 
                     await _questionRepository.UpdateAsync(question);
 

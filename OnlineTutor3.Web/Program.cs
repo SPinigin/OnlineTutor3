@@ -6,6 +6,8 @@ using OnlineTutor3.Infrastructure;
 using OnlineTutor3.Infrastructure.Data;
 using OnlineTutor3.Web;
 
+ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
 var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
 try
@@ -19,15 +21,6 @@ try
     builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddApplication();
     builder.Services.AddWeb();
-
-    try
-    {
-        OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-    }
-    catch (Exception ex)
-    {
-        logger.Error(ex, "EPPlus license configuration failed");
-    }
 
     builder.Services.AddScoped<OnlineTutor3.Web.Services.SpellingQuestionImportService>();
     builder.Services.AddScoped<OnlineTutor3.Web.Services.PunctuationQuestionImportService>();

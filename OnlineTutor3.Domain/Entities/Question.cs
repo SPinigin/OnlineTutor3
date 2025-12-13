@@ -31,13 +31,17 @@ namespace OnlineTutor3.Domain.Entities
         [StringLength(200)]
         public string WordWithGap { get; set; } = string.Empty; // Слово с пропуском
 
-        [Required]
         [StringLength(10)]
-        public string CorrectLetter { get; set; } = string.Empty; // Правильная буква
+        public string? CorrectLetter { get; set; } // Правильная буква (необязательна, если RequiresAnswer = false)
 
         [Required]
         [StringLength(200)]
         public string FullWord { get; set; } = string.Empty; // Полное слово
+
+        /// <summary>
+        /// Требуется ли ответ на этот вопрос. Если false, то пустой ответ считается правильным.
+        /// </summary>
+        public bool RequiresAnswer { get; set; } = true;
     }
 
     /// <summary>

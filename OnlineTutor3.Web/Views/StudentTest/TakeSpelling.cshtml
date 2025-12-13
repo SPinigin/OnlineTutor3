@@ -100,11 +100,22 @@
                                        maxlength="10"
                                        placeholder="Введите ответ"
                                        value="@(existingAnswer?.StudentAnswer ?? "")"
-                                       data-question-id="@question.Id" />
+                                       data-question-id="@question.Id"
+                                       @(existingAnswer?.NoLetterNeeded == true ? "disabled" : "") />
                                 <button class="btn btn-modern-outline-secondary" type="button" onclick="clearAnswer(@question.Id)"
                                         title="Очистить ответ">
                                     <i class="fas fa-times"></i>
                                 </button>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input no-letter-checkbox" 
+                                       type="checkbox" 
+                                       id="noLetter_@question.Id"
+                                       data-question-id="@question.Id"
+                                       @(existingAnswer?.NoLetterNeeded == true ? "checked" : "") />
+                                <label class="form-check-label small" for="noLetter_@question.Id">
+                                    <i class="fas fa-check-square"></i> Буква не нужна
+                                </label>
                             </div>
                             <small class="form-text text-muted-modern d-block mt-1">
                                 <i class="fas fa-info-circle"></i>
@@ -112,11 +123,11 @@
                                     var gapCount = question.WordWithGap.Count(c => c == '…' || c == '_');
                                     if (gapCount > 1)
                                     {
-                                        <span>Введите @gapCount буквы через запятую (например: а,о)</span>
+                                        <span>Введите @gapCount буквы через запятую (например: а,о) или отметьте чекбокс "Буква не нужна", если буквы не требуются</span>
                                     }
                                     else
                                     {
-                                        <span>Введите одну букву</span>
+                                        <span>Введите одну букву или отметьте чекбокс "Буква не нужна", если буква не требуется</span>
                                     }
                                 }
                             </small>
@@ -369,13 +380,33 @@
             updateProgress();
             updateNavigation();
 
-            // Автосохранение ответов
+            // Автосохранение ответов при вводе
             $('.answer-input').on('input', function() {
                 const questionId = $(this).data('question-id');
                 const answer = $(this).val().trim();
+                const noLetterNeeded = $(`#noLetter_${questionId}`).is(':checked');
+                
+                if (noLetterNeeded) {
+                    $(this).prop('disabled', true).val('');
+                } else {
+                    $(this).prop('disabled', false);
+                }
+                
+                saveAnswer(questionId, answer, noLetterNeeded);
+            });
 
-                if (answer) {
-                    saveAnswer(questionId, answer);
+            $('.no-letter-checkbox').on('change', function() {
+                const questionId = $(this).data('question-id');
+                const noLetterNeeded = $(this).is(':checked');
+                const answerInput = $(`.answer-input[data-question-id="${questionId}"]`);
+                
+                if (noLetterNeeded) {
+                    answerInput.prop('disabled', true).val('');
+                    saveAnswer(questionId, '', true);
+                } else {
+                    answerInput.prop('disabled', false);
+                    const answer = answerInput.val().trim();
+                    saveAnswer(questionId, answer, false);
                 }
             });
 
@@ -391,10 +422,38 @@
         function loadExistingAnswers() {
             @foreach (var answer in Model.Answers)
             {
+                var escapedAnswer = (answer.StudentAnswer ?? "").Replace("'", "\\'").Replace("\"", "\\\"").Replace("\r", "").Replace("\n", "");
                 <text>
-                answers[@answer.SpellingQuestionId] = '@(answer.StudentAnswer ?? "")';
+                answers[@answer.SpellingQuestionId] = { 
+                    answer: '@Html.Raw(escapedAnswer)', 
+                    noLetterNeeded: @(answer.NoLetterNeeded ? "true" : "false")
+                };
                 </text>
             }
+            
+            // Инициализируем состояние чекбоксов и полей ввода для всех сохраненных ответов
+            @foreach (var answer in Model.Answers)
+            {
+                var escapedAnswer = (answer.StudentAnswer ?? "").Replace("'", "\\'").Replace("\"", "\\\"");
+                <text>
+                (function() {
+                    const questionId = @answer.SpellingQuestionId;
+                    const checkbox = $('#noLetter_' + questionId);
+                    const input = $('.answer-input[data-question-id="' + questionId + '"]');
+                    if (@(answer.NoLetterNeeded ? "true" : "false")) {
+                        checkbox.prop('checked', true);
+                        input.prop('disabled', true).val('');
+                    } else {
+                        checkbox.prop('checked', false);
+                        input.prop('disabled', false);
+                        if (input.length > 0) {
+                            input.val('@Html.Raw(escapedAnswer)');
+                        }
+                    }
+                })();
+                </text>
+            }
+            
             updateProgress();
         }
 
@@ -459,7 +518,7 @@
             }
         }
 
-        function saveAnswer(questionId, answer) {
+        function saveAnswer(questionId, answer, noLetterNeeded) {
             $.ajax({
                 url: '@Url.Action("SubmitSpellingAnswer")',
                 type: 'POST',
@@ -467,14 +526,15 @@
                 data: JSON.stringify({
                     TestResultId: @Model.TestResult.Id,
                     QuestionId: questionId,
-                    StudentAnswer: answer
+                    StudentAnswer: answer,
+                    NoLetterNeeded: noLetterNeeded || false
                 }),
                 headers: {
                     'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                 },
                 success: function(response) {
                     if (response.success) {
-                        answers[questionId] = answer;
+                        answers[questionId] = { answer: answer, noLetterNeeded: noLetterNeeded || false };
                         updateProgress();
                         if (window.StudentTestEnhancements?.showSaveIndicator) {
                             window.StudentTestEnhancements.showSaveIndicator(true, 'Ответ сохранен');
@@ -527,40 +587,56 @@
             const currentCard = $('.question-card.active');
             const nextCard = $(`.question-card[data-question-index="${index}"]`);
             
-            // Проверяем, что следующая карточка существует
             if (nextCard.length === 0) {
                 console.error('Question card not found for index:', index);
                 isTransitioning = false;
                 return;
             }
             
-            // Анимация перехода
+            const questionId = nextCard.data('question-id');
+            
+            const answerData = answers[questionId];
+            if (answerData) {
+                const checkbox = nextCard.find(`#noLetter_${questionId}`);
+                const input = nextCard.find('.answer-input[data-question-id="' + questionId + '"]');
+                
+                if (answerData.noLetterNeeded) {
+                    checkbox.prop('checked', true);
+                    input.prop('disabled', true).val('');
+                } else {
+                    checkbox.prop('checked', false);
+                    input.prop('disabled', false);
+                    if (answerData.answer) {
+                        input.val(answerData.answer);
+                    }
+                }
+            } else {
+                const checkbox = nextCard.find(`#noLetter_${questionId}`);
+                const input = nextCard.find('.answer-input[data-question-id="' + questionId + '"]');
+                checkbox.prop('checked', false);
+                input.prop('disabled', false).val('');
+            }
+            
             if (window.StudentTestEnhancements?.animateQuestionTransition && currentCard.length > 0) {
                 currentCard.fadeOut(150, function() {
                     currentCard.addClass('d-none').removeClass('active');
                     
-                    // Убираем d-none и устанавливаем display перед анимацией
                     nextCard.removeClass('d-none').addClass('active');
                     nextCard.css('display', 'block');
                     nextCard.css('opacity', '0');
                     
-                    // Запускаем анимацию перехода
                     if (nextCard[0] && window.StudentTestEnhancements.animateQuestionTransition) {
                         window.StudentTestEnhancements.animateQuestionTransition(nextCard[0], direction);
                     }
                     
-                    // Показываем карточку с fadeIn
                     nextCard.fadeIn(150, function() {
-                        // Убираем inline стили после анимации
                         nextCard.css('opacity', '');
-                        isTransitioning = false; // Сбрасываем флаг после завершения анимации
+                        isTransitioning = false;
                     });
                 });
             } else {
-                // Простое переключение без анимации
                 $('.question-card').addClass('d-none').removeClass('active');
                 nextCard.removeClass('d-none').addClass('active');
-                // Сбрасываем флаг сразу для простого переключения
                 setTimeout(function() {
                     isTransitioning = false;
                 }, 50);
@@ -570,9 +646,11 @@
             updateProgress();
             updateNavigation();
 
-            // Фокус на поле ввода
             setTimeout(function() {
-                nextCard.find('.answer-input').focus();
+                const input = nextCard.find('.answer-input');
+                if (!input.prop('disabled')) {
+                    input.focus();
+                }
             }, 200);
 
             if ($(window).width() < 768) {
@@ -590,17 +668,14 @@
             $('#currentQuestion').text(currentQuestionIndex + 1);
             $('#answeredCount, #answeredCountModal').text(answeredCount);
 
-            // Обновляем панель навигации
             $('.question-nav-btn').each(function() {
                 const idx = $(this).data('question-index');
                 const questionId = $(`.question-card[data-question-index="${idx}"]`).data('question-id');
-                const answerValue = answers[questionId];
-                const isAnswered = answerValue && answerValue.toString().trim() !== '';
+                const answerData = answers[questionId];
+                const isAnswered = answerData !== undefined;
                 
-                // Убираем все классы статуса
                 $(this).removeClass('btn-modern-success btn-modern-primary active btn-modern-outline-secondary');
                 
-                // Добавляем класс в зависимости от статуса
                 if (idx === currentQuestionIndex) {
                     $(this).addClass('btn-modern-primary active');
                 } else if (isAnswered) {
@@ -614,14 +689,12 @@
         function updateNavigation() {
             $('#prevButton').prop('disabled', currentQuestionIndex === 0);
 
-            // Кнопка "Следующий" скрывается только на последнем вопросе
             if (currentQuestionIndex === totalQuestions - 1) {
                 $('#nextButton').addClass('d-none');
             } else {
                 $('#nextButton').removeClass('d-none');
             }
             
-            // Кнопка "Завершить тест" всегда видна
             $('#finishButton').removeClass('d-none');
         }
 
@@ -639,12 +712,16 @@
         }
 
         function clearAnswer(questionId) {
-            $(`.answer-input[data-question-id="${questionId}"]`).val('').focus();
+            const answerInput = $(`.answer-input[data-question-id="${questionId}"]`);
+            const checkbox = $(`#noLetter_${questionId}`);
+            
+            answerInput.val('').prop('disabled', false);
+            checkbox.prop('checked', false);
             delete answers[questionId];
             updateProgress();
             
             // Удаляем ответ с сервера
-            saveAnswer(questionId, '');
+            saveAnswer(questionId, '', false);
         }
 
         function showFinishModal() {
@@ -735,16 +812,13 @@
                 return;
             }
             
-            // Сохраняем время перед закрытием (синхронный запрос)
             if (navigator.sendBeacon) {
-                // Используем sendBeacon для надежной отправки
                 const formData = new FormData();
                 formData.append('testResultId', testResultId);
                 formData.append('timeRemainingSeconds', timeRemaining);
                 formData.append('testType', testType);
                 navigator.sendBeacon('@Url.Action("UpdateTimeRemaining", "StudentTest")', formData);
             } else {
-                // Fallback для старых браузеров
                 $.ajax({
                     url: '@Url.Action("UpdateTimeRemaining", "StudentTest")',
                     type: 'POST',

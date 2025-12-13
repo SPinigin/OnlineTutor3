@@ -151,7 +151,7 @@ else
         </div>
 
         <div class="accordion" id="assignmentsAccordion">
-            @foreach (var kvp in Model.AssignmentsWithResults.OrderByDescending(a => a.Value.Assignment.CreatedAt))
+            @foreach (var kvp in Model.AssignmentsWithResults)
             {
                 var assignmentInfo = kvp.Value;
                 var assignment = assignmentInfo.Assignment;

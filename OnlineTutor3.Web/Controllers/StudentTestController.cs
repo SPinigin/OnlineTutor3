@@ -7,6 +7,7 @@ using OnlineTutor3.Application.Services;
 using OnlineTutor3.Domain.Entities;
 using OnlineTutor3.Web.Hubs;
 using OnlineTutor3.Web.ViewModels;
+using System.Text.RegularExpressions;
 
 namespace OnlineTutor3.Web.Controllers
 {
@@ -133,6 +134,9 @@ namespace OnlineTutor3.Web.Controllers
                 {
                     allAssignments = await _assignmentRepository.GetByTeacherIdAsync(viewModel.Class.TeacherId);
                     allAssignments = allAssignments.Where(a => a.IsActive).ToList();
+                    // Сортируем задания по названию с использованием NaturalStringComparer
+                    var naturalComparer = new NaturalStringComparer();
+                    allAssignments = allAssignments.OrderBy(a => a.Title, naturalComparer).ToList();
                 }
 
                 var assignmentsDict = new Dictionary<int, AssignmentTestsInfo>();
@@ -262,7 +266,24 @@ namespace OnlineTutor3.Web.Controllers
                     assignmentsDict = filteredAssignments;
                 }
 
-                viewModel.AssignmentsWithTests = assignmentsDict;
+                // Сортируем тесты внутри каждого задания с использованием NaturalStringComparer
+                var naturalComparerForTests = new NaturalStringComparer();
+                foreach (var kvp in assignmentsDict)
+                {
+                    var assignmentInfo = kvp.Value;
+                    assignmentInfo.SpellingTests = assignmentInfo.SpellingTests.OrderBy(t => t.Title, naturalComparerForTests).ToList();
+                    assignmentInfo.PunctuationTests = assignmentInfo.PunctuationTests.OrderBy(t => t.Title, naturalComparerForTests).ToList();
+                    assignmentInfo.OrthoeopyTests = assignmentInfo.OrthoeopyTests.OrderBy(t => t.Title, naturalComparerForTests).ToList();
+                    assignmentInfo.RegularTests = assignmentInfo.RegularTests.OrderBy(t => t.Title, naturalComparerForTests).ToList();
+                }
+
+                // Сортируем задания по названию с использованием NaturalStringComparer
+                var naturalComparerForAssignments = new NaturalStringComparer();
+                var sortedAssignmentsDict = assignmentsDict
+                    .OrderBy(kvp => kvp.Value.Assignment.Title, naturalComparerForAssignments)
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+                viewModel.AssignmentsWithTests = sortedAssignmentsDict;
                 viewModel.AvailableAssignments = allAssignments;
 
                 return View(viewModel);
@@ -495,7 +516,13 @@ namespace OnlineTutor3.Web.Controllers
                 }
             }
 
-            viewModel.AssignmentsWithResults = assignmentsDict;
+            // Сортируем задания по названию с использованием NaturalStringComparer (как в Index)
+            var naturalComparerForAssignments = new NaturalStringComparer();
+            var sortedAssignmentsDict = assignmentsDict
+                .OrderBy(kvp => kvp.Value.Assignment.Title, naturalComparerForAssignments)
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            viewModel.AssignmentsWithResults = sortedAssignmentsDict;
             viewModel.SubjectsDict = subjectsDict;
         }
 
@@ -698,11 +725,12 @@ namespace OnlineTutor3.Web.Controllers
                     return Json(new { success = false, message = "Вопрос не принадлежит тесту" });
                 }
 
-                var answer = await _answerService.SaveSpellingAnswerAsync(model.TestResultId, model.QuestionId, model.StudentAnswer ?? "");
+                var answer = await _answerService.SaveSpellingAnswerAsync(model.TestResultId, model.QuestionId, model.StudentAnswer ?? "", model.NoLetterNeeded);
 
                 var (isCorrect, points) = await _testEvaluationService.EvaluateSpellingAnswerAsync(
                     question, 
                     model.StudentAnswer ?? "", 
+                    model.NoLetterNeeded,
                     question.Points);
                 answer.IsCorrect = isCorrect;
                 answer.Points = points;
@@ -2362,6 +2390,44 @@ namespace OnlineTutor3.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка отправки SignalR уведомления о начале теста");
+            }
+        }
+
+        private class NaturalStringComparer : IComparer<string>
+        {
+            public int Compare(string? x, string? y)
+            {
+                if (x == null && y == null) return 0;
+                if (x == null) return -1;
+                if (y == null) return 1;
+
+                // Разбиваем строки на части (текст и числа)
+                var partsX = Regex.Split(x, @"(\d+)");
+                var partsY = Regex.Split(y, @"(\d+)");
+
+                int minLength = Math.Min(partsX.Length, partsY.Length);
+
+                for (int i = 0; i < minLength; i++)
+                {
+                    var partX = partsX[i];
+                    var partY = partsY[i];
+
+                    // Если обе части - числа, сравниваем как числа
+                    if (int.TryParse(partX, out int numX) && int.TryParse(partY, out int numY))
+                    {
+                        int comparison = numX.CompareTo(numY);
+                        if (comparison != 0) return comparison;
+                    }
+                    else
+                    {
+                        // Иначе сравниваем как строки
+                        int comparison = string.Compare(partX, partY, StringComparison.OrdinalIgnoreCase);
+                        if (comparison != 0) return comparison;
+                    }
+                }
+
+                // Если все части совпадают, сравниваем по длине
+                return partsX.Length.CompareTo(partsY.Length);
             }
         }
     }

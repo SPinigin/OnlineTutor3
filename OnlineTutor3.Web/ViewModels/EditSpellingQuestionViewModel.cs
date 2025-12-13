@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace OnlineTutor3.Web.ViewModels
 {
-    public class EditSpellingQuestionViewModel
+    public class EditSpellingQuestionViewModel : IValidatableObject
     {
         public int Id { get; set; }
 
@@ -25,10 +25,9 @@ namespace OnlineTutor3.Web.ViewModels
         [Display(Name = "Слово с пропуском")]
         public string WordWithGap { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Правильная буква обязательна")]
         [StringLength(10, ErrorMessage = "Буква не может превышать 10 символов")]
         [Display(Name = "Правильная буква")]
-        public string CorrectLetter { get; set; } = string.Empty;
+        public string? CorrectLetter { get; set; }
 
         [Required(ErrorMessage = "Полное слово обязательно")]
         [StringLength(200, ErrorMessage = "Слово не может превышать 200 символов")]
@@ -38,6 +37,25 @@ namespace OnlineTutor3.Web.ViewModels
         [StringLength(500, ErrorMessage = "Подсказка не может превышать 500 символов")]
         [Display(Name = "Подсказка")]
         public string? Hint { get; set; }
+
+        [Display(Name = "Требуется ответ")]
+        public bool RequiresAnswer { get; set; } = true;
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (!RequiresAnswer)
+            {
+                CorrectLetter = null;
+                yield break;
+            }
+            
+            if (string.IsNullOrWhiteSpace(CorrectLetter))
+            {
+                yield return new ValidationResult(
+                    "Правильная буква обязательна, когда требуется ответ",
+                    new[] { nameof(CorrectLetter) });
+            }
+        }
     }
 }
 

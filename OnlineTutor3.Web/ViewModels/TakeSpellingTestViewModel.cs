@@ -29,6 +29,11 @@ namespace OnlineTutor3.Web.ViewModels
 
         [StringLength(10)]
         public string? StudentAnswer { get; set; }
+
+        /// <summary>
+        /// Отмечен ли чекбокс "Буква не нужна"
+        /// </summary>
+        public bool NoLetterNeeded { get; set; } = false;
     }
 }
 

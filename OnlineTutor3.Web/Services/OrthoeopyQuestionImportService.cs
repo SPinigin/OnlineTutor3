@@ -19,28 +19,9 @@ namespace OnlineTutor3.Web.Services
 
         private void ConfigureExcelPackage()
         {
-            try
-            {
-                // Всегда устанавливаем лицензию (если еще не установлена)
-                if (ExcelPackage.LicenseContext != LicenseContext.NonCommercial)
-                {
-                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                }
-                _logger.LogDebug("EPPlus license context: {LicenseContext}", ExcelPackage.LicenseContext);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка настройки EPPlus license");
-                // Устанавливаем лицензию принудительно, даже если была ошибка
-                try
-                {
-                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                }
-                catch
-                {
-                    // Игнорируем повторную ошибку
-                }
-            }
+            // Устанавливаем лицензию EPPlus (должна быть установлена в Program.cs, но на всякий случай устанавливаем здесь тоже)
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            _logger.LogDebug("EPPlus license context: {LicenseContext}", ExcelPackage.LicenseContext);
         }
 
         public async Task<List<ImportOrthoeopyQuestionRow>> ParseExcelFileAsync(IFormFile file)

@@ -10,7 +10,7 @@ namespace OnlineTutor3.Application.Interfaces
         /// <summary>
         /// Сохраняет ответ на вопрос по орфографии
         /// </summary>
-        Task<SpellingAnswer> SaveSpellingAnswerAsync(int testResultId, int questionId, string studentAnswer);
+        Task<SpellingAnswer> SaveSpellingAnswerAsync(int testResultId, int questionId, string studentAnswer, bool noLetterNeeded = false);
 
         /// <summary>
         /// Сохраняет ответ на вопрос по пунктуации

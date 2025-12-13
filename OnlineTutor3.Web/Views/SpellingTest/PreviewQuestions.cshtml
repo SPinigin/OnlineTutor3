@@ -145,8 +145,9 @@
                             <th class="small" style="width: 5%; min-width: 40px;">#</th>
                             <th class="small" style="min-width: 120px;">Слово с пропуском</th>
                             <th class="small" style="width: 15%; min-width: 80px;">Правильная буква</th>
-                            <th class="small d-none d-md-table-cell" style="width: 30%;">Полное слово</th>
-                            <th class="small d-none d-md-table-cell" style="width: 10%;">Баллы</th>
+                            <th class="small d-none d-md-table-cell" style="width: 25%;">Полное слово</th>
+                            <th class="small d-none d-md-table-cell" style="width: 10%;">Требуется ответ</th>
+                            <th class="small d-none d-md-table-cell" style="width: 8%;">Баллы</th>
                             <th class="small d-none d-md-table-cell" style="width: 10%;">Подсказка</th>
                         </tr>
                     </thead>
@@ -159,6 +160,20 @@
                                 <td class="small text-dark-modern">@question.WordWithGap</td>
                                 <td class="small text-dark-modern"><strong>@question.CorrectLetter</strong></td>
                                 <td class="small text-muted-modern d-none d-md-table-cell">@question.FullWord</td>
+                                <td class="small d-none d-md-table-cell">
+                                    @if (question.RequiresAnswer)
+                                    {
+                                        <span class="badge badge-modern-success badge-sm">
+                                            <i class="fas fa-check"></i> Да
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-modern-warning badge-sm">
+                                            <i class="fas fa-times"></i> Нет
+                                        </span>
+                                    }
+                                </td>
                                 <td class="small text-muted-modern d-none d-md-table-cell">@pointsPerQuestion</td>
                                 <td class="small text-muted-modern d-none d-md-table-cell">@(string.IsNullOrEmpty(question.Hint) ? "-" : question.Hint)</td>
                             </tr>

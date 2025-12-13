@@ -187,7 +187,11 @@
                                     <div class="col-6">
                                         <small class="text-muted-modern d-block" style="font-size: 0.7rem;">Ваш ответ:</small>
                                         <div class="fw-bold @(isCorrect ? "nav-link-icon-green" : "nav-link-icon-danger")" style="font-size: 0.75rem;">
-                                            @if (!string.IsNullOrEmpty(answer?.StudentAnswer))
+                                            @if (answer?.NoLetterNeeded == true)
+                                            {
+                                                <span class="text-info">Буква не нужна</span>
+                                            }
+                                            else if (!string.IsNullOrEmpty(answer?.StudentAnswer))
                                             {
                                                 <span>"@answer.StudentAnswer"</span>
                                             }
