@@ -194,3 +194,4 @@ FodyWeavers.xsd
 /OnlineTutor3.Web/Properties/PublishProfiles
 /OnlineTutor3.Web/wwwroot/uploads/materials
 /OnlineTutor3.Infrastructure/Migrations
+/temp_publish

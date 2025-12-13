@@ -498,8 +498,7 @@ namespace OnlineTutor3.Web.Controllers
                     return Challenge();
                 }
 
-                // Настройка EPPlus
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                // Лицензия EPPlus устанавливается в Program.cs при запуске приложения
 
                 // Получаем данные для экспорта (аналогично методу Index)
                 var teacherSubjects = await _teacherService.GetTeacherSubjectsByUserIdAsync(currentUser.Id) ?? new List<Subject>();
@@ -671,8 +670,7 @@ namespace OnlineTutor3.Web.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Настройка EPPlus
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                // Лицензия EPPlus устанавливается в Program.cs при запуске приложения
 
                 using var package = new ExcelPackage();
                 
