@@ -516,7 +516,13 @@ namespace OnlineTutor3.Web.Controllers
                 }
             }
 
-            viewModel.AssignmentsWithResults = assignmentsDict;
+            // Сортируем задания по названию с использованием NaturalStringComparer (как в Index)
+            var naturalComparerForAssignments = new NaturalStringComparer();
+            var sortedAssignmentsDict = assignmentsDict
+                .OrderBy(kvp => kvp.Value.Assignment.Title, naturalComparerForAssignments)
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            viewModel.AssignmentsWithResults = sortedAssignmentsDict;
             viewModel.SubjectsDict = subjectsDict;
         }
 
