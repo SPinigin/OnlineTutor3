@@ -31,7 +31,6 @@
                                 <i class="fas fa-sort-numeric-down"></i> Порядковый номер <span class="text-danger">*</span>
                             </label>
                             <input asp-for="OrderIndex" type="number" class="form-control form-control-sm" min="1" />
-                            <span asp-validation-for="OrderIndex" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6 mb-2">
@@ -39,7 +38,6 @@
                                 <i class="fas fa-star"></i> Баллы <span class="text-danger">*</span>
                             </label>
                             <input asp-for="Points" type="number" class="form-control form-control-sm" min="1" max="100" />
-                            <span asp-validation-for="Points" class="text-danger small"></span>
                         </div>
                     </div>
 
@@ -48,15 +46,23 @@
                             <i class="fas fa-spell-check"></i> Слово с пропуском <span class="text-danger">*</span>
                         </label>
                         <input asp-for="WordWithGap" class="form-control form-control-sm" placeholder="Например: к_рзина" />
-                        <span asp-validation-for="WordWithGap" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-2" id="correctLetterSection">
                         <label asp-for="CorrectLetter" class="form-label small">
                             <i class="fas fa-check-circle"></i> Правильная буква <span class="text-danger" id="correctLetterRequired">*</span>
                         </label>
-                        <input asp-for="CorrectLetter" class="form-control form-control-sm" placeholder="Например: о" maxlength="10" id="correctLetterInput" />
-                        <span asp-validation-for="CorrectLetter" class="text-danger small"></span>
+                        <input asp-for="CorrectLetter" class="form-control form-control-sm" placeholder="Например: о" maxlength="10" id="correctLetterInput" data-val="true" data-val-required="Правильная буква обязательна, когда требуется ответ" />
+                        
+                        <div class="form-check mt-2">
+                            <input asp-for="RequiresAnswer" class="form-check-input" type="checkbox" id="RequiresAnswer" checked />
+                            <label asp-for="RequiresAnswer" class="form-check-label small" for="RequiresAnswer">
+                                Требуется ответ
+                            </label>
+                        </div>
+                        <small class="form-text text-muted d-block mt-1 small">
+                            Если снять галочку, пустой ответ будет считаться правильным
+                        </small>
                     </div>
 
                     <div class="mb-2">
@@ -64,7 +70,6 @@
                             <i class="fas fa-book"></i> Полное слово <span class="text-danger">*</span>
                         </label>
                         <input asp-for="FullWord" class="form-control form-control-sm" placeholder="Например: корзина" />
-                        <span asp-validation-for="FullWord" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-3">
@@ -72,20 +77,6 @@
                             <i class="fas fa-lightbulb"></i> Подсказка
                         </label>
                         <textarea asp-for="Hint" class="form-control form-control-sm" rows="2" placeholder="Необязательная подсказка для ученика..."></textarea>
-                        <span asp-validation-for="Hint" class="text-danger small"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input asp-for="RequiresAnswer" class="form-check-input" type="checkbox" checked />
-                            <label asp-for="RequiresAnswer" class="form-check-label small">
-                                <i class="fas fa-keyboard"></i> Требуется ответ (если снять галочку, то пустой ответ будет считаться правильным)
-                            </label>
-                        </div>
-                        <small class="form-text text-muted-modern d-block mt-1">
-                            <i class="fas fa-info-circle"></i>
-                            Для слов, в которых не нужно ставить букву вместо пропуска, снимите эту галочку.
-                        </small>
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-3">
@@ -110,6 +101,16 @@
             const correctLetterInput = $('#correctLetterInput');
             const requiresAnswerCheckbox = $('#RequiresAnswer');
             
+            if (typeof $.validator !== 'undefined' && form.length > 0) {
+                form.validate({
+                    messages: {
+                        CorrectLetter: {
+                            required: "Правильная буква обязательна, когда требуется ответ"
+                        }
+                    }
+                });
+            }
+            
             function disableValidationForField() {
                 correctLetterInput.attr('data-val', 'false');
                 correctLetterInput.removeAttr('data-val-required');
@@ -132,15 +133,15 @@
                     }
                 }
                 
-                $('span[data-valmsg-for="CorrectLetter"]').text('').hide();
-                $('span.field-validation-error[data-valmsg-for="CorrectLetter"]').text('').hide();
             }
             
             function enableValidationForField() {
                 if (typeof $.validator !== 'undefined' && form.length > 0) {
-                    const validator = form.data('validator');
-                    if (validator) {
-                        validator.settings.ignore = validator.settings.ignore || '';
+                    let validator = form.data('validator');
+                    if (!validator) {
+                        validator = form.validate();
+                    }
+                    if (validator && validator.settings.ignore) {
                         validator.settings.ignore = validator.settings.ignore.replace(/#correctLetterInput/g, '').trim();
                         if (validator.settings.ignore === '') {
                             delete validator.settings.ignore;
@@ -155,19 +156,17 @@
                 
                 if (!requiresAnswer) {
                     correctLetterRequired.hide();
+                    correctLetterInput.prop('disabled', true);
                     correctLetterInput.removeAttr('required');
                     correctLetterInput.attr('data-val', 'false');
                     correctLetterInput.removeAttr('data-val-required');
                     correctLetterInput.removeClass('input-validation-error');
                     correctLetterInput.val('');
-                    $('span[data-valmsg-for="CorrectLetter"]').text('').hide();
-                    $('span.field-validation-error[data-valmsg-for="CorrectLetter"]').text('').hide();
-                    $('span.text-danger:has([data-valmsg-for="CorrectLetter"])').hide();
-                    $('.field-validation-error[data-valmsg-for="CorrectLetter"]').hide();
                     disableValidationForField();
                 } else {
                     correctLetterRequired.show();
-                    correctLetterInput.attr('required', 'required');
+                    correctLetterInput.prop('disabled', false);
+                    correctLetterInput.removeAttr('required');
                     correctLetterInput.attr('data-val', 'true');
                     correctLetterInput.attr('data-val-required', 'Правильная буква обязательна, когда требуется ответ');
                     correctLetterInput.removeClass('input-validation-error');
@@ -179,20 +178,94 @@
             
             requiresAnswerCheckbox.on('change', function() {
                 toggleCorrectLetterField();
+                if (typeof $.validator !== 'undefined') {
+                    const validator = form.data('validator');
+                    if (validator) {
+                        validator.element(correctLetterInput);
+                    }
+                }
+            });
+            
+            correctLetterInput.on('blur', function() {
+                if (requiresAnswerCheckbox.is(':checked')) {
+                    const letterValue = $(this).val().trim();
+                    if (!letterValue) {
+                        $(this).addClass('input-validation-error');
+                    } else {
+                        $(this).removeClass('input-validation-error');
+                    }
+                }
             });
             
             form.on('submit', function(e) {
                 const requiresAnswer = requiresAnswerCheckbox.is(':checked');
+                
                 if (!requiresAnswer) {
                     correctLetterInput.val('');
-                    correctLetterInput.removeAttr('required');
                     correctLetterInput.attr('data-val', 'false');
                     correctLetterInput.removeAttr('data-val-required');
-                    $('span[data-valmsg-for="CorrectLetter"]').text('').hide();
-                    $('span.field-validation-error[data-valmsg-for="CorrectLetter"]').text('').hide();
-                    $('span.text-danger:has([data-valmsg-for="CorrectLetter"])').hide();
-                    $('.field-validation-error[data-valmsg-for="CorrectLetter"]').hide();
-                    disableValidationForField();
+                    correctLetterInput.removeAttr('required');
+                    correctLetterInput.removeClass('input-validation-error');
+                    
+                    if (typeof $.validator !== 'undefined') {
+                        const validator = form.data('validator');
+                        if (validator) {
+                            validator.settings.ignore = validator.settings.ignore || '';
+                            if (validator.settings.ignore.indexOf('#correctLetterInput') === -1) {
+                                validator.settings.ignore = (validator.settings.ignore + ' #correctLetterInput').trim();
+                            }
+                            validator.resetForm();
+                        }
+                    }
+                } else {
+                    const letterValue = correctLetterInput.val().trim();
+                    if (!letterValue) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        correctLetterInput.addClass('input-validation-error');
+                        
+                        const errorMessage = 'Правильная буква обязательна, когда требуется ответ';
+                        let summary = $('div[asp-validation-summary="All"]');
+                        
+                        if (summary.length === 0) {
+                            summary = $('div.validation-summary-errors, div.text-danger').first();
+                        }
+                        
+                        if (summary.length > 0) {
+                            summary.removeClass('validation-summary-valid').addClass('validation-summary-errors');
+                            summary.css('display', 'block');
+                            
+                            let ul = summary.find('ul');
+                            if (ul.length === 0) {
+                                summary.append('<ul></ul>');
+                                ul = summary.find('ul');
+                            }
+                            
+                            const existingError = ul.find('li:contains("Правильная буква обязательна"), li:contains("This field is required")');
+                            if (existingError.length > 0) {
+                                existingError.text(errorMessage);
+                            } else {
+                                ul.append('<li>' + errorMessage + '</li>');
+                            }
+                        } else {
+                            const form = $('form');
+                            const validationDiv = $('<div asp-validation-summary="All" class="validation-summary-errors text-danger mb-2 small"><ul><li>' + errorMessage + '</li></ul></div>');
+                            const existingSummary = form.find('div[asp-validation-summary], div.validation-summary-errors').first();
+                            if (existingSummary.length > 0) {
+                                existingSummary.replaceWith(validationDiv);
+                            } else {
+                                form.prepend(validationDiv);
+                            }
+                        }
+                        
+                        return false;
+                    } else {
+                        correctLetterInput.removeClass('input-validation-error');
+                        $('div.validation-summary-errors li:contains("Правильная буква обязательна")').remove();
+                        if ($('div.validation-summary-errors ul li').length === 0) {
+                            $('div.validation-summary-errors').hide();
+                        }
+                    }
                 }
             });
         });
