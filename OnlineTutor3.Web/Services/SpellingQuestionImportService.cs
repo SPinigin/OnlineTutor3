@@ -19,7 +19,6 @@ namespace OnlineTutor3.Web.Services
 
         private void ConfigureExcelPackage()
         {
-            // Устанавливаем лицензию EPPlus (должна быть установлена в Program.cs, но на всякий случай устанавливаем здесь тоже)
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             _logger.LogDebug("EPPlus license context: {LicenseContext}", ExcelPackage.LicenseContext);
         }
@@ -144,7 +143,7 @@ namespace OnlineTutor3.Web.Services
             worksheet.Cells[1, 4].Value = "Подсказка";
             worksheet.Cells[1, 5].Value = "Требуется ответ";
 
-            // Примеры данных (используем нижнее подчеркивание вместо многоточия)
+            // Примеры данных
             worksheet.Cells[2, 1].Value = "Прол_тает";
             worksheet.Cells[2, 2].Value = "е";
             worksheet.Cells[2, 3].Value = "пролетает";
@@ -167,9 +166,6 @@ namespace OnlineTutor3.Web.Services
             for (int i = 1; i <= 5; i++)
             {
                 worksheet.Cells[1, i].Style.Font.Bold = true;
-                // Убираем цветовое оформление, чтобы избежать проблем с SetColor
-                // worksheet.Cells[1, i].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                // worksheet.Cells[1, i].Style.Fill.BackgroundColor.SetColor(255, 173, 216, 230);
             }
 
             // Настройка ширины столбцов
