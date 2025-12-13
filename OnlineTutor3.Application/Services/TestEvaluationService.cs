@@ -45,15 +45,27 @@ namespace OnlineTutor3.Application.Services
             _logger = logger;
         }
 
-        public async Task<(bool IsCorrect, int Points)> EvaluateSpellingAnswerAsync(SpellingQuestion question, string studentAnswer, int pointsPerQuestion)
+        public async Task<(bool IsCorrect, int Points)> EvaluateSpellingAnswerAsync(SpellingQuestion question, string studentAnswer, bool noLetterNeeded, int pointsPerQuestion)
         {
             try
             {
-                // Нормализуем ответы: убираем пробелы в начале и конце, а также пробелы после запятых
+                bool isCorrect;
+                
+                if (!question.RequiresAnswer)
+                {
+                    isCorrect = noLetterNeeded;
+                    return (isCorrect, isCorrect ? pointsPerQuestion : 0);
+                }
+
+                if (noLetterNeeded)
+                {
+                    return (false, 0);
+                }
+
                 var normalizedCorrect = NormalizeSpellingAnswer(question.CorrectLetter);
                 var normalizedStudent = NormalizeSpellingAnswer(studentAnswer);
                 
-                var isCorrect = normalizedCorrect.Equals(normalizedStudent, StringComparison.OrdinalIgnoreCase);
+                isCorrect = normalizedCorrect.Equals(normalizedStudent, StringComparison.OrdinalIgnoreCase);
                 return (isCorrect, isCorrect ? pointsPerQuestion : 0);
             }
             catch (Exception ex)
@@ -200,7 +212,7 @@ namespace OnlineTutor3.Application.Services
                     var question = questions.FirstOrDefault(q => q.Id == answer.SpellingQuestionId);
                     if (question != null)
                     {
-                        var (isCorrect, points) = await EvaluateSpellingAnswerAsync(question, answer.StudentAnswer, question.Points);
+                        var (isCorrect, points) = await EvaluateSpellingAnswerAsync(question, answer.StudentAnswer, answer.NoLetterNeeded, question.Points);
                         answer.IsCorrect = isCorrect;
                         answer.Points = points;
                         score += points;

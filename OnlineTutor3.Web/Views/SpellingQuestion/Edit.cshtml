@@ -52,12 +52,19 @@
                         <span asp-validation-for="WordWithGap" class="text-danger small"></span>
                     </div>
 
-                    <div class="mb-2">
+                    <div class="mb-2" id="correctLetterSection">
                         <label asp-for="CorrectLetter" class="form-label small">
-                            <i class="fas fa-check-circle"></i> Правильная буква <span class="text-danger">*</span>
+                            <i class="fas fa-check-circle"></i> Правильная буква <span class="text-danger" id="correctLetterRequired" style="@(Model.RequiresAnswer ? "" : "display:none;")">*</span>
                         </label>
-                        <input asp-for="CorrectLetter" class="form-control form-control-sm" placeholder="Например: о" maxlength="10" />
-                        <span asp-validation-for="CorrectLetter" class="text-danger small"></span>
+                        @if (Model.RequiresAnswer)
+                        {
+                            <input asp-for="CorrectLetter" class="form-control form-control-sm" placeholder="Например: о" maxlength="10" id="correctLetterInput" required />
+                        }
+                        else
+                        {
+                            <input name="CorrectLetter" value="" class="form-control form-control-sm" placeholder="Например: о" maxlength="10" id="correctLetterInput" data-val="false" />
+                        }
+                        <span asp-validation-for="CorrectLetter" class="text-danger small" id="correctLetterValidation"></span>
                     </div>
 
                     <div class="mb-2">
@@ -76,6 +83,19 @@
                         <span asp-validation-for="Hint" class="text-danger small"></span>
                     </div>
 
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input asp-for="RequiresAnswer" class="form-check-input" type="checkbox" id="RequiresAnswer" />
+                            <label asp-for="RequiresAnswer" class="form-check-label small" for="RequiresAnswer">
+                                <i class="fas fa-keyboard"></i> Требуется ответ (если снять галочку, то пустой ответ будет считаться правильным)
+                            </label>
+                        </div>
+                        <small class="form-text text-muted-modern d-block mt-1">
+                            <i class="fas fa-info-circle"></i>
+                            Для слов, в которых не нужно ставить букву вместо пропуска, снимите эту галочку.
+                        </small>
+                    </div>
+
                     <div class="d-flex justify-content-end gap-2 mt-3">
                         <a asp-controller="SpellingTest" asp-action="Details" asp-route-id="@Model.SpellingTestId" class="btn btn-sm btn-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Отмена
@@ -92,5 +112,126 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            const form = $('form');
+            const correctLetterInput = $('#correctLetterInput');
+            const requiresAnswerCheckbox = $('#RequiresAnswer');
+            
+            function disableValidationForField() {
+                correctLetterInput.attr('data-val', 'false');
+                correctLetterInput.removeAttr('data-val-required');
+                correctLetterInput.removeAttr('required');
+                correctLetterInput.removeClass('input-validation-error');
+                
+                if (typeof $.validator !== 'undefined' && form.length > 0) {
+                    let validator = form.data('validator');
+                    if (!validator) {
+                        validator = form.validate();
+                    }
+                    if (validator) {
+                        if (!validator.settings.ignore) {
+                            validator.settings.ignore = '';
+                        }
+                        if (validator.settings.ignore.indexOf('#correctLetterInput') === -1) {
+                            validator.settings.ignore = (validator.settings.ignore + ' #correctLetterInput').trim();
+                        }
+                        validator.resetForm();
+                    }
+                }
+                
+                $('#correctLetterValidation').text('').hide();
+                $('span[data-valmsg-for="CorrectLetter"]').text('').hide();
+                $('span.field-validation-error[data-valmsg-for="CorrectLetter"]').text('').hide();
+            }
+            
+            function enableValidationForField() {
+                if (typeof $.validator !== 'undefined' && form.length > 0) {
+                    const validator = form.data('validator');
+                    if (validator && validator.settings.ignore) {
+                        validator.settings.ignore = validator.settings.ignore.replace(/#correctLetterInput/g, '').trim();
+                        if (validator.settings.ignore === '') {
+                            delete validator.settings.ignore;
+                        }
+                    }
+                }
+            }
+            
+            function toggleCorrectLetterField() {
+                const requiresAnswer = requiresAnswerCheckbox.is(':checked');
+                const correctLetterRequired = $('#correctLetterRequired');
+                
+                if (!requiresAnswer) {
+                    correctLetterRequired.hide();
+                    correctLetterInput.removeAttr('required');
+                    correctLetterInput.attr('data-val', 'false');
+                    correctLetterInput.removeAttr('data-val-required');
+                    correctLetterInput.removeClass('input-validation-error');
+                    correctLetterInput.val('');
+                    $('span[data-valmsg-for="CorrectLetter"]').text('').hide();
+                    $('span.field-validation-error[data-valmsg-for="CorrectLetter"]').text('').hide();
+                    $('span.text-danger:has([data-valmsg-for="CorrectLetter"])').hide();
+                    $('.field-validation-error[data-valmsg-for="CorrectLetter"]').hide();
+                    disableValidationForField();
+                } else {
+                    correctLetterRequired.show();
+                    correctLetterInput.attr('required', 'required');
+                    correctLetterInput.attr('data-val', 'true');
+                    correctLetterInput.attr('data-val-required', 'Правильная буква обязательна, когда требуется ответ');
+                    correctLetterInput.removeClass('input-validation-error');
+                    enableValidationForField();
+                    
+                    if (typeof $.validator !== 'undefined' && form.length > 0) {
+                        const validator = form.data('validator');
+                        if (validator) {
+                            validator.settings.ignore = validator.settings.ignore || '';
+                            validator.settings.ignore = validator.settings.ignore.replace(/#correctLetterInput/g, '').trim();
+                            if (validator.settings.ignore === '') {
+                                delete validator.settings.ignore;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (!@Model.RequiresAnswer.ToString().ToLower()) {
+                disableValidationForField();
+                correctLetterInput.attr('data-val', 'false');
+                correctLetterInput.removeAttr('data-val-required');
+            }
+            
+            toggleCorrectLetterField();
+            
+            requiresAnswerCheckbox.on('change', function() {
+                toggleCorrectLetterField();
+            });
+            
+            form.on('submit', function(e) {
+                const requiresAnswer = requiresAnswerCheckbox.is(':checked');
+                if (!requiresAnswer) {
+                    correctLetterInput.val('');
+                    correctLetterInput.attr('data-val', 'false');
+                    correctLetterInput.removeAttr('data-val-required');
+                    correctLetterInput.removeAttr('required');
+                    correctLetterInput.removeClass('input-validation-error');
+                    
+                    $('#correctLetterValidation').text('').hide();
+                    $('span[data-valmsg-for="CorrectLetter"]').text('').hide();
+                    $('span.field-validation-error[data-valmsg-for="CorrectLetter"]').text('').hide();
+                    
+                    if (typeof $.validator !== 'undefined') {
+                        const validator = form.data('validator');
+                        if (validator) {
+                            validator.settings.ignore = validator.settings.ignore || '';
+                            if (validator.settings.ignore.indexOf('#correctLetterInput') === -1) {
+                                validator.settings.ignore = (validator.settings.ignore + ' #correctLetterInput').trim();
+                            }
+                            validator.resetForm();
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 }
 

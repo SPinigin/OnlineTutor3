@@ -23,6 +23,7 @@ namespace OnlineTutor3.Web.ViewModels
         public string? CorrectLetter { get; set; }
         public string? FullWord { get; set; }
         public string? Hint { get; set; }
+        public bool RequiresAnswer { get; set; } = true; // По умолчанию требуется ответ
         public List<string> Errors { get; set; } = new();
         public bool IsValid => !Errors.Any();
     }

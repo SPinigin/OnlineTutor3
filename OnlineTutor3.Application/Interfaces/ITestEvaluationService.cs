@@ -10,7 +10,7 @@ namespace OnlineTutor3.Application.Interfaces
         /// <summary>
         /// Оценивает ответ на вопрос по орфографии
         /// </summary>
-        Task<(bool IsCorrect, int Points)> EvaluateSpellingAnswerAsync(SpellingQuestion question, string studentAnswer, int pointsPerQuestion);
+        Task<(bool IsCorrect, int Points)> EvaluateSpellingAnswerAsync(SpellingQuestion question, string studentAnswer, bool noLetterNeeded, int pointsPerQuestion);
 
         /// <summary>
         /// Оценивает ответ на вопрос по пунктуации

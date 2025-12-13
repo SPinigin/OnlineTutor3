@@ -19,28 +19,9 @@ namespace OnlineTutor3.Web.Services
 
         private void ConfigureExcelPackage()
         {
-            try
-            {
-                // Всегда устанавливаем лицензию (если еще не установлена)
-                if (ExcelPackage.LicenseContext != LicenseContext.NonCommercial)
-                {
-                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                }
-                _logger.LogDebug("EPPlus license context: {LicenseContext}", ExcelPackage.LicenseContext);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка настройки EPPlus license");
-                // Устанавливаем лицензию принудительно, даже если была ошибка
-                try
-                {
-                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                }
-                catch
-                {
-                    // Игнорируем повторную ошибку
-                }
-            }
+            // Устанавливаем лицензию EPPlus (должна быть установлена в Program.cs, но на всякий случай устанавливаем здесь тоже)
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            _logger.LogDebug("EPPlus license context: {LicenseContext}", ExcelPackage.LicenseContext);
         }
 
         public async Task<List<ImportSpellingQuestionRow>> ParseExcelFileAsync(IFormFile file)
@@ -93,6 +74,22 @@ namespace OnlineTutor3.Web.Services
                         question.CorrectLetter = GetCellValue(worksheet, row, 2);
                         question.FullWord = GetCellValue(worksheet, row, 3);
                         question.Hint = GetCellValue(worksheet, row, 4);
+                        
+                        // Читаем RequiresAnswer из 5-го столбца (по умолчанию true)
+                        var requiresAnswerValue = GetCellValue(worksheet, row, 5);
+                        if (!string.IsNullOrWhiteSpace(requiresAnswerValue))
+                        {
+                            // Поддерживаем различные форматы: "да"/"нет", "1"/"0", "true"/"false", "да"/"нет"
+                            var normalized = requiresAnswerValue.Trim().ToLower();
+                            question.RequiresAnswer = normalized == "да" || normalized == "yes" || 
+                                                      normalized == "1" || normalized == "true" || 
+                                                      normalized == "требуется" || normalized == "required";
+                        }
+                        else
+                        {
+                            // По умолчанию требуется ответ
+                            question.RequiresAnswer = true;
+                        }
 
                         // Пропускаем пустые строки
                         if (string.IsNullOrWhiteSpace(question.WordWithGap) &&
@@ -145,25 +142,29 @@ namespace OnlineTutor3.Web.Services
             worksheet.Cells[1, 2].Value = "Правильная буква*";
             worksheet.Cells[1, 3].Value = "Полное слово*";
             worksheet.Cells[1, 4].Value = "Подсказка";
+            worksheet.Cells[1, 5].Value = "Требуется ответ";
 
             // Примеры данных (используем нижнее подчеркивание вместо многоточия)
             worksheet.Cells[2, 1].Value = "Прол_тает";
             worksheet.Cells[2, 2].Value = "е";
             worksheet.Cells[2, 3].Value = "пролетает";
             worksheet.Cells[2, 4].Value = "Безударная гласная \"е\" в корне слова \"пролетает\" проверяется подбором проверочного слова, где эта гласная находится под ударением.";
+            worksheet.Cells[2, 5].Value = "да";
 
             worksheet.Cells[3, 1].Value = "пож_лтели";
             worksheet.Cells[3, 2].Value = "е";
             worksheet.Cells[3, 3].Value = "пожелтели";
             worksheet.Cells[3, 4].Value = "Безударная гласная \"е\" в корне слова \"пожелтели\" проверяется подбором проверочного слова \"жёлтый\".";
+            worksheet.Cells[3, 5].Value = "да";
 
             worksheet.Cells[4, 1].Value = "сн_говик";
             worksheet.Cells[4, 2].Value = "е";
             worksheet.Cells[4, 3].Value = "снеговик";
             worksheet.Cells[4, 4].Value = "Безударная гласная \"е\" в корне слова \"снеговик\" проверяется с помощью слова \"снег\".";
+            worksheet.Cells[4, 5].Value = "да";
 
             // Форматирование заголовков
-            for (int i = 1; i <= 4; i++)
+            for (int i = 1; i <= 5; i++)
             {
                 worksheet.Cells[1, i].Style.Font.Bold = true;
                 // Убираем цветовое оформление, чтобы избежать проблем с SetColor
@@ -176,6 +177,7 @@ namespace OnlineTutor3.Web.Services
             worksheet.Column(2).Width = 18; // Правильная буква
             worksheet.Column(3).Width = 25; // Полное слово
             worksheet.Column(4).Width = 60; // Подсказка
+            worksheet.Column(5).Width = 18; // Требуется ответ
 
             // Добавляем лист с инструкциями
             var instructionSheet = package.Workbook.Worksheets.Add("Инструкция");
@@ -189,19 +191,22 @@ namespace OnlineTutor3.Web.Services
             instructionSheet.Cells[5, 1].Value = "2. Правильная буква - одна или несколько букв (а, е, и, о, у, я, ё). Для нескольких пропусков используйте запятую: а,о";
             instructionSheet.Cells[6, 1].Value = "3. Полное слово - слово без пропусков";
             instructionSheet.Cells[7, 1].Value = "4. Подсказка - объяснение правила (необязательно)";
+            instructionSheet.Cells[8, 1].Value = "5. Требуется ответ - укажите \"да\" или \"нет\" (по умолчанию \"да\"). Если \"нет\", то ученик должен отметить чекбокс \"Буква не нужна\"";
 
             instructionSheet.Cells[9, 1].Value = "Примеры:";
             instructionSheet.Cells[9, 1].Style.Font.Bold = true;
-            instructionSheet.Cells[10, 1].Value = "• д_ждливый | о | дождливый | Проверочное слово: дождь";
-            instructionSheet.Cells[11, 1].Value = "• л_сник | е | лесник | Проверочное слово: лес";
-            instructionSheet.Cells[12, 1].Value = "• ст_р_жил | о,о | сторожил | Проверочное слово: сторож";
+            instructionSheet.Cells[10, 1].Value = "• д_ждливый | о | дождливый | Проверочное слово: дождь | да";
+            instructionSheet.Cells[11, 1].Value = "• л_сник | е | лесник | Проверочное слово: лес | да";
+            instructionSheet.Cells[12, 1].Value = "• ст_р_жил | о,о | сторожил | Проверочное слово: сторож | да";
+            instructionSheet.Cells[13, 1].Value = "• слово_без_буквы | - | слово | Буква не требуется | нет";
 
-            instructionSheet.Cells[14, 1].Value = "Важно:";
-            instructionSheet.Cells[14, 1].Style.Font.Bold = true;
-            instructionSheet.Cells[15, 1].Value = "• Не удаляйте строку с заголовками";
-            instructionSheet.Cells[16, 1].Value = "• Заполняйте данные начиная со 2-й строки";
-            instructionSheet.Cells[17, 1].Value = "• Для нескольких пропусков используйте запятую: а,о";
-            instructionSheet.Cells[18, 1].Value = "• Используйте символ _ (нижнее подчеркивание) для обозначения пропущенной буквы";
+            instructionSheet.Cells[15, 1].Value = "Важно:";
+            instructionSheet.Cells[15, 1].Style.Font.Bold = true;
+            instructionSheet.Cells[16, 1].Value = "• Не удаляйте строку с заголовками";
+            instructionSheet.Cells[17, 1].Value = "• Заполняйте данные начиная со 2-й строки";
+            instructionSheet.Cells[18, 1].Value = "• Для нескольких пропусков используйте запятую: а,о";
+            instructionSheet.Cells[19, 1].Value = "• Используйте символ _ (нижнее подчеркивание) для обозначения пропущенной буквы";
+            instructionSheet.Cells[20, 1].Value = "• Для столбца \"Требуется ответ\" используйте: \"да\" (требуется) или \"нет\" (не требуется, по умолчанию \"да\")";
 
             instructionSheet.Cells.AutoFitColumns();
 
@@ -241,9 +246,9 @@ namespace OnlineTutor3.Web.Services
                 question.Errors.Add("Слово должно содержать символ пропуска (_)");
             }
 
-            if (string.IsNullOrWhiteSpace(question.CorrectLetter))
+            if (question.RequiresAnswer && string.IsNullOrWhiteSpace(question.CorrectLetter))
             {
-                question.Errors.Add("Правильная буква обязательна");
+                question.Errors.Add("Правильная буква обязательна, когда требуется ответ");
             }
 
             if (string.IsNullOrWhiteSpace(question.FullWord))
@@ -251,28 +256,24 @@ namespace OnlineTutor3.Web.Services
                 question.Errors.Add("Полное слово обязательно");
             }
 
-            // Проверка соответствия
-            if (!string.IsNullOrWhiteSpace(question.WordWithGap) &&
+            if (question.RequiresAnswer &&
+                !string.IsNullOrWhiteSpace(question.WordWithGap) &&
                 !string.IsNullOrWhiteSpace(question.FullWord) &&
                 !string.IsNullOrWhiteSpace(question.CorrectLetter))
             {
-                // Подсчитываем количество пропусков в слове
                 int gapCount = question.WordWithGap.Count(c => c == '_');
 
-                // Разбиваем правильные буквы по запятой
                 var correctLetters = question.CorrectLetter.Split(',')
                     .Select(l => l.Trim())
                     .Where(l => !string.IsNullOrEmpty(l))
                     .ToArray();
 
-                // Проверяем, что количество букв соответствует количеству пропусков
                 if (correctLetters.Length != gapCount)
                 {
                     question.Errors.Add($"Количество букв ({correctLetters.Length}) не соответствует количеству пропусков ({gapCount})");
                     return;
                 }
 
-                // Заменяем пропуски по очереди
                 var reconstructed = question.WordWithGap;
                 foreach (var letter in correctLetters)
                 {
@@ -283,7 +284,6 @@ namespace OnlineTutor3.Web.Services
                     }
                 }
 
-                // Сравниваем результат с полным словом (без учета регистра)
                 if (!reconstructed.Equals(question.FullWord, StringComparison.OrdinalIgnoreCase))
                 {
                     question.Errors.Add($"Полное слово \"{question.FullWord}\" не соответствует слову с заменёнными буквами \"{reconstructed}\". Проверьте правильность данных.");

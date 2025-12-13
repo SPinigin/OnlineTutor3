@@ -798,7 +798,8 @@ namespace OnlineTutor3.Web.Controllers
                             WordWithGap = importQuestion.WordWithGap ?? "",
                             CorrectLetter = importQuestion.CorrectLetter ?? "",
                             FullWord = importQuestion.FullWord ?? "",
-                            Hint = importQuestion.Hint
+                            Hint = importQuestion.Hint,
+                            RequiresAnswer = importQuestion.RequiresAnswer
                         };
 
                         await _questionRepository.CreateAsync(question);
