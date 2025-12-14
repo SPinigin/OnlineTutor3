@@ -155,9 +155,53 @@
                                 <tbody>
                                     @foreach (var result in testResults)
                                     {
-                                        var duration = result.CompletedAt.HasValue
-                                            ? (result.CompletedAt.Value - result.StartedAt).ToString(@"mm\:ss")
-                                            : "-";
+                                        // Вычисляем фактическое время прохождения с учетом пауз
+                                        string duration = "-";
+                                        if (result.CompletedAt.HasValue)
+                                        {
+                                            TimeSpan actualDuration;
+                                            int timeLimit = 0;
+                                            
+                                            if (result is SpellingTestResult spellingResult && spellingResult.SpellingTest != null)
+                                            {
+                                                timeLimit = spellingResult.SpellingTest.TimeLimit;
+                                            }
+                                            else if (result is PunctuationTestResult punctuationResult && punctuationResult.PunctuationTest != null)
+                                            {
+                                                timeLimit = punctuationResult.PunctuationTest.TimeLimit;
+                                            }
+                                            else if (result is OrthoeopyTestResult orthoeopyResult && orthoeopyResult.OrthoeopyTest != null)
+                                            {
+                                                timeLimit = orthoeopyResult.OrthoeopyTest.TimeLimit;
+                                            }
+                                            else if (result is RegularTestResult regularResult && regularResult.RegularTest != null)
+                                            {
+                                                timeLimit = regularResult.RegularTest.TimeLimit;
+                                            }
+                                            
+                                            if (timeLimit > 0 && result.TimeRemainingSeconds.HasValue)
+                                            {
+                                                var timeLimitSpan = TimeSpan.FromMinutes(timeLimit);
+                                                var timeRemaining = TimeSpan.FromSeconds(result.TimeRemainingSeconds.Value);
+                                                actualDuration = timeLimitSpan - timeRemaining;
+                                                
+                                                if (actualDuration <= TimeSpan.Zero)
+                                                {
+                                                    actualDuration = timeLimitSpan;
+                                                }
+                                                else if (actualDuration > timeLimitSpan)
+                                                {
+                                                    actualDuration = timeLimitSpan;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                // Fallback: используем разницу между CompletedAt и StartedAt
+                                                actualDuration = result.CompletedAt.Value - result.StartedAt;
+                                            }
+                                            
+                                            duration = actualDuration.ToString(@"mm\:ss");
+                                        }
 
                                         int resultId = result.Id;
                                         string resultAction = "";

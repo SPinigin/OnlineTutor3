@@ -1845,7 +1845,7 @@ namespace OnlineTutor3.Web.Controllers
                     Grade = testResult.Grade ?? 0,
                     CompletedAt = testResult.CompletedAt,
                     StartedAt = testResult.StartedAt,
-                    Duration = testResult.CompletedAt.HasValue ? testResult.CompletedAt.Value - testResult.StartedAt : TimeSpan.Zero,
+                    Duration = CalculateTestDuration(testResult, test.TimeLimit),
                     StudentName = currentUser.FullName ?? currentUser.Email ?? "",
                     ShowCorrectAnswers = test.ShowCorrectAnswers,
                     TestIcon = "fa-spell-check",
@@ -2034,7 +2034,7 @@ namespace OnlineTutor3.Web.Controllers
                     Grade = testResult.Grade ?? 0,
                     CompletedAt = testResult.CompletedAt,
                     StartedAt = testResult.StartedAt,
-                    Duration = testResult.CompletedAt.HasValue ? testResult.CompletedAt.Value - testResult.StartedAt : TimeSpan.Zero,
+                    Duration = CalculateTestDuration(testResult, test.TimeLimit),
                     StudentName = currentUser.FullName ?? currentUser.Email ?? "",
                     ShowCorrectAnswers = test.ShowCorrectAnswers,
                     TestIcon = "fa-exclamation",
@@ -2106,7 +2106,7 @@ namespace OnlineTutor3.Web.Controllers
                     Grade = testResult.Grade ?? 0,
                     CompletedAt = testResult.CompletedAt,
                     StartedAt = testResult.StartedAt,
-                    Duration = testResult.CompletedAt.HasValue ? testResult.CompletedAt.Value - testResult.StartedAt : TimeSpan.Zero,
+                    Duration = CalculateTestDuration(testResult, test.TimeLimit),
                     StudentName = currentUser.FullName ?? currentUser.Email ?? "",
                     ShowCorrectAnswers = test.ShowCorrectAnswers,
                     TestIcon = "fa-volume-up",
@@ -2187,7 +2187,7 @@ namespace OnlineTutor3.Web.Controllers
                     Grade = testResult.Grade ?? 0,
                     CompletedAt = testResult.CompletedAt,
                     StartedAt = testResult.StartedAt,
-                    Duration = testResult.CompletedAt.HasValue ? testResult.CompletedAt.Value - testResult.StartedAt : TimeSpan.Zero,
+                    Duration = CalculateTestDuration(testResult, test.TimeLimit),
                     StudentName = currentUser.FullName ?? currentUser.Email ?? "",
                     ShowCorrectAnswers = test.ShowCorrectAnswers,
                     TestIcon = "fa-list-ul",
@@ -2203,6 +2203,44 @@ namespace OnlineTutor3.Web.Controllers
                 TempData["ErrorMessage"] = "Произошла ошибка при загрузке результата.";
                 return RedirectToAction("Index");
             }
+        }
+
+        /// <summary>
+        /// Вычисляет фактическое время прохождения теста с учетом пауз
+        /// </summary>
+        private TimeSpan CalculateTestDuration(TestResult testResult, int timeLimitMinutes)
+        {
+            if (!testResult.CompletedAt.HasValue)
+            {
+                return TimeSpan.Zero;
+            }
+
+            // Если есть информация об оставшемся времени, вычисляем фактическое время прохождения
+            if (testResult.TimeRemainingSeconds.HasValue)
+            {
+                var timeLimit = TimeSpan.FromMinutes(timeLimitMinutes);
+                var timeRemaining = TimeSpan.FromSeconds(testResult.TimeRemainingSeconds.Value);
+                
+                // Фактическое время прохождения = лимит времени - оставшееся время
+                var actualDuration = timeLimit - timeRemaining;
+                
+                // Если время отрицательное или нулевое (тест завершен автоматически), используем лимит времени
+                if (actualDuration <= TimeSpan.Zero)
+                {
+                    return timeLimit;
+                }
+                
+                // Если время больше лимита (не должно быть, но на всякий случай), ограничиваем лимитом
+                if (actualDuration > timeLimit)
+                {
+                    return timeLimit;
+                }
+                
+                return actualDuration;
+            }
+
+            // Fallback: используем разницу между CompletedAt и StartedAt (может быть неточным из-за пауз)
+            return testResult.CompletedAt.Value - testResult.StartedAt;
         }
 
         /// <summary>

@@ -68,6 +68,44 @@ namespace OnlineTutor3.Web.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Вычисляет фактическое время прохождения теста с учетом пауз
+        /// </summary>
+        private TimeSpan CalculateTestDuration(TestResult testResult, int timeLimitMinutes)
+        {
+            if (!testResult.CompletedAt.HasValue)
+            {
+                return TimeSpan.Zero;
+            }
+
+            // Если есть информация об оставшемся времени, вычисляем фактическое время прохождения
+            if (testResult.TimeRemainingSeconds.HasValue)
+            {
+                var timeLimit = TimeSpan.FromMinutes(timeLimitMinutes);
+                var timeRemaining = TimeSpan.FromSeconds(testResult.TimeRemainingSeconds.Value);
+                
+                // Фактическое время прохождения = лимит времени - оставшееся время
+                var actualDuration = timeLimit - timeRemaining;
+                
+                // Если время отрицательное или нулевое (тест завершен автоматически), используем лимит времени
+                if (actualDuration <= TimeSpan.Zero)
+                {
+                    return timeLimit;
+                }
+                
+                // Если время больше лимита (не должно быть, но на всякий случай), ограничиваем лимитом
+                if (actualDuration > timeLimit)
+                {
+                    return timeLimit;
+                }
+                
+                return actualDuration;
+            }
+
+            // Fallback: используем разницу между CompletedAt и StartedAt (может быть неточным из-за пауз)
+            return testResult.CompletedAt.Value - testResult.StartedAt;
+        }
+
         public async Task<IActionResult> Index()
         {
             try
@@ -329,7 +367,7 @@ namespace OnlineTutor3.Web.Controllers
                                 Grade = spellingResult.Grade ?? 0,
                                 CompletedAt = spellingResult.CompletedAt,
                                 StartedAt = spellingResult.StartedAt,
-                                Duration = spellingResult.CompletedAt.HasValue ? spellingResult.CompletedAt.Value - spellingResult.StartedAt : TimeSpan.Zero,
+                                Duration = CalculateTestDuration(spellingResult, spellingTest.TimeLimit),
                                 StudentName = studentName,
                                 ShowCorrectAnswers = spellingTest.ShowCorrectAnswers,
                                 TestIcon = "fa-spell-check",
@@ -368,7 +406,7 @@ namespace OnlineTutor3.Web.Controllers
                                 Grade = punctuationResult.Grade ?? 0,
                                 CompletedAt = punctuationResult.CompletedAt,
                                 StartedAt = punctuationResult.StartedAt,
-                                Duration = punctuationResult.CompletedAt.HasValue ? punctuationResult.CompletedAt.Value - punctuationResult.StartedAt : TimeSpan.Zero,
+                                Duration = CalculateTestDuration(punctuationResult, punctuationTest.TimeLimit),
                                 StudentName = studentName,
                                 ShowCorrectAnswers = punctuationTest.ShowCorrectAnswers,
                                 TestIcon = "fa-exclamation",
@@ -407,7 +445,7 @@ namespace OnlineTutor3.Web.Controllers
                                 Grade = orthoeopyResult.Grade ?? 0,
                                 CompletedAt = orthoeopyResult.CompletedAt,
                                 StartedAt = orthoeopyResult.StartedAt,
-                                Duration = orthoeopyResult.CompletedAt.HasValue ? orthoeopyResult.CompletedAt.Value - orthoeopyResult.StartedAt : TimeSpan.Zero,
+                                Duration = CalculateTestDuration(orthoeopyResult, orthoeopyTest.TimeLimit),
                                 StudentName = studentName,
                                 ShowCorrectAnswers = orthoeopyTest.ShowCorrectAnswers,
                                 TestIcon = "fa-volume-up",
@@ -455,7 +493,7 @@ namespace OnlineTutor3.Web.Controllers
                                 Grade = regularResult.Grade ?? 0,
                                 CompletedAt = regularResult.CompletedAt,
                                 StartedAt = regularResult.StartedAt,
-                                Duration = regularResult.CompletedAt.HasValue ? regularResult.CompletedAt.Value - regularResult.StartedAt : TimeSpan.Zero,
+                                Duration = CalculateTestDuration(regularResult, regularTest.TimeLimit),
                                 StudentName = studentName,
                                 ShowCorrectAnswers = regularTest.ShowCorrectAnswers,
                                 TestIcon = "fa-list-ul",
