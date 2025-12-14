@@ -36,9 +36,35 @@
                 <tbody>
                     @foreach (var result in results)
                     {
-                        var duration = result.CompletedAt.HasValue && result.IsCompleted
-                            ? result.CompletedAt.Value - result.StartedAt
-                            : (TimeSpan?)null;
+                        // Вычисляем фактическое время прохождения с учетом пауз
+                        TimeSpan? duration = null;
+                        if (result.CompletedAt.HasValue && result.IsCompleted)
+                        {
+                            if (test != null && result.TimeRemainingSeconds.HasValue)
+                            {
+                                var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                                var timeRemaining = TimeSpan.FromSeconds(result.TimeRemainingSeconds.Value);
+                                var actualDuration = timeLimit - timeRemaining;
+                                
+                                if (actualDuration <= TimeSpan.Zero)
+                                {
+                                    duration = timeLimit;
+                                }
+                                else if (actualDuration > timeLimit)
+                                {
+                                    duration = timeLimit;
+                                }
+                                else
+                                {
+                                    duration = actualDuration;
+                                }
+                            }
+                            else
+                            {
+                                // Fallback: используем разницу между CompletedAt и StartedAt
+                                duration = result.CompletedAt.Value - result.StartedAt;
+                            }
+                        }
                         var grade = result.Grade ?? (result.Percentage >= 91 ? 5 : result.Percentage >= 76 ? 4 : result.Percentage >= 61 ? 3 : 2);
                         var gradeColor = grade == 5 ? "success" : grade == 4 ? "info" : grade == 3 ? "warning" : "danger";
                         

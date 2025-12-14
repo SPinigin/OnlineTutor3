@@ -277,10 +277,36 @@ namespace OnlineTutor3.Web.Controllers
                     stats.LastCompletion = completedResultsWithDate.Max(r => r.CompletedAt);
                 }
 
-                // Среднее время выполнения
+                // Среднее время выполнения (с учетом пауз)
                 var completionTimes = completedResults
                     .Where(r => r.CompletedAt.HasValue)
-                    .Select(r => (r.CompletedAt!.Value - r.StartedAt).TotalSeconds)
+                    .Select(r =>
+                    {
+                        // Если есть информация об оставшемся времени, вычисляем фактическое время прохождения
+                        if (r.TimeRemainingSeconds.HasValue)
+                        {
+                            var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                            var timeRemaining = TimeSpan.FromSeconds(r.TimeRemainingSeconds.Value);
+                            var actualDuration = timeLimit - timeRemaining;
+                            
+                            // Если время отрицательное или нулевое (тест завершен автоматически), используем лимит времени
+                            if (actualDuration <= TimeSpan.Zero)
+                            {
+                                return timeLimit.TotalSeconds;
+                            }
+                            
+                            // Если время больше лимита (не должно быть, но на всякий случай), ограничиваем лимитом
+                            if (actualDuration > timeLimit)
+                            {
+                                return timeLimit.TotalSeconds;
+                            }
+                            
+                            return actualDuration.TotalSeconds;
+                        }
+                        
+                        // Fallback: используем разницу между CompletedAt и StartedAt (может быть неточным из-за пауз)
+                        return (r.CompletedAt!.Value - r.StartedAt).TotalSeconds;
+                    })
                     .Where(seconds => seconds > 0)
                     .ToList();
                 
@@ -539,9 +565,36 @@ namespace OnlineTutor3.Web.Controllers
                     stats.LastCompletion = completedResultsWithDate.Max(r => r.CompletedAt);
                 }
 
+                // Среднее время выполнения (с учетом пауз)
                 var completionTimes = completedResults
                     .Where(r => r.CompletedAt.HasValue)
-                    .Select(r => (r.CompletedAt!.Value - r.StartedAt).TotalSeconds)
+                    .Select(r =>
+                    {
+                        // Если есть информация об оставшемся времени, вычисляем фактическое время прохождения
+                        if (r.TimeRemainingSeconds.HasValue)
+                        {
+                            var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                            var timeRemaining = TimeSpan.FromSeconds(r.TimeRemainingSeconds.Value);
+                            var actualDuration = timeLimit - timeRemaining;
+                            
+                            // Если время отрицательное или нулевое (тест завершен автоматически), используем лимит времени
+                            if (actualDuration <= TimeSpan.Zero)
+                            {
+                                return timeLimit.TotalSeconds;
+                            }
+                            
+                            // Если время больше лимита (не должно быть, но на всякий случай), ограничиваем лимитом
+                            if (actualDuration > timeLimit)
+                            {
+                                return timeLimit.TotalSeconds;
+                            }
+                            
+                            return actualDuration.TotalSeconds;
+                        }
+                        
+                        // Fallback: используем разницу между CompletedAt и StartedAt (может быть неточным из-за пауз)
+                        return (r.CompletedAt!.Value - r.StartedAt).TotalSeconds;
+                    })
                     .Where(seconds => seconds > 0)
                     .ToList();
                 
@@ -714,9 +767,36 @@ namespace OnlineTutor3.Web.Controllers
                     stats.LastCompletion = completedResultsWithDate.Max(r => r.CompletedAt);
                 }
 
+                // Среднее время выполнения (с учетом пауз)
                 var completionTimes = completedResults
                     .Where(r => r.CompletedAt.HasValue)
-                    .Select(r => (r.CompletedAt!.Value - r.StartedAt).TotalSeconds)
+                    .Select(r =>
+                    {
+                        // Если есть информация об оставшемся времени, вычисляем фактическое время прохождения
+                        if (r.TimeRemainingSeconds.HasValue)
+                        {
+                            var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                            var timeRemaining = TimeSpan.FromSeconds(r.TimeRemainingSeconds.Value);
+                            var actualDuration = timeLimit - timeRemaining;
+                            
+                            // Если время отрицательное или нулевое (тест завершен автоматически), используем лимит времени
+                            if (actualDuration <= TimeSpan.Zero)
+                            {
+                                return timeLimit.TotalSeconds;
+                            }
+                            
+                            // Если время больше лимита (не должно быть, но на всякий случай), ограничиваем лимитом
+                            if (actualDuration > timeLimit)
+                            {
+                                return timeLimit.TotalSeconds;
+                            }
+                            
+                            return actualDuration.TotalSeconds;
+                        }
+                        
+                        // Fallback: используем разницу между CompletedAt и StartedAt (может быть неточным из-за пауз)
+                        return (r.CompletedAt!.Value - r.StartedAt).TotalSeconds;
+                    })
                     .Where(seconds => seconds > 0)
                     .ToList();
                 
@@ -956,9 +1036,36 @@ namespace OnlineTutor3.Web.Controllers
                     stats.LastCompletion = completedResultsWithDate.Max(r => r.CompletedAt);
                 }
 
+                // Среднее время выполнения (с учетом пауз)
                 var completionTimes = completedResults
                     .Where(r => r.CompletedAt.HasValue)
-                    .Select(r => (r.CompletedAt!.Value - r.StartedAt).TotalSeconds)
+                    .Select(r =>
+                    {
+                        // Если есть информация об оставшемся времени, вычисляем фактическое время прохождения
+                        if (r.TimeRemainingSeconds.HasValue)
+                        {
+                            var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                            var timeRemaining = TimeSpan.FromSeconds(r.TimeRemainingSeconds.Value);
+                            var actualDuration = timeLimit - timeRemaining;
+                            
+                            // Если время отрицательное или нулевое (тест завершен автоматически), используем лимит времени
+                            if (actualDuration <= TimeSpan.Zero)
+                            {
+                                return timeLimit.TotalSeconds;
+                            }
+                            
+                            // Если время больше лимита (не должно быть, но на всякий случай), ограничиваем лимитом
+                            if (actualDuration > timeLimit)
+                            {
+                                return timeLimit.TotalSeconds;
+                            }
+                            
+                            return actualDuration.TotalSeconds;
+                        }
+                        
+                        // Fallback: используем разницу между CompletedAt и StartedAt (может быть неточным из-за пауз)
+                        return (r.CompletedAt!.Value - r.StartedAt).TotalSeconds;
+                    })
                     .Where(seconds => seconds > 0)
                     .ToList();
                 
