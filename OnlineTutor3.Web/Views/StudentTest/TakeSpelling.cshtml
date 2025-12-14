@@ -363,15 +363,43 @@
         let timerInterval;
         let timeSaveInterval;
         let testCompleting = false;
-        let isTransitioning = false; // Флаг для предотвращения множественных кликов
+        let isTransitioning = false;
+        
+        let questionsData = {};
+        @foreach (var question in Model.Questions)
+        {
+            var escapedWordWithGap = (question.WordWithGap ?? "").Replace("'", "\\'").Replace("\"", "\\\"");
+            <text>
+            questionsData[@question.Id] = {
+                wordWithGap: '@Html.Raw(escapedWordWithGap)',
+                orderIndex: @question.OrderIndex
+            };
+            </text>
+        }
 
         $(document).ready(function() {
             initializeTest();
             startTimer();
             loadExistingAnswers();
 
-            // Обработчик завершения теста
-            $('form[action*="CompleteSpellingTest"]').on('submit', function() {
+            $('form[action*="CompleteSpellingTest"]').on('submit', function(e) {
+                const warnings = validateGapsAndAnswers();
+                
+                if (warnings.length > 0) {
+                    let warningMessage = 'Внимание! Обнаружены вопросы с неполными ответами:\n\n';
+                    warnings.forEach((warning, index) => {
+                        const wordDisplay = warning.wordWithGap.replace(/_/g, '___').replace(/…/g, '…');
+                        warningMessage += `${index + 1}. Вопрос ${warning.questionIndex + 1}: "${wordDisplay}"\n`;
+                        warningMessage += `   Пропусков: ${warning.gapCount}, в ответе: ${warning.answerLetterCount} ${warning.answerLetterCount === 1 ? 'буква' : 'букв'}\n\n`;
+                    });
+                    warningMessage += 'Для вопросов с несколькими пропусками необходимо ввести все буквы через запятую.\n\nВы уверены, что хотите завершить тест?';
+                    
+                    if (!confirm(warningMessage)) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+                
                 testCompleting = true;
             });
         });
@@ -555,15 +583,90 @@
             });
         }
 
+        function countGaps(wordWithGap) {
+            if (!wordWithGap) return 0;
+            let count = 0;
+            for (let i = 0; i < wordWithGap.length; i++) {
+                if (wordWithGap[i] === '_' || wordWithGap[i] === '…') {
+                    count++;
+                }
+            }
+            return count;
+        }
+        
+        function countAnswerLetters(answer) {
+            if (!answer || answer.trim() === '') return 0;
+            return answer.split(',')
+                .map(letter => letter.trim())
+                .filter(letter => letter.length > 0)
+                .length;
+        }
+        
+        function validateGapsAndAnswers() {
+            const warnings = [];
+            
+            for (let questionId in questionsData) {
+                const questionData = questionsData[questionId];
+                const answerData = answers[parseInt(questionId)];
+                
+                if (!answerData || answerData.noLetterNeeded) {
+                    continue;
+                }
+                
+                if (!answerData.answer || answerData.answer.trim() === '') {
+                    continue;
+                }
+                
+                const gapCount = countGaps(questionData.wordWithGap);
+                if (gapCount <= 1) {
+                    continue;
+                }
+                
+                const answerLetterCount = countAnswerLetters(answerData.answer);
+                if (answerLetterCount < gapCount) {
+                    const questionCard = $(`.question-card[data-question-id="${questionId}"]`);
+                    const questionIndex = questionCard.data('question-index');
+                    warnings.push({
+                        questionId: parseInt(questionId),
+                        questionIndex: questionIndex !== undefined ? questionIndex : -1,
+                        gapCount: gapCount,
+                        answerLetterCount: answerLetterCount,
+                        wordWithGap: questionData.wordWithGap
+                    });
+                }
+            }
+            
+            return warnings;
+        }
+        
         function nextQuestion() {
-            if (isTransitioning) return; // Предотвращаем множественные клики
+            if (isTransitioning) return;
+            
+            const currentCard = $('.question-card.active');
+            const currentQuestionId = currentCard.data('question-id');
+            const currentQuestionData = questionsData[currentQuestionId];
+            const currentAnswerData = answers[currentQuestionId];
+            
+            if (currentQuestionData && currentAnswerData && !currentAnswerData.noLetterNeeded) {
+                const gapCount = countGaps(currentQuestionData.wordWithGap);
+                if (gapCount > 1 && currentAnswerData.answer) {
+                    const answerLetterCount = countAnswerLetters(currentAnswerData.answer);
+                    if (answerLetterCount < gapCount) {
+                        const wordWithGapDisplay = currentQuestionData.wordWithGap.replace(/_/g, '___').replace(/…/g, '…');
+                        if (!confirm(`Внимание! В слове "${wordWithGapDisplay}" несколько пропусков (${gapCount}), а в ответе указано только ${answerLetterCount} ${answerLetterCount === 1 ? 'буква' : 'буквы'}. Пожалуйста, введите все буквы через запятую (например: а,о).\n\nПерейти к следующему вопросу? Нажмите "Ок" \nДля изменения ответа нажмите "Отмена" `)) {
+                            return;
+                        }
+                    }
+                }
+            }
+            
             if (currentQuestionIndex < totalQuestions - 1) {
                 showQuestion(currentQuestionIndex + 1);
             }
         }
 
         function previousQuestion() {
-            if (isTransitioning) return; // Предотвращаем множественные клики
+            if (isTransitioning) return;
             if (currentQuestionIndex > 0) {
                 showQuestion(currentQuestionIndex - 1);
             }
@@ -725,6 +828,22 @@
         }
 
         function showFinishModal() {
+            const warnings = validateGapsAndAnswers();
+            
+            if (warnings.length > 0) {
+                let warningMessage = 'Внимание! Обнаружены вопросы с неполными ответами:\n\n';
+                warnings.forEach((warning, index) => {
+                    const wordDisplay = warning.wordWithGap.replace(/_/g, '___').replace(/…/g, '…');
+                    warningMessage += `${index + 1}. Вопрос ${warning.questionIndex + 1}: "${wordDisplay}"\n`;
+                    warningMessage += `   Пропусков: ${warning.gapCount}, в ответе: ${warning.answerLetterCount} ${warning.answerLetterCount === 1 ? 'буква' : 'букв'}\n\n`;
+                });
+                warningMessage += 'Для вопросов с несколькими пропусками необходимо ввести все буквы через запятую.\n\nВы уверены, что хотите завершить тест?';
+                
+                if (!confirm(warningMessage)) {
+                    return;
+                }
+            }
+            
             $('#currentQuestionModal').text(currentQuestionIndex + 1);
             $('#answeredCountModal').text(Object.keys(answers).length);
 
