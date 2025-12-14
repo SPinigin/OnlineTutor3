@@ -120,7 +120,7 @@
                             <small class="form-text text-muted-modern d-block mt-1">
                                 <i class="fas fa-info-circle"></i>
                                 @{
-                                    var gapCount = question.WordWithGap.Count(c => c == '…' || c == '_');
+                                    var gapCount = question.WordWithGap.Count(c => c == '_');
                                     if (gapCount > 1)
                                     {
                                         <span>Введите @gapCount буквы через запятую (например: а,о) или отметьте чекбокс "Буква не нужна", если буквы не требуются</span>
@@ -388,7 +388,7 @@
                 if (warnings.length > 0) {
                     let warningMessage = 'Внимание! Обнаружены вопросы с неполными ответами:\n\n';
                     warnings.forEach((warning, index) => {
-                        const wordDisplay = warning.wordWithGap.replace(/_/g, '___').replace(/…/g, '…');
+                        const wordDisplay = warning.wordWithGap.replace(/_/g, '___');
                         warningMessage += `${index + 1}. Вопрос ${warning.questionIndex + 1}: "${wordDisplay}"\n`;
                         warningMessage += `   Пропусков: ${warning.gapCount}, в ответе: ${warning.answerLetterCount} ${warning.answerLetterCount === 1 ? 'буква' : 'букв'}\n\n`;
                     });
@@ -587,7 +587,7 @@
             if (!wordWithGap) return 0;
             let count = 0;
             for (let i = 0; i < wordWithGap.length; i++) {
-                if (wordWithGap[i] === '_' || wordWithGap[i] === '…') {
+                if (wordWithGap[i] === '_') {
                     count++;
                 }
             }
@@ -652,7 +652,7 @@
                 if (gapCount > 1 && currentAnswerData.answer) {
                     const answerLetterCount = countAnswerLetters(currentAnswerData.answer);
                     if (answerLetterCount < gapCount) {
-                        const wordWithGapDisplay = currentQuestionData.wordWithGap.replace(/_/g, '___').replace(/…/g, '…');
+                        const wordWithGapDisplay = currentQuestionData.wordWithGap.replace(/_/g, '___');
                         if (!confirm(`Внимание! В слове "${wordWithGapDisplay}" несколько пропусков (${gapCount}), а в ответе указано только ${answerLetterCount} ${answerLetterCount === 1 ? 'буква' : 'буквы'}. Пожалуйста, введите все буквы через запятую (например: а,о).\n\nПерейти к следующему вопросу? Нажмите "Ок" \nДля изменения ответа нажмите "Отмена" `)) {
                             return;
                         }
@@ -833,7 +833,7 @@
             if (warnings.length > 0) {
                 let warningMessage = 'Внимание! Обнаружены вопросы с неполными ответами:\n\n';
                 warnings.forEach((warning, index) => {
-                    const wordDisplay = warning.wordWithGap.replace(/_/g, '___').replace(/…/g, '…');
+                    const wordDisplay = warning.wordWithGap.replace(/_/g, '___');
                     warningMessage += `${index + 1}. Вопрос ${warning.questionIndex + 1}: "${wordDisplay}"\n`;
                     warningMessage += `   Пропусков: ${warning.gapCount}, в ответе: ${warning.answerLetterCount} ${warning.answerLetterCount === 1 ? 'буква' : 'букв'}\n\n`;
                 });
