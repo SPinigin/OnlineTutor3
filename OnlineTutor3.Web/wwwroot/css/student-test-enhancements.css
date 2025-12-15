@@ -232,6 +232,28 @@
     color: #5a6268;
 }
 
+/* Вопрос с неполным ответом - заливка оранжевым/желтым цветом */
+.question-nav-btn.btn-modern-warning {
+    border-color: #ffc107;
+    background-color: #ffc107;
+    color: #212529;
+    font-weight: 600;
+}
+
+.question-nav-btn.btn-modern-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+    color: #212529;
+}
+
+/* Текущий вопрос с неполным ответом */
+.question-nav-btn.btn-modern-warning.active {
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.5);
+    background-color: #ffc107;
+    color: #212529;
+    border-color: #ffc107;
+}
+
 /* Адаптивность для мобильных */
 @media (max-width: 768px) {
     .question-navigator {

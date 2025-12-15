@@ -833,10 +833,19 @@ namespace OnlineTutor3.Web.Controllers
                     return NotFound();
                 }
 
-                if (!_securityValidation.ValidateTimeLimit(testResult.StartedAt, test.TimeLimit, 60))
+                // Проверяем, истекло ли время
+                bool timeExpired = !_securityValidation.ValidateTimeLimit(testResult.StartedAt, test.TimeLimit, 60);
+                if (timeExpired)
                 {
                     _logger.LogWarning("Попытка завершить тест после истечения времени. ResultId: {ResultId}", id);
                     TempData["ErrorMessage"] = "Время теста истекло. Тест будет завершен автоматически.";
+                    
+                    // Если время истекло, устанавливаем TimeRemainingSeconds в 0 или отрицательное значение
+                    // чтобы CalculateTestDuration правильно рассчитал время прохождения как полный лимит
+                    if (testResult.TimeRemainingSeconds.HasValue && testResult.TimeRemainingSeconds.Value > 0)
+                    {
+                        testResult.TimeRemainingSeconds = 0;
+                    }
                 }
 
                 var (score, maxScore, percentage) = await _testEvaluationService.CalculateSpellingTestResultAsync(testResult.Id, testResult.SpellingTestId);
@@ -2215,10 +2224,11 @@ namespace OnlineTutor3.Web.Controllers
                 return TimeSpan.Zero;
             }
 
+            var timeLimit = TimeSpan.FromMinutes(timeLimitMinutes);
+
             // Если есть информация об оставшемся времени, вычисляем фактическое время прохождения
             if (testResult.TimeRemainingSeconds.HasValue)
             {
-                var timeLimit = TimeSpan.FromMinutes(timeLimitMinutes);
                 var timeRemaining = TimeSpan.FromSeconds(testResult.TimeRemainingSeconds.Value);
                 
                 // Фактическое время прохождения = лимит времени - оставшееся время
@@ -2236,11 +2246,21 @@ namespace OnlineTutor3.Web.Controllers
                     return timeLimit;
                 }
                 
+                // Дополнительная проверка: если фактическое время прохождения (CompletedAt - StartedAt) 
+                // больше или равно лимиту, значит время истекло, используем полный лимит
+                var elapsedTime = testResult.CompletedAt.Value - testResult.StartedAt;
+                if (elapsedTime >= timeLimit)
+                {
+                    return timeLimit;
+                }
+                
                 return actualDuration;
             }
 
-            // Fallback: используем разницу между CompletedAt и StartedAt (может быть неточным из-за пауз)
-            return testResult.CompletedAt.Value - testResult.StartedAt;
+            // Fallback: используем разницу между CompletedAt и StartedAt
+            // Но ограничиваем лимитом времени, если прошло больше лимита
+            var fallbackDuration = testResult.CompletedAt.Value - testResult.StartedAt;
+            return fallbackDuration > timeLimit ? timeLimit : fallbackDuration;
         }
 
         /// <summary>

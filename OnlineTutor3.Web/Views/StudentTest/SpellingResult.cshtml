@@ -113,8 +113,8 @@
                             <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
                                 @{
                                     var totalSeconds = Model.Duration.TotalSeconds;
-                                    var maxSeconds = 3600;
-                                    var timePercentage = totalSeconds > maxSeconds ? 100 : (totalSeconds / maxSeconds) * 100;
+                                    var maxSeconds = Model.Test.TimeLimit * 60; // Лимит времени теста в секундах
+                                    var timePercentage = maxSeconds > 0 ? Math.Min(100, (totalSeconds / maxSeconds) * 100) : 0;
                                 }
                                 <defs>
                                     <linearGradient id="grad3-@Model.TestResult.Id" x1="0%" y1="0%" x2="100%" y2="100%">

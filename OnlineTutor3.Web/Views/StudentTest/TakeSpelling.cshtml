@@ -364,6 +364,7 @@
         let timeSaveInterval;
         let testCompleting = false;
         let isTransitioning = false;
+        let isAutoCompleting = false; // Флаг автоматического завершения из-за истечения времени
         
         let questionsData = {};
         @foreach (var question in Model.Questions)
@@ -392,11 +393,19 @@
                         warningMessage += `${index + 1}. Вопрос ${warning.questionIndex + 1}: "${wordDisplay}"\n`;
                         warningMessage += `   Пропусков: ${warning.gapCount}, в ответе: ${warning.answerLetterCount} ${warning.answerLetterCount === 1 ? 'буква' : 'букв'}\n\n`;
                     });
-                    warningMessage += 'Для вопросов с несколькими пропусками необходимо ввести все буквы через запятую.\n\nВы уверены, что хотите завершить тест?';
                     
-                    if (!confirm(warningMessage)) {
-                        e.preventDefault();
-                        return false;
+                    // Если тест завершается автоматически из-за истечения времени,
+                    // показываем только информационное сообщение без возможности отмены
+                    if (isAutoCompleting) {
+                        warningMessage += 'Для вопросов с несколькими пропусками необходимо ввести все буквы через запятую.\n\nТест будет завершен автоматически.';
+                        alert(warningMessage);
+                    } else {
+                        warningMessage += 'Для вопросов с несколькими пропусками необходимо ввести все буквы через запятую.\n\nВы уверены, что хотите завершить тест?';
+                        
+                        if (!confirm(warningMessage)) {
+                            e.preventDefault();
+                            return false;
+                        }
                     }
                 }
                 
@@ -763,6 +772,29 @@
             }
         }
 
+        function isIncompleteAnswer(questionId, answerData) {
+            if (!answerData || answerData.noLetterNeeded) {
+                return false;
+            }
+            
+            if (!answerData.answer || answerData.answer.trim() === '') {
+                return false;
+            }
+            
+            const questionData = questionsData[questionId];
+            if (!questionData) {
+                return false;
+            }
+            
+            const gapCount = countGaps(questionData.wordWithGap);
+            if (gapCount <= 1) {
+                return false;
+            }
+            
+            const answerLetterCount = countAnswerLetters(answerData.answer);
+            return answerLetterCount < gapCount;
+        }
+
         function updateProgress() {
             const answeredCount = Object.keys(answers).length;
             const percentage = (answeredCount / totalQuestions) * 100;
@@ -776,11 +808,18 @@
                 const questionId = $(`.question-card[data-question-index="${idx}"]`).data('question-id');
                 const answerData = answers[questionId];
                 const isAnswered = answerData !== undefined;
+                const isIncomplete = isIncompleteAnswer(questionId, answerData);
                 
-                $(this).removeClass('btn-modern-success btn-modern-primary active btn-modern-outline-secondary');
+                $(this).removeClass('btn-modern-success btn-modern-primary active btn-modern-outline-secondary btn-modern-warning');
                 
                 if (idx === currentQuestionIndex) {
-                    $(this).addClass('btn-modern-primary active');
+                    if (isIncomplete) {
+                        $(this).addClass('btn-modern-warning active');
+                    } else {
+                        $(this).addClass('btn-modern-primary active');
+                    }
+                } else if (isIncomplete) {
+                    $(this).addClass('btn-modern-warning');
                 } else if (isAnswered) {
                     $(this).addClass('btn-modern-success');
                 } else {
@@ -919,9 +958,31 @@
             }
             
             alert('Время истекло! Тест будет автоматически завершен.');
+            isAutoCompleting = true; // Устанавливаем флаг автоматического завершения
             testCompleting = true;
             clearInterval(timerInterval);
             clearInterval(timeSaveInterval);
+            
+            // Устанавливаем timeRemaining в 0 и сохраняем на сервере перед завершением
+            // чтобы сервер правильно рассчитал время прохождения
+            timeRemaining = 0;
+            $.ajax({
+                url: '@Url.Action("UpdateTimeRemaining", "StudentTest")',
+                type: 'POST',
+                async: false, // Синхронный запрос, чтобы гарантировать сохранение перед отправкой формы
+                data: {
+                    testResultId: testResultId,
+                    timeRemainingSeconds: 0,
+                    testType: testType
+                },
+                success: function() {
+                    // Время успешно сохранено
+                },
+                error: function() {
+                    // В случае ошибки все равно продолжаем завершение
+                }
+            });
+            
             $('form[action*="CompleteSpellingTest"]').submit();
         }
 
