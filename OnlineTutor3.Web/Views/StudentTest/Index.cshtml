@@ -449,6 +449,77 @@ else
                                                 </tr>
                                             }
                                         }
+
+                                        @if (assignmentInfo.NotParticleTests.Any())
+                                        {
+                                            @foreach (var test in assignmentInfo.NotParticleTests)
+                                            {
+                                                <tr class="test-row" data-test-title="@test.Title.ToLower()">
+                                                    <td>
+                                                        <span class="badge badge-modern-secondary">
+                                                            <i class="fas fa-minus-circle"></i>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <small class="text-dark-modern"><strong>@test.Title</strong></small>
+                                                        @if (!string.IsNullOrEmpty(test.Description))
+                                                        {
+                                                            <br>
+                                                            <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <small class="text-muted-modern">@test.QuestionsCount</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <small class="text-muted-modern">@test.TimeLimit мин</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge @(test.AttemptsUsed >= test.MaxAttempts ? "badge-modern-danger" : "badge-modern-warning") badge-sm">
+                                                            @test.AttemptsUsed/@test.MaxAttempts
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @if (test.BestPercentage.HasValue)
+                                                        {
+                                                            <span class="badge @(test.BestPercentage >= 80 ? "badge-modern-success" : test.BestPercentage >= 60 ? "badge-modern-warning" : "badge-modern-danger") badge-sm">
+                                                                @test.BestPercentage.Value.ToString("F1")%
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <small class="text-muted-modern">—</small>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center" onclick="event.stopPropagation();">
+                                                        <div class="d-flex gap-1 justify-content-center">
+                                                            @if (test.Status == TestStatus.Ongoing && test.OngoingTestResultId.HasValue)
+                                                            {
+                                                                <a asp-action="TakeNotParticle" asp-route-id="@test.OngoingTestResultId.Value" 
+                                                                   class="btn btn-sm btn-modern-outline-warning" title="Продолжить">
+                                                                    <i class="fas fa-play"></i>
+                                                                    <span class="d-none d-lg-inline ms-1">Продолжить</span>
+                                                                </a>
+                                                            }
+                                                            else if (test.Status == TestStatus.CanStart)
+                                                            {
+                                                                <button type="button" class="btn btn-sm btn-modern-success"
+                                                                        onclick="confirmStartTest(@test.Id, '@test.Title.Replace("'", "\\'")', @test.TimeLimit, 'notparticle')" title="Начать">
+                                                                    <i class="fas fa-play"></i>
+                                                                    <span class="d-none d-lg-inline ms-1">Начать</span>
+                                                                </button>
+                                                            }
+                                                            else if (test.Status == TestStatus.Exhausted)
+                                                            {
+                                                                <button type="button" class="btn btn-sm btn-modern-outline-secondary" disabled title="Исчерпано">
+                                                                    <i class="fas fa-ban"></i>
+                                                                </button>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
                                     </tbody>
                                 </table>
                             </div>
@@ -560,6 +631,8 @@ else
                 actionUrl = '@Url.Action("StartOrthoeopy")/' + testId;
             } else if (testType === 'regular') {
                 actionUrl = '@Url.Action("StartRegular")/' + testId;
+            } else if (testType === 'notparticle') {
+                actionUrl = '@Url.Action("StartNotParticle")/' + testId;
             }
 
             document.getElementById('startTestButton').href = actionUrl;

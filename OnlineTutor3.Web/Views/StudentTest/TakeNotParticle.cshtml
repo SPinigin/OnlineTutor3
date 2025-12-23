@@ -1,0 +1,550 @@
+@model OnlineTutor3.Web.ViewModels.TakeNotParticleTestViewModel
+@{
+    ViewData["Title"] = $"Прохождение теста: {Model.Test.Title}";
+}
+
+<div class="mb-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-compact">
+            <li class="breadcrumb-item">
+                <a asp-controller="StudentTest" asp-action="Index">Доступные тесты</a>
+            </li>
+            <li class="breadcrumb-item active">@Model.Test.Title</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="test-container">
+    <div class="card modern-card mb-3">
+        <div class="card-header modern-card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <div class="d-flex justify-content-between align-items-center gap-2">
+                <div class="flex-grow-1 min-w-0">
+                    <h6 class="mb-0 d-flex align-items-center" style="color: white;">
+                        <i class="fas fa-spell-check me-2 flex-shrink-0"></i>
+                        <span class="text-truncate">@Model.Test.Title</span>
+                    </h6>
+                </div>
+                <div class="flex-shrink-0">
+                    <div id="timer" class="d-flex align-items-center" style="color: white;">
+                        <i class="fas fa-clock me-2"></i>
+                        <span id="timeRemaining" class="h6 mb-0 font-monospace">
+                            @($"{Model.TimeRemaining.Minutes:D2}:{Model.TimeRemaining.Seconds:D2}")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body p-2 p-md-3">
+            <div class="progress mb-2" style="height: 8px;">
+                <div class="progress-bar" role="progressbar" style="width: 0%; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);" id="progressBar"></div>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <small class="text-muted-modern mb-0">
+                    <i class="fas fa-redo-alt"></i>
+                    Попытка @Model.TestResult.AttemptNumber из @Model.Test.MaxAttempts
+                </small>
+                <small class="text-muted-modern mb-0">
+                    <i class="fas fa-question-circle"></i>
+                    Вопрос <span id="currentQuestion" class="fw-bold text-dark-modern">1</span> из @Model.Questions.Count
+                </small>
+                <small class="text-muted-modern mb-0" id="answeredInfo">
+                    <i class="fas fa-check-circle nav-link-icon-green"></i>
+                    Отвечено: <span id="answeredCount" class="text-dark-modern">0</span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div id="questionsContainer">
+        @for (int i = 0; i < Model.Questions.Count; i++)
+        {
+            var question = Model.Questions[i];
+            var existingAnswer = Model.Answers.FirstOrDefault(a => a.NotParticleQuestionId == question.Id);
+
+            <div class="question-card @(i == 0 ? "active" : "d-none")" data-question-index="@i" data-question-id="@question.Id">
+                <div class="card modern-card">
+                    <div class="card-body p-3 p-md-4">
+                        <div class="question-header mb-3">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <h6 class="text-dark-modern mb-0">
+                                    <i class="fas fa-question-circle nav-link-icon"></i>
+                                    Вопрос @(i + 1)
+                                </h6>
+                                <span class="badge badge-modern-info badge-sm">
+                                    <i class="fas fa-star"></i> Балл: @question.Points
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="question-content mb-4">
+                            <p class="mb-3 text-muted-modern">
+                                <i class="fas fa-pencil-alt"></i>
+                                Выберите правильный вариант написания частицы "не":
+                            </p>
+                            
+                            <div class="text-container text-center mb-4">
+                                <div class="text-with-gap" style="font-size: 1.3rem; font-weight: 500; letter-spacing: 0.05em; padding: 1.5rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 0.75rem; border: 2px solid #dee2e6;">
+                                    @question.TextWithGap
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="answer-buttons-section mb-4">
+                            <label class="form-label small fw-semibold mb-3 d-block">
+                                <i class="fas fa-mouse-pointer"></i> Ваш ответ:
+                            </label>
+                            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                                @{
+                                    var existingAnswerIsMerged = existingAnswer != null && 
+                                        (existingAnswer.StudentAnswer?.Trim().ToLower() == "слитно" || 
+                                         existingAnswer.StudentAnswer?.Trim().ToLower() == "true" || 
+                                         existingAnswer.StudentAnswer?.Trim().ToLower() == "1");
+                                }
+                                <button type="button" 
+                                        class="btn answer-btn btn-lg @(existingAnswerIsMerged ? "btn-modern-success" : "btn-modern-outline-success")"
+                                        data-question-id="@question.Id"
+                                        data-answer="слитно"
+                                        onclick="selectAnswer(@question.Id, true)"
+                                        style="min-width: 150px; padding: 1rem 2rem; font-size: 1.1rem; font-weight: 600;">
+                                    <i class="fas fa-link me-2"></i>
+                                    Слитно
+                                </button>
+                                <button type="button" 
+                                        class="btn answer-btn btn-lg @(!existingAnswerIsMerged && existingAnswer != null ? "btn-modern-danger" : "btn-modern-outline-danger")"
+                                        data-question-id="@question.Id"
+                                        data-answer="раздельно"
+                                        onclick="selectAnswer(@question.Id, false)"
+                                        style="min-width: 150px; padding: 1rem 2rem; font-size: 1.1rem; font-weight: 600;">
+                                    <i class="fas fa-unlink me-2"></i>
+                                    Раздельно
+                                </button>
+                            </div>
+                            <div class="text-center mt-3">
+                                <small class="text-muted-modern" id="answerStatus_@question.Id">
+                                    @if (existingAnswer != null && !string.IsNullOrEmpty(existingAnswer.StudentAnswer))
+                                    {
+                                        <i class="fas fa-check-circle nav-link-icon-green"></i>
+                                        <span>Ответ сохранен: <strong>@existingAnswer.StudentAnswer</strong></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted-modern">Выберите вариант ответа</span>
+                                    }
+                                </small>
+                            </div>
+                        </div>
+
+                        @if (Model.Test.ShowHints && !string.IsNullOrEmpty(question.Hint))
+                        {
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-modern-outline-info btn-sm" onclick="toggleHint(@i)">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span class="hint-button-text">Показать подсказку</span>
+                                </button>
+                            </div>
+                            
+                            <div class="hint-container" style="display: none;">
+                                <div class="alert modern-alert-info alert-sm py-2 mb-0">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-lightbulb mt-1 me-2"></i>
+                                        <div>
+                                            <strong class="small text-dark-modern">Подсказка:</strong>
+                                            <p class="mb-0 small text-dark-modern">@question.Hint</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="card modern-card mt-3 navigation-card">
+        <div class="card-body p-2 p-md-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap flex-md-nowrap gap-2 mb-2">
+                <div class="d-flex gap-2 w-100 w-md-auto justify-content-around justify-content-md-start">
+                    <button type="button" 
+                            class="btn btn-modern-outline-secondary btn-sm flex-fill flex-md-fill-auto" 
+                            id="prevButton" 
+                            onclick="previousQuestion()" 
+                            disabled>
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="ms-1">Предыдущий</span>
+                    </button>
+                    <button type="button" 
+                            class="btn btn-modern-outline-secondary btn-sm flex-fill flex-md-fill-auto" 
+                            id="toggleNavigatorBtn"
+                            onclick="toggleQuestionNavigator()"
+                            title="Показать/скрыть навигацию по вопросам">
+                        <i class="fas fa-list" id="toggleNavigatorIcon"></i>
+                        <span class="ms-1">Навигация</span>
+                    </button>
+                    <button type="button" 
+                            class="btn btn-modern-outline-secondary btn-sm flex-fill flex-md-fill-auto" 
+                            id="nextButton" 
+                            onclick="nextQuestion()">
+                        <span class="me-1">Следующий</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+                
+                <div class="d-flex gap-2 w-100 w-md-auto justify-content-around justify-content-md-end">
+                    <button type="button" 
+                            class="btn btn-modern-warning btn-sm flex-fill flex-md-fill-auto" 
+                            id="pauseButton" 
+                            onclick="showPauseModal()">
+                        <i class="fas fa-pause"></i>
+                        <span class="ms-1">Хочу продолжить позже</span>
+                    </button>
+                    
+                    <button type="button" 
+                            class="btn btn-modern-success btn-sm flex-fill flex-md-fill-auto" 
+                            id="finishButton" 
+                            onclick="showFinishModal()">
+                        <i class="fas fa-check"></i>
+                        <span class="ms-1">Завершить тест</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="question-navigator-collapse" id="questionNavigatorCollapse" style="display: none;">
+                <div class="question-navigator d-flex gap-1 flex-wrap justify-content-center mx-2">
+                    @for (int i = 0; i < Model.Questions.Count; i++)
+                    {
+                        <button type="button" 
+                                class="btn btn-sm btn-modern-outline-secondary question-nav-btn" 
+                                data-question-index="@i"
+                                onclick="goToQuestion(@i)"
+                                title="Вопрос @(i + 1)">
+                            @(i + 1)
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="finishTestModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header py-2 bg-light">
+                <h6 class="modal-title mb-0">
+                    <i class="fas fa-check-circle text-success"></i> Завершить тест
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="alert modern-alert-info alert-sm py-2 mb-3" style="background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%); border-left: 4px solid #ff9800;">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-triangle mt-1 me-2" style="color: #ff9800;"></i>
+                        <div>
+                            <strong class="small text-dark-modern">Внимание!</strong>
+                            <p class="mb-0 small text-dark-modern">После завершения теста вы не сможете изменить ответы.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <p class="mb-2 small text-dark-modern">
+                        <i class="fas fa-clipboard-check nav-link-icon"></i>
+                        Вы ответили на <strong><span id="answeredCountModal">0</span></strong> 
+                        из <strong>@Model.Questions.Count</strong> вопросов.
+                    </p>
+                    @if (Model.Questions.Count > 1)
+                    {
+                        <p class="mb-2 small text-dark-modern">
+                            <i class="fas fa-exclamation-circle nav-link-icon-yellow"></i>
+                            Вы находитесь на вопросе <strong><span id="currentQuestionModal">1</span></strong> из <strong>@Model.Questions.Count</strong>.
+                            <span>Неотвеченные вопросы будут засчитаны как неправильные.</span>
+                        </p>
+                    }
+                    <p class="mb-0 small text-muted-modern">Вы уверены, что хотите завершить тест?</p>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-modern-outline-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Продолжить
+                </button>
+                <form asp-action="CompleteNotParticleTest" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.TestResult.Id" />
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-modern-success btn-sm">
+                        <i class="fas fa-check"></i> Завершить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pauseTestModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header py-2" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); color: white;">
+                <h6 class="modal-title mb-0">
+                    <i class="fas fa-pause"></i> Продолжить позже
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <p class="mb-2 small text-dark-modern">
+                    Вы можете закрыть тест сейчас и продолжить его прохождение позже. Оставшееся время будет сохранено.
+                </p>
+                <p class="mb-0 small text-muted-modern">
+                    Все ваши ответы сохранены. При следующем открытии теста вы сможете продолжить с того места, где остановились.
+                </p>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-modern-outline-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Отмена
+                </button>
+                <button type="button" class="btn btn-modern-warning btn-sm" onclick="pauseTest()">
+                    <i class="fas fa-pause"></i> Да, продолжить позже
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/student-test-enhancements.css" asp-append-version="true" />
+    <style>
+        .timer-warning { color: #ffc107 !important; }
+        .timer-danger { color: #dc3545 !important; animation: pulse 1s infinite; }
+        @@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .text-with-gap { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .answer-btn { transition: all 0.3s ease; }
+        .answer-btn:hover { transform: scale(1.05); }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/js/student-test-enhancements.js" asp-append-version="true"></script>
+    <script>
+        let currentQuestionIndex = 0;
+        let totalQuestions = @Model.Questions.Count;
+        let timeRemaining = @((int)Model.TimeRemaining.TotalSeconds);
+        let testResultId = @Model.TestResult.Id;
+        let testType = 'notparticle';
+        let answers = {};
+        let timerInterval;
+        let timeSaveInterval;
+        let testCompleting = false;
+        let isAutoCompleting = false; // Флаг автоматического завершения из-за истечения времени
+
+        $(document).ready(function() {
+            initializeTest();
+            startTimer();
+            loadExistingAnswers();
+
+            $('form[action*="CompleteNotParticleTest"]').on('submit', function(e) {
+                testCompleting = true;
+            });
+        });
+
+        function initializeTest() {
+            updateProgress();
+            updateNavigation();
+        }
+
+        function loadExistingAnswers() {
+            @foreach (var answer in Model.Answers)
+            {
+                var answerIsMerged = answer.StudentAnswer?.Trim().ToLower() == "слитно" || 
+                                     answer.StudentAnswer?.Trim().ToLower() == "true" || 
+                                     answer.StudentAnswer?.Trim().ToLower() == "1";
+                <text>
+                answers[@answer.NotParticleQuestionId] = { 
+                    isMerged: @(answerIsMerged ? "true" : "false")
+                };
+                </text>
+            }
+            updateProgress();
+        }
+
+        function saveTimeRemaining() {
+            if (testCompleting) return;
+            $.ajax({
+                url: '@Url.Action("UpdateTimeRemaining", "StudentTest")',
+                type: 'POST',
+                data: { testResultId: testResultId, timeRemainingSeconds: timeRemaining, testType: testType },
+                success: function() {},
+                error: function() {}
+            });
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            timeSaveInterval = setInterval(function() { saveTimeRemaining(); }, 30000);
+            timerInterval = setInterval(function() {
+                timeRemaining--;
+                updateTimerDisplay();
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    clearInterval(timeSaveInterval);
+                    autoSubmitTest();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            $('#timeRemaining').text(display);
+            const timerElement = $('#timer');
+            timerElement.removeClass('timer-warning timer-danger');
+            if (timeRemaining <= 60) {
+                timerElement.addClass('timer-danger');
+            } else if (timeRemaining <= 300) {
+                timerElement.addClass('timer-warning');
+            }
+        }
+
+        function selectAnswer(questionId, isMerged) {
+            const answerText = isMerged ? 'слитно' : 'раздельно';
+            
+            // Обновляем визуальное состояние кнопок
+            const buttons = $(`.answer-btn[data-question-id="${questionId}"]`);
+            buttons.removeClass('btn-modern-success btn-modern-danger')
+                   .addClass('btn-modern-outline-success btn-modern-outline-danger');
+            
+            if (isMerged) {
+                $(`.answer-btn[data-answer="слитно"]`).removeClass('btn-modern-outline-success').addClass('btn-modern-success');
+            } else {
+                $(`.answer-btn[data-answer="раздельно"]`).removeClass('btn-modern-outline-danger').addClass('btn-modern-danger');
+            }
+
+            // Обновляем статус
+            $(`#answerStatus_${questionId}`).html(`<i class="fas fa-check-circle nav-link-icon-green"></i> <span>Ответ сохранен: <strong>${answerText}</strong></span>`);
+
+            // Сохраняем ответ
+            saveAnswer(questionId, answerText);
+        }
+
+        function saveAnswer(questionId, answerText) {
+            const isMerged = answerText === 'слитно';
+            $.ajax({
+                url: '@Url.Action("SubmitNotParticleAnswer")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    TestResultId: testResultId,
+                    QuestionId: questionId,
+                    StudentAnswer: answerText
+                }),
+                headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+                success: function(response) {
+                    if (response.success) {
+                        answers[questionId] = { isMerged: isMerged };
+                        updateProgress();
+                        if (window.StudentTestEnhancements?.showSaveIndicator) {
+                            window.StudentTestEnhancements.showSaveIndicator(true, 'Ответ сохранен');
+                        }
+                        // Сбрасываем флаг изменений для предотвращения предупреждения при закрытии
+                        document.dispatchEvent(new Event('answerSaved'));
+                    } else {
+                        if (window.StudentTestEnhancements?.showSaveIndicator) {
+                            window.StudentTestEnhancements.showSaveIndicator(false, response.message || 'Ошибка сохранения');
+                        }
+                    }
+                },
+                error: function(xhr, status, error) {
+                    if (window.StudentTestEnhancements?.showSaveIndicator) {
+                        window.StudentTestEnhancements.showSaveIndicator(false, 'Ошибка сохранения');
+                    }
+                }
+            });
+        }
+
+        function updateProgress() {
+            const answeredCount = Object.keys(answers).length;
+            const progress = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+            $('#progressBar').css('width', progress + '%');
+            $('#answeredCount').text(answeredCount);
+            $('#answeredCountModal').text(answeredCount);
+            updateQuestionNavigator();
+        }
+
+        function updateNavigation() {
+            $('#prevButton').prop('disabled', currentQuestionIndex === 0);
+            $('#nextButton').prop('disabled', currentQuestionIndex === totalQuestions - 1);
+            $('#currentQuestion').text(currentQuestionIndex + 1);
+        }
+
+        function updateQuestionNavigator() {
+            $('.question-nav-btn').each(function() {
+                const index = $(this).data('question-index');
+                const questionId = $('.question-card').eq(index).data('question-id');
+                if (answers[questionId]) {
+                    $(this).removeClass('btn-modern-outline-secondary').addClass('btn-modern-success');
+                } else {
+                    $(this).removeClass('btn-modern-success').addClass('btn-modern-outline-secondary');
+                }
+            });
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < totalQuestions - 1) {
+                goToQuestion(currentQuestionIndex + 1);
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                goToQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        function goToQuestion(index) {
+            $('.question-card').eq(currentQuestionIndex).removeClass('active').addClass('d-none');
+            currentQuestionIndex = index;
+            $('.question-card').eq(currentQuestionIndex).removeClass('d-none').addClass('active');
+            updateNavigation();
+            $('#questionNavigatorCollapse').collapse('hide');
+        }
+
+        function toggleQuestionNavigator() {
+            $('#questionNavigatorCollapse').collapse('toggle');
+        }
+
+        function showFinishModal() {
+            $('#currentQuestionModal').text(currentQuestionIndex + 1);
+            $('#finishTestModal').modal('show');
+        }
+
+        function showPauseModal() {
+            $('#pauseTestModal').modal('show');
+        }
+
+        function pauseTest() {
+            saveTimeRemaining();
+            window.location.href = '@Url.Action("Index", "StudentTest")';
+        }
+
+        function autoSubmitTest() {
+            if (testCompleting) return;
+            isAutoCompleting = true;
+            testCompleting = true;
+            $('form[action*="CompleteNotParticleTest"]').submit();
+        }
+
+        function toggleHint(index) {
+            const hintContainer = $('.question-card').eq(index).find('.hint-container');
+            const button = $('.question-card').eq(index).find('.hint-button-text');
+            if (hintContainer.is(':visible')) {
+                hintContainer.slideUp();
+                button.text('Показать подсказку');
+            } else {
+                hintContainer.slideDown();
+                button.text('Скрыть подсказку');
+            }
+        }
+    </script>
+}
+
