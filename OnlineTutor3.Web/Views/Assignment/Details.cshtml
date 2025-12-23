@@ -11,7 +11,9 @@
     var punctuationQuestionCounts = ViewBag.PunctuationTestQuestionCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
     var orthoeopyQuestionCounts = ViewBag.OrthoeopyTestQuestionCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
     var regularQuestionCounts = ViewBag.RegularTestQuestionCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
-    var totalTests = spellingTests.Count + punctuationTests.Count + orthoeopyTests.Count + regularTests.Count;
+    var notParticleTests = ViewBag.NotParticleTests as List<NotParticleTest> ?? new List<NotParticleTest>();
+    var notParticleQuestionCounts = ViewBag.NotParticleTestQuestionCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+    var totalTests = spellingTests.Count + punctuationTests.Count + orthoeopyTests.Count + regularTests.Count + notParticleTests.Count;
     var isRussianLanguage = subject?.Name?.Equals("Русский язык", StringComparison.OrdinalIgnoreCase) == true;
 }
 
@@ -158,6 +160,9 @@
                 </a>
                 <a asp-controller="OrthoeopyTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-modern-outline-warning" title="Орфоэпия">
                     <i class="fas fa-plus"></i> <i class="fas fa-volume-up"></i>
+                </a>
+                <a asp-controller="NotParticleTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-modern-outline-secondary" title="Частица 'не'">
+                    <i class="fas fa-plus"></i> <i class="fas fa-link"></i>
                 </a>
             }
             <a asp-controller="RegularTest" asp-action="Create" asp-route-assignmentId="@Model.Id" class="btn btn-sm btn-modern-outline-primary" title="Классический">
@@ -342,6 +347,48 @@
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <a asp-controller="RegularTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+
+                        @foreach (var test in notParticleTests)
+                        {
+                            <tr class="test-row" data-details-url="@Url.Action("Details", "NotParticleTest", new { id = test.Id })">
+                                <td>
+                                    <span class="badge badge-modern-secondary">
+                                        <i class="fas fa-minus-circle"></i>
+                                    </span>
+                                </td>
+                                <td>
+                                    <small><strong class="text-dark-modern">@test.Title</strong></small>
+                                    @if (!string.IsNullOrEmpty(test.Description))
+                                    {
+                                        <br>
+                                        <small class="text-muted-modern">@(test.Description.Length > 50 ? test.Description.Substring(0, 50) + "..." : test.Description)</small>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <small class="text-muted-modern">@(notParticleQuestionCounts.ContainsKey(test.Id) ? notParticleQuestionCounts[test.Id] : 0)</small>
+                                </td>
+                                <td class="text-center"><small class="text-muted-modern">@test.TimeLimit</small></td>
+                                <td class="text-center">
+                                    <span class="badge badge-modern-@(test.IsActive ? "success" : "secondary") badge-sm d-none d-md-inline">
+                                        @(test.IsActive ? "Активен" : "Неактивен")
+                                    </span>
+                                    <i class="fas @(test.IsActive ? "fa-check-circle" : "fa-pause-circle") test-status-icon-@(test.IsActive ? "active" : "inactive") d-md-none" title="@(test.IsActive ? "Активен" : "Неактивен")"></i>
+                                </td>
+                                <td class="text-center" onclick="event.stopPropagation();" style="white-space: nowrap;">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <a asp-controller="NotParticleTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-info" title="Подробнее">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-controller="NotParticleTest" asp-action="Edit" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary" title="Редактировать">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-controller="NotParticleTest" asp-action="Delete" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-danger" title="Удалить">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
