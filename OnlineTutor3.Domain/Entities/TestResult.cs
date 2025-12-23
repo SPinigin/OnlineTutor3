@@ -84,5 +84,17 @@ namespace OnlineTutor3.Domain.Entities
         // Навигационное свойство
         public RegularTest? RegularTest { get; set; }
     }
+
+    /// <summary>
+    /// Результат теста на правописание частицы "не"
+    /// </summary>
+    public class NotParticleTestResult : TestResult
+    {
+        [Required]
+        public int NotParticleTestId { get; set; }
+
+        // Навигационное свойство
+        public NotParticleTest? NotParticleTest { get; set; }
+    }
 }
 

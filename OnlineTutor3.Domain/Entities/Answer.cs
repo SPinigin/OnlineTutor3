@@ -74,5 +74,18 @@ namespace OnlineTutor3.Domain.Entities
 
         public int? SelectedOptionId { get; set; } // Выбранный вариант (для SingleChoice)
     }
+
+    /// <summary>
+    /// Ответ на вопрос теста на правописание частицы "не"
+    /// </summary>
+    public class NotParticleAnswer : Answer
+    {
+        [Required]
+        public int NotParticleQuestionId { get; set; }
+
+        [Required]
+        [StringLength(20)]
+        public string StudentAnswer { get; set; } = string.Empty; // "слитно" или "раздельно"
+    }
 }
 

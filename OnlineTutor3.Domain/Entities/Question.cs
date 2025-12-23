@@ -107,6 +107,27 @@ namespace OnlineTutor3.Domain.Entities
         public string? Explanation { get; set; } // Объяснение правильного ответа
     }
 
+    /// <summary>
+    /// Вопрос для теста на правописание частицы "не"
+    /// </summary>
+    public class NotParticleQuestion : Question
+    {
+        [Required]
+        public int NotParticleTestId { get; set; }
+
+        [Required]
+        [StringLength(500)]
+        public string TextWithGap { get; set; } = string.Empty; // Текст с (не) вместо частицы
+
+        [Required]
+        [StringLength(20)]
+        public string CorrectAnswer { get; set; } = string.Empty; // "слитно" или "раздельно"
+
+        [Required]
+        [StringLength(500)]
+        public string FullText { get; set; } = string.Empty; // Полный текст с правильным написанием
+    }
+
     public enum QuestionType
     {
         SingleChoice = 1,      // Одиночный выбор
