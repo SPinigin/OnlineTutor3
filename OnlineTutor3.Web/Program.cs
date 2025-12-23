@@ -26,6 +26,7 @@ try
     builder.Services.AddScoped<OnlineTutor3.Web.Services.PunctuationQuestionImportService>();
     builder.Services.AddScoped<OnlineTutor3.Web.Services.OrthoeopyQuestionImportService>();
     builder.Services.AddScoped<OnlineTutor3.Web.Services.RegularQuestionImportService>();
+    builder.Services.AddScoped<OnlineTutor3.Web.Services.NotParticleQuestionImportService>();
 
     var app = builder.Build();
 
