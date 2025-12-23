@@ -1,0 +1,179 @@
+@model List<OnlineTutor3.Web.ViewModels.ImportNotParticleQuestionRow>
+@{
+    ViewData["Title"] = "Предпросмотр импорта вопросов";
+    var test = ViewBag.Test as OnlineTutor3.Domain.Entities.NotParticleTest;
+    var pointsPerQuestion = ViewBag.PointsPerQuestion as int? ?? 1;
+    
+    var validQuestions = Model?.Where(q => q.IsValid).ToList() ?? new List<OnlineTutor3.Web.ViewModels.ImportNotParticleQuestionRow>();
+    var invalidQuestions = Model?.Where(q => !q.IsValid).ToList() ?? new List<OnlineTutor3.Web.ViewModels.ImportNotParticleQuestionRow>();
+}
+
+<div class="page-header">
+    <div>
+        <h4 class="page-header-title">
+            <i class="fas fa-eye page-header-icon"></i>
+            <span>Предпросмотр импорта вопросов</span>
+        </h4>
+        @if (test != null)
+        {
+            <p class="text-muted-modern mb-0 small">
+                <i class="fas fa-clipboard-check"></i> Тест: @test.Title
+            </p>
+        }
+    </div>
+    <div>
+        <a asp-action="ImportQuestions" asp-route-id="@test!.Id" class="btn btn-sm btn-modern-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Назад
+        </a>
+    </div>
+</div>
+
+<div class="row mb-3 g-2 g-md-3" style="flex-wrap: nowrap;">
+    <div class="col-4">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body text-center py-1 px-1 px-md-2">
+                <div class="stat-card-icon stat-icon-blue" style="font-size: 0.9rem;">
+                    <i class="fas fa-list"></i>
+                </div>
+                <div class="stat-card-value" style="font-size: 1rem;">@Model.Count</div>
+                <small class="stat-card-label" style="font-size: 0.65rem;">Всего вопросов</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card border-0 shadow-sm stat-card stat-card-green">
+            <div class="card-body text-center py-1 px-1 px-md-2">
+                <div class="stat-card-icon stat-icon-green" style="font-size: 0.9rem;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-card-value" style="font-size: 1rem;">@validQuestions.Count</div>
+                <small class="stat-card-label" style="font-size: 0.65rem;">Валидных</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card border-0 shadow-sm stat-card stat-card-pink">
+            <div class="card-body text-center py-1 px-1 px-md-2">
+                <div class="stat-card-icon stat-icon-pink" style="font-size: 0.9rem;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-card-value" style="font-size: 1rem;">@invalidQuestions.Count</div>
+                <small class="stat-card-label" style="font-size: 0.65rem;">С ошибками</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (invalidQuestions.Any())
+{
+    <div class="card mb-3 modern-card border-warning">
+        <div class="card-header modern-card-header bg-warning text-dark">
+            <h5 class="modern-card-title mb-0">
+                <i class="fas fa-exclamation-triangle"></i> Вопросы с ошибками (@invalidQuestions.Count)
+            </h5>
+        </div>
+        <div class="card-body modern-card-body">
+            <div class="table-responsive">
+                <table class="table modern-table table-sm">
+                    <thead>
+                        <tr>
+                            <th class="small">Строка</th>
+                            <th class="small">Текст с (не)</th>
+                            <th class="small">Правильный ответ</th>
+                            <th class="small">Полный текст</th>
+                            <th class="small">Ошибки</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var question in invalidQuestions)
+                        {
+                            <tr>
+                                <td class="small">@question.RowNumber</td>
+                                <td class="small">@question.TextWithGap</td>
+                                <td class="small">@question.CorrectAnswer</td>
+                                <td class="small">@question.FullText</td>
+                                <td class="small text-danger">
+                                    <ul class="mb-0 ps-3">
+                                        @foreach (var error in question.Errors)
+                                        {
+                                            <li>@error</li>
+                                        }
+                                    </ul>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+@if (validQuestions.Any())
+{
+    <div class="card mb-3 modern-card">
+        <div class="card-header modern-card-header">
+            <h5 class="modern-card-title mb-0">
+                <i class="fas fa-check-circle text-success"></i> Валидные вопросы (@validQuestions.Count)
+            </h5>
+        </div>
+        <div class="card-body modern-card-body">
+            <div class="table-responsive">
+                <table class="table modern-table table-sm">
+                    <thead>
+                        <tr>
+                            <th class="small">Строка</th>
+                            <th class="small">Текст с (не)</th>
+                            <th class="small">Правильный ответ</th>
+                            <th class="small">Полный текст</th>
+                            <th class="small">Подсказка</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var question in validQuestions)
+                        {
+                            <tr>
+                                <td class="small">@question.RowNumber</td>
+                                <td class="small">@question.TextWithGap</td>
+                                <td class="small"><strong>@question.CorrectAnswer</strong></td>
+                                <td class="small">@question.FullText</td>
+                                <td class="small text-muted-modern">@(question.Hint ?? "-")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+@if (validQuestions.Any())
+{
+    <div class="card modern-card">
+        <div class="card-body modern-card-body">
+            <div class="alert alert-info mb-3">
+                <i class="fas fa-info-circle"></i>
+                Будет импортировано <strong>@validQuestions.Count</strong> вопросов с <strong>@pointsPerQuestion</strong> баллами за каждый.
+            </div>
+            <form asp-action="ConfirmImport" method="post">
+                @Html.AntiForgeryToken()
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="ImportQuestions" asp-route-id="@test!.Id" class="btn btn-modern-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Отмена
+                    </a>
+                    <button type="submit" class="btn btn-modern-success">
+                        <i class="fas fa-check"></i> Подтвердить импорт
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        Нет валидных вопросов для импорта. Исправьте ошибки и попробуйте снова.
+    </div>
+}
+
