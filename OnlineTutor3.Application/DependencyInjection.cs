@@ -19,6 +19,7 @@ namespace OnlineTutor3.Application
             services.AddScoped<IPunctuationTestService, PunctuationTestService>();
             services.AddScoped<IOrthoeopyTestService, OrthoeopyTestService>();
             services.AddScoped<IRegularTestService, RegularTestService>();
+            services.AddScoped<INotParticleTestService, NotParticleTestService>();
             services.AddScoped<ITestAccessService, TestAccessService>();
             services.AddScoped<ITestResultService, TestResultService>();
             services.AddScoped<IAnswerService, AnswerService>();

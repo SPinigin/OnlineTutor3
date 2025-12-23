@@ -46,6 +46,10 @@ namespace OnlineTutor3.Infrastructure
             services.AddScoped<IPunctuationAnswerRepository, PunctuationAnswerRepository>();
             services.AddScoped<IOrthoeopyAnswerRepository, OrthoeopyAnswerRepository>();
             services.AddScoped<IRegularAnswerRepository, RegularAnswerRepository>();
+            services.AddScoped<INotParticleTestRepository, NotParticleTestRepository>();
+            services.AddScoped<INotParticleQuestionRepository, NotParticleQuestionRepository>();
+            services.AddScoped<INotParticleTestResultRepository, NotParticleTestResultRepository>();
+            services.AddScoped<INotParticleAnswerRepository, NotParticleAnswerRepository>();
 
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
