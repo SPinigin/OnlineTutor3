@@ -13,10 +13,12 @@ namespace OnlineTutor3.Application.Services
         private readonly IPunctuationTestResultRepository _punctuationTestResultRepository;
         private readonly IOrthoeopyTestResultRepository _orthoeopyTestResultRepository;
         private readonly IRegularTestResultRepository _regularTestResultRepository;
+        private readonly INotParticleTestResultRepository _notParticleTestResultRepository;
         private readonly ISpellingQuestionRepository _spellingQuestionRepository;
         private readonly IPunctuationQuestionRepository _punctuationQuestionRepository;
         private readonly IOrthoeopyQuestionRepository _orthoeopyQuestionRepository;
         private readonly IRegularQuestionRepository _regularQuestionRepository;
+        private readonly INotParticleQuestionRepository _notParticleQuestionRepository;
         private readonly ILogger<TestResultService> _logger;
 
         public TestResultService(
@@ -24,20 +26,24 @@ namespace OnlineTutor3.Application.Services
             IPunctuationTestResultRepository punctuationTestResultRepository,
             IOrthoeopyTestResultRepository orthoeopyTestResultRepository,
             IRegularTestResultRepository regularTestResultRepository,
+            INotParticleTestResultRepository notParticleTestResultRepository,
             ISpellingQuestionRepository spellingQuestionRepository,
             IPunctuationQuestionRepository punctuationQuestionRepository,
             IOrthoeopyQuestionRepository orthoeopyQuestionRepository,
             IRegularQuestionRepository regularQuestionRepository,
+            INotParticleQuestionRepository notParticleQuestionRepository,
             ILogger<TestResultService> logger)
         {
             _spellingTestResultRepository = spellingTestResultRepository;
             _punctuationTestResultRepository = punctuationTestResultRepository;
             _orthoeopyTestResultRepository = orthoeopyTestResultRepository;
             _regularTestResultRepository = regularTestResultRepository;
+            _notParticleTestResultRepository = notParticleTestResultRepository;
             _spellingQuestionRepository = spellingQuestionRepository;
             _punctuationQuestionRepository = punctuationQuestionRepository;
             _orthoeopyQuestionRepository = orthoeopyQuestionRepository;
             _regularQuestionRepository = regularQuestionRepository;
+            _notParticleQuestionRepository = notParticleQuestionRepository;
             _logger = logger;
         }
 
@@ -165,6 +171,40 @@ namespace OnlineTutor3.Application.Services
             }
         }
 
+        public async Task<NotParticleTestResult> CreateNotParticleTestResultAsync(int studentId, int testId)
+        {
+            try
+            {
+                var existingResults = await _notParticleTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId);
+                var attemptNumber = existingResults.Count + 1;
+
+                // Вычисляем максимальный балл (сумма баллов всех вопросов)
+                var questions = await _notParticleQuestionRepository.GetByTestIdOrderedAsync(testId);
+                var maxScore = questions.Sum(q => q.Points);
+
+                var testResult = new NotParticleTestResult
+                {
+                    StudentId = studentId,
+                    NotParticleTestId = testId,
+                    AttemptNumber = attemptNumber,
+                    StartedAt = DateTime.Now,
+                    Score = 0,
+                    MaxScore = maxScore,
+                    Percentage = 0.0,
+                    IsCompleted = false
+                };
+
+                var id = await _notParticleTestResultRepository.CreateAsync(testResult);
+                testResult.Id = id;
+                return testResult;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при создании результата теста на правописание частицы \"не\". StudentId: {StudentId}, TestId: {TestId}", studentId, testId);
+                throw;
+            }
+        }
+
         public async Task<SpellingTestResult?> GetOngoingSpellingTestResultAsync(int studentId, int testId)
         {
             try
@@ -221,6 +261,20 @@ namespace OnlineTutor3.Application.Services
             }
         }
 
+        public async Task<NotParticleTestResult?> GetOngoingNotParticleTestResultAsync(int studentId, int testId)
+        {
+            try
+            {
+                var results = await _notParticleTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId);
+                return results.FirstOrDefault(r => !r.IsCompleted);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении незавершенного результата теста на правописание частицы \"не\". StudentId: {StudentId}, TestId: {TestId}", studentId, testId);
+                return null;
+            }
+        }
+
         public async Task<int> GetAttemptCountAsync(int studentId, int testId, TestType testType)
         {
             try
@@ -231,6 +285,7 @@ namespace OnlineTutor3.Application.Services
                     TestType.Punctuation => (await _punctuationTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId)).Count,
                     TestType.Orthoeopy => (await _orthoeopyTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId)).Count,
                     TestType.Regular => (await _regularTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId)).Count,
+                    TestType.NotParticle => (await _notParticleTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId)).Count,
                     _ => 0
                 };
             }
@@ -277,6 +332,10 @@ namespace OnlineTutor3.Application.Services
                 {
                     await _regularTestResultRepository.UpdateAsync(regularResult);
                 }
+                else if (testResult is NotParticleTestResult notParticleResult)
+                {
+                    await _notParticleTestResultRepository.UpdateAsync(notParticleResult);
+                }
             }
             catch (Exception ex)
             {
@@ -309,6 +368,11 @@ namespace OnlineTutor3.Application.Services
                     var results = await _regularTestResultRepository.GetByStudentIdAsync(studentId);
                     return results.Cast<T>().ToList();
                 }
+                else if (typeof(T) == typeof(NotParticleTestResult))
+                {
+                    var results = await _notParticleTestResultRepository.GetByStudentIdAsync(studentId);
+                    return results.Cast<T>().ToList();
+                }
 
                 return new List<T>();
             }
@@ -329,6 +393,7 @@ namespace OnlineTutor3.Application.Services
                     Type t when t == typeof(PunctuationTestResult) => (await _punctuationTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId)).Cast<TestResult>().ToList(),
                     Type t when t == typeof(OrthoeopyTestResult) => (await _orthoeopyTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId)).Cast<TestResult>().ToList(),
                     Type t when t == typeof(RegularTestResult) => (await _regularTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId)).Cast<TestResult>().ToList(),
+                    Type t when t == typeof(NotParticleTestResult) => (await _notParticleTestResultRepository.GetByStudentAndTestIdAsync(studentId, testId)).Cast<TestResult>().ToList(),
                     _ => new List<TestResult>()
                 };
 
@@ -385,6 +450,15 @@ namespace OnlineTutor3.Application.Services
                     {
                         result.TimeRemainingSeconds = timeRemainingSeconds;
                         await _regularTestResultRepository.UpdateAsync(result);
+                    }
+                }
+                else if (typeof(T) == typeof(NotParticleTestResult))
+                {
+                    var result = await _notParticleTestResultRepository.GetByIdAsync(testResultId);
+                    if (result != null && !result.IsCompleted)
+                    {
+                        result.TimeRemainingSeconds = timeRemainingSeconds;
+                        await _notParticleTestResultRepository.UpdateAsync(result);
                     }
                 }
             }

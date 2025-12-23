@@ -61,6 +61,11 @@ namespace OnlineTutor3.Application.Services
                     viewModel.RegularTests = await _testAccessService.GetAvailableRegularTestsAsync(studentId);
                 }
 
+                if (category == null || category == "notparticle")
+                {
+                    viewModel.NotParticleTests = await _testAccessService.GetAvailableNotParticleTestsAsync(studentId);
+                }
+
                 return viewModel;
             }
             catch (Exception ex)
@@ -116,6 +121,15 @@ namespace OnlineTutor3.Application.Services
                 {
                     var allRegular = await _testResultService.GetStudentResultsAsync<RegularTestResult>(studentId);
                     viewModel.RegularResults = allRegular
+                        .Where(r => r.IsCompleted)
+                        .OrderByDescending(r => r.CompletedAt ?? r.StartedAt)
+                        .ToList();
+                }
+
+                if (testType == null || testType == "notparticle")
+                {
+                    var allNotParticle = await _testResultService.GetStudentResultsAsync<NotParticleTestResult>(studentId);
+                    viewModel.NotParticleResults = allNotParticle
                         .Where(r => r.IsCompleted)
                         .OrderByDescending(r => r.CompletedAt ?? r.StartedAt)
                         .ToList();
@@ -225,6 +239,30 @@ namespace OnlineTutor3.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при начале классического теста. StudentId: {StudentId}, TestId: {TestId}", studentId, testId);
+                throw;
+            }
+        }
+
+        public async Task<NotParticleTestResult> StartNotParticleTestAsync(int studentId, int testId)
+        {
+            try
+            {
+                if (!await _testAccessService.CanAccessNotParticleTestAsync(studentId, testId))
+                {
+                    throw new UnauthorizedAccessException($"Студент {studentId} не имеет доступа к тесту {testId}");
+                }
+
+                var ongoing = await _testResultService.GetOngoingNotParticleTestResultAsync(studentId, testId);
+                if (ongoing != null)
+                {
+                    return ongoing;
+                }
+
+                return await _testResultService.CreateNotParticleTestResultAsync(studentId, testId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при начале теста на правописание частицы \"не\". StudentId: {StudentId}, TestId: {TestId}", studentId, testId);
                 throw;
             }
         }

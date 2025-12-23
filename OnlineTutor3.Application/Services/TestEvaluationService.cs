@@ -14,11 +14,13 @@ namespace OnlineTutor3.Application.Services
         private readonly IPunctuationQuestionRepository _punctuationQuestionRepository;
         private readonly IOrthoeopyQuestionRepository _orthoeopyQuestionRepository;
         private readonly IRegularQuestionRepository _regularQuestionRepository;
+        private readonly INotParticleQuestionRepository _notParticleQuestionRepository;
         private readonly IRegularQuestionOptionRepository _regularQuestionOptionRepository;
         private readonly ISpellingAnswerRepository _spellingAnswerRepository;
         private readonly IPunctuationAnswerRepository _punctuationAnswerRepository;
         private readonly IOrthoeopyAnswerRepository _orthoeopyAnswerRepository;
         private readonly IRegularAnswerRepository _regularAnswerRepository;
+        private readonly INotParticleAnswerRepository _notParticleAnswerRepository;
         private readonly ILogger<TestEvaluationService> _logger;
 
         public TestEvaluationService(
@@ -26,22 +28,26 @@ namespace OnlineTutor3.Application.Services
             IPunctuationQuestionRepository punctuationQuestionRepository,
             IOrthoeopyQuestionRepository orthoeopyQuestionRepository,
             IRegularQuestionRepository regularQuestionRepository,
+            INotParticleQuestionRepository notParticleQuestionRepository,
             IRegularQuestionOptionRepository regularQuestionOptionRepository,
             ISpellingAnswerRepository spellingAnswerRepository,
             IPunctuationAnswerRepository punctuationAnswerRepository,
             IOrthoeopyAnswerRepository orthoeopyAnswerRepository,
             IRegularAnswerRepository regularAnswerRepository,
+            INotParticleAnswerRepository notParticleAnswerRepository,
             ILogger<TestEvaluationService> logger)
         {
             _spellingQuestionRepository = spellingQuestionRepository;
             _punctuationQuestionRepository = punctuationQuestionRepository;
             _orthoeopyQuestionRepository = orthoeopyQuestionRepository;
             _regularQuestionRepository = regularQuestionRepository;
+            _notParticleQuestionRepository = notParticleQuestionRepository;
             _regularQuestionOptionRepository = regularQuestionOptionRepository;
             _spellingAnswerRepository = spellingAnswerRepository;
             _punctuationAnswerRepository = punctuationAnswerRepository;
             _orthoeopyAnswerRepository = orthoeopyAnswerRepository;
             _regularAnswerRepository = regularAnswerRepository;
+            _notParticleAnswerRepository = notParticleAnswerRepository;
             _logger = logger;
         }
 
@@ -359,6 +365,68 @@ namespace OnlineTutor3.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при вычислении результата классического теста. TestResultId: {TestResultId}", testResultId);
+                return (0, 0, 0);
+            }
+        }
+
+        public async Task<(bool IsCorrect, int Points)> EvaluateNotParticleAnswerAsync(NotParticleQuestion question, bool studentAnswerIsMerged, int pointsPerQuestion)
+        {
+            try
+            {
+                // Преобразуем CorrectAnswer ("слитно"/"раздельно") в bool
+                var normalizedCorrect = question.CorrectAnswer?.Trim().ToLower() ?? "";
+                bool correctIsMerged = normalizedCorrect == "слитно";
+                
+                // Сравниваем ответ студента с правильным ответом
+                bool isCorrect = correctIsMerged == studentAnswerIsMerged;
+                return (isCorrect, isCorrect ? pointsPerQuestion : 0);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при оценке ответа на тест на правописание частицы \"не\". QuestionId: {QuestionId}", question.Id);
+                return (false, 0);
+            }
+        }
+
+        public async Task<(int Score, int MaxScore, double Percentage)> CalculateNotParticleTestResultAsync(int testResultId, int testId)
+        {
+            try
+            {
+                var answers = await _notParticleAnswerRepository.GetByTestResultIdAsync(testResultId);
+                var questions = await _notParticleQuestionRepository.GetByTestIdOrderedAsync(testId);
+
+                int score = 0;
+                int maxScore = questions.Sum(q => q.Points);
+
+                // Группируем ответы по вопросу и берем только последний ответ на каждый вопрос (по Id)
+                var uniqueAnswers = answers
+                    .GroupBy(a => a.NotParticleQuestionId)
+                    .Select(g => g.OrderByDescending(a => a.Id).First())
+                    .ToList();
+
+                foreach (var answer in uniqueAnswers)
+                {
+                    var question = questions.FirstOrDefault(q => q.Id == answer.NotParticleQuestionId);
+                    if (question != null)
+                    {
+                        // Преобразуем строку "слитно"/"раздельно" в bool
+                        var normalizedAnswer = answer.StudentAnswer?.Trim().ToLower() ?? "";
+                        bool studentAnswerIsMerged = normalizedAnswer == "слитно" || normalizedAnswer == "true" || normalizedAnswer == "1";
+                        
+                        var (isCorrect, points) = await EvaluateNotParticleAnswerAsync(question, studentAnswerIsMerged, question.Points);
+                        answer.IsCorrect = isCorrect;
+                        answer.Points = points;
+                        score += points;
+                        await _notParticleAnswerRepository.UpdateAsync(answer);
+                    }
+                }
+
+                var percentage = maxScore > 0 ? (double)score / maxScore * 100 : 0;
+                return (score, maxScore, percentage);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при вычислении результата теста на правописание частицы \"не\". TestResultId: {TestResultId}", testResultId);
                 return (0, 0, 0);
             }
         }

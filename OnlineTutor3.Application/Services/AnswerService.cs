@@ -13,6 +13,7 @@ namespace OnlineTutor3.Application.Services
         private readonly IPunctuationAnswerRepository _punctuationAnswerRepository;
         private readonly IOrthoeopyAnswerRepository _orthoeopyAnswerRepository;
         private readonly IRegularAnswerRepository _regularAnswerRepository;
+        private readonly INotParticleAnswerRepository _notParticleAnswerRepository;
         private readonly ILogger<AnswerService> _logger;
 
         public AnswerService(
@@ -20,12 +21,14 @@ namespace OnlineTutor3.Application.Services
             IPunctuationAnswerRepository punctuationAnswerRepository,
             IOrthoeopyAnswerRepository orthoeopyAnswerRepository,
             IRegularAnswerRepository regularAnswerRepository,
+            INotParticleAnswerRepository notParticleAnswerRepository,
             ILogger<AnswerService> logger)
         {
             _spellingAnswerRepository = spellingAnswerRepository;
             _punctuationAnswerRepository = punctuationAnswerRepository;
             _orthoeopyAnswerRepository = orthoeopyAnswerRepository;
             _regularAnswerRepository = regularAnswerRepository;
+            _notParticleAnswerRepository = notParticleAnswerRepository;
             _logger = logger;
         }
 
@@ -257,6 +260,62 @@ namespace OnlineTutor3.Application.Services
             return await _regularAnswerRepository.GetByTestResultIdAsync(testResultId);
         }
 
+        public async Task<NotParticleAnswer> SaveNotParticleAnswerAsync(int testResultId, int questionId, string studentAnswer)
+        {
+            try
+            {
+                var existingAnswers = await _notParticleAnswerRepository.GetByTestResultIdAsync(testResultId);
+                var existingAnswer = existingAnswers.FirstOrDefault(a => a.NotParticleQuestionId == questionId);
+
+                NotParticleAnswer savedAnswer;
+
+                if (existingAnswer != null)
+                {
+                    existingAnswer.StudentAnswer = studentAnswer;
+                    await _notParticleAnswerRepository.UpdateAsync(existingAnswer);
+                    savedAnswer = existingAnswer;
+                }
+                else
+                {
+                    var answer = new NotParticleAnswer
+                    {
+                        TestResultId = testResultId,
+                        NotParticleQuestionId = questionId,
+                        StudentAnswer = studentAnswer,
+                        IsCorrect = false,
+                        Points = 0
+                    };
+
+                    var id = await _notParticleAnswerRepository.CreateAsync(answer);
+                    answer.Id = id;
+                    savedAnswer = answer;
+                }
+
+                // Переполучаем все ответы и удаляем старые дубликаты для этого вопроса (кроме только что сохраненного ответа)
+                var allAnswers = await _notParticleAnswerRepository.GetByTestResultIdAsync(testResultId);
+                var duplicates = allAnswers
+                    .Where(a => a.NotParticleQuestionId == questionId && a.Id != savedAnswer.Id)
+                    .ToList();
+
+                foreach (var duplicate in duplicates)
+                {
+                    await _notParticleAnswerRepository.DeleteAsync(duplicate.Id);
+                }
+
+                return savedAnswer;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при сохранении ответа на тест на правописание частицы \"не\". TestResultId: {TestResultId}, QuestionId: {QuestionId}", testResultId, questionId);
+                throw;
+            }
+        }
+
+        public async Task<List<NotParticleAnswer>> GetNotParticleAnswersAsync(int testResultId)
+        {
+            return await _notParticleAnswerRepository.GetByTestResultIdAsync(testResultId);
+        }
+
         public async Task UpdateAnswerAsync<T>(T answer) where T : Answer
         {
             try
@@ -276,6 +335,10 @@ namespace OnlineTutor3.Application.Services
                 else if (answer is RegularAnswer regularAnswer)
                 {
                     await _regularAnswerRepository.UpdateAsync(regularAnswer);
+                }
+                else if (answer is NotParticleAnswer notParticleAnswer)
+                {
+                    await _notParticleAnswerRepository.UpdateAsync(notParticleAnswer);
                 }
             }
             catch (Exception ex)

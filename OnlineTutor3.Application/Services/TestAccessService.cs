@@ -17,6 +17,7 @@ namespace OnlineTutor3.Application.Services
         private readonly IPunctuationTestRepository _punctuationTestRepository;
         private readonly IOrthoeopyTestRepository _orthoeopyTestRepository;
         private readonly IRegularTestRepository _regularTestRepository;
+        private readonly INotParticleTestRepository _notParticleTestRepository;
         private readonly ILogger<TestAccessService> _logger;
 
         public TestAccessService(
@@ -28,6 +29,7 @@ namespace OnlineTutor3.Application.Services
             IPunctuationTestRepository punctuationTestRepository,
             IOrthoeopyTestRepository orthoeopyTestRepository,
             IRegularTestRepository regularTestRepository,
+            INotParticleTestRepository notParticleTestRepository,
             ILogger<TestAccessService> logger)
         {
             _studentRepository = studentRepository;
@@ -38,6 +40,7 @@ namespace OnlineTutor3.Application.Services
             _punctuationTestRepository = punctuationTestRepository;
             _orthoeopyTestRepository = orthoeopyTestRepository;
             _regularTestRepository = regularTestRepository;
+            _notParticleTestRepository = notParticleTestRepository;
             _logger = logger;
         }
 
@@ -261,6 +264,60 @@ namespace OnlineTutor3.Application.Services
             {
                 _logger.LogError(ex, "Ошибка при получении доступных классических тестов. StudentId: {StudentId}", studentId);
                 return new List<RegularTest>();
+            }
+        }
+
+        public async Task<bool> CanAccessNotParticleTestAsync(int studentId, int testId)
+        {
+            try
+            {
+                var student = await _studentRepository.GetByIdAsync(studentId);
+                if (student == null) return false;
+
+                var test = await _notParticleTestRepository.GetByIdAsync(testId);
+                if (test == null || !test.IsActive) return false;
+
+                var now = DateTime.Now;
+                if (test.StartDate.HasValue && test.StartDate.Value > now) return false;
+                if (test.EndDate.HasValue && test.EndDate.Value < now) return false;
+
+                var assignment = await _assignmentRepository.GetByIdAsync(test.AssignmentId);
+                if (assignment == null || !assignment.IsActive) return false;
+
+                if (student.ClassId.HasValue)
+                {
+                    var assignmentClasses = await _assignmentClassRepository.GetByAssignmentIdAsync(assignment.Id);
+                    if (assignmentClasses.Any(ac => ac.ClassId == student.ClassId.Value))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при проверке доступа к тесту на правописание частицы \"не\". StudentId: {StudentId}, TestId: {TestId}", studentId, testId);
+                return false;
+            }
+        }
+
+        public async Task<List<NotParticleTest>> GetAvailableNotParticleTestsAsync(int studentId)
+        {
+            try
+            {
+                var student = await _studentRepository.GetByIdAsync(studentId);
+                if (student == null || !student.ClassId.HasValue) return new List<NotParticleTest>();
+
+                var @class = await _classRepository.GetByIdAsync(student.ClassId.Value);
+                if (@class == null) return new List<NotParticleTest>();
+
+                return await _notParticleTestRepository.GetAvailableForStudentAsync(studentId, student.ClassId.Value, @class.TeacherId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении доступных тестов на правописание частицы \"не\". StudentId: {StudentId}", studentId);
+                return new List<NotParticleTest>();
             }
         }
     }
