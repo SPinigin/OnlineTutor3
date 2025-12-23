@@ -16,14 +16,17 @@ namespace OnlineTutor3.Web.Controllers
         private readonly IPunctuationTestService _punctuationTestService;
         private readonly IOrthoeopyTestService _orthoeopyTestService;
         private readonly IRegularTestService _regularTestService;
+        private readonly INotParticleTestService _notParticleTestService;
         private readonly ISpellingTestResultRepository _spellingTestResultRepository;
         private readonly IPunctuationTestResultRepository _punctuationTestResultRepository;
         private readonly IOrthoeopyTestResultRepository _orthoeopyTestResultRepository;
         private readonly IRegularTestResultRepository _regularTestResultRepository;
+        private readonly INotParticleTestResultRepository _notParticleTestResultRepository;
         private readonly ISpellingQuestionRepository _spellingQuestionRepository;
         private readonly IPunctuationQuestionRepository _punctuationQuestionRepository;
         private readonly IOrthoeopyQuestionRepository _orthoeopyQuestionRepository;
         private readonly IRegularQuestionRepository _regularQuestionRepository;
+        private readonly INotParticleQuestionRepository _notParticleQuestionRepository;
         private readonly IRegularQuestionOptionRepository _regularQuestionOptionRepository;
         private readonly IAnswerService _answerService;
         private readonly IStudentService _studentService;
@@ -35,14 +38,17 @@ namespace OnlineTutor3.Web.Controllers
             IPunctuationTestService punctuationTestService,
             IOrthoeopyTestService orthoeopyTestService,
             IRegularTestService regularTestService,
+            INotParticleTestService notParticleTestService,
             ISpellingTestResultRepository spellingTestResultRepository,
             IPunctuationTestResultRepository punctuationTestResultRepository,
             IOrthoeopyTestResultRepository orthoeopyTestResultRepository,
             IRegularTestResultRepository regularTestResultRepository,
+            INotParticleTestResultRepository notParticleTestResultRepository,
             ISpellingQuestionRepository spellingQuestionRepository,
             IPunctuationQuestionRepository punctuationQuestionRepository,
             IOrthoeopyQuestionRepository orthoeopyQuestionRepository,
             IRegularQuestionRepository regularQuestionRepository,
+            INotParticleQuestionRepository notParticleQuestionRepository,
             IRegularQuestionOptionRepository regularQuestionOptionRepository,
             IAnswerService answerService,
             IStudentService studentService,
@@ -53,14 +59,17 @@ namespace OnlineTutor3.Web.Controllers
             _punctuationTestService = punctuationTestService;
             _orthoeopyTestService = orthoeopyTestService;
             _regularTestService = regularTestService;
+            _notParticleTestService = notParticleTestService;
             _spellingTestResultRepository = spellingTestResultRepository;
             _punctuationTestResultRepository = punctuationTestResultRepository;
             _orthoeopyTestResultRepository = orthoeopyTestResultRepository;
             _regularTestResultRepository = regularTestResultRepository;
+            _notParticleTestResultRepository = notParticleTestResultRepository;
             _spellingQuestionRepository = spellingQuestionRepository;
             _punctuationQuestionRepository = punctuationQuestionRepository;
             _orthoeopyQuestionRepository = orthoeopyQuestionRepository;
             _regularQuestionRepository = regularQuestionRepository;
+            _notParticleQuestionRepository = notParticleQuestionRepository;
             _regularQuestionOptionRepository = regularQuestionOptionRepository;
             _answerService = answerService;
             _studentService = studentService;
@@ -120,6 +129,7 @@ namespace OnlineTutor3.Web.Controllers
                 var punctuationTests = await _punctuationTestService.GetActiveByTeacherIdAsync(currentUser.Id);
                 var orthoeopyTests = await _orthoeopyTestService.GetActiveByTeacherIdAsync(currentUser.Id);
                 var regularTests = await _regularTestService.GetActiveByTeacherIdAsync(currentUser.Id);
+                var notParticleTests = await _notParticleTestService.GetActiveByTeacherIdAsync(currentUser.Id);
 
                 var viewModel = new TeacherDashboardViewModel
                 {
@@ -127,7 +137,8 @@ namespace OnlineTutor3.Web.Controllers
                     SpellingTests = spellingTests.Take(20).ToList(),
                     PunctuationTests = punctuationTests.Take(20).ToList(),
                     OrthoeopyTests = orthoeopyTests.Take(20).ToList(),
-                    RegularTests = regularTests.Take(20).ToList()
+                    RegularTests = regularTests.Take(20).ToList(),
+                    NotParticleTests = notParticleTests.Take(20).ToList()
                 };
                 await CalculateStatisticsAsync(viewModel, currentUser.Id);
                 await CalculateTestStatisticsAsync(viewModel);
@@ -162,16 +173,19 @@ namespace OnlineTutor3.Web.Controllers
                 var punctuationTests = await _punctuationTestService.GetByTeacherIdAsync(currentUser.Id);
                 var orthoeopyTests = await _orthoeopyTestService.GetByTeacherIdAsync(currentUser.Id);
                 var regularTests = await _regularTestService.GetByTeacherIdAsync(currentUser.Id);
+                var notParticleTests = await _notParticleTestService.GetByTeacherIdAsync(currentUser.Id);
 
                 var spellingTestIds = spellingTests.Select(t => t.Id).ToList();
                 var punctuationTestIds = punctuationTests.Select(t => t.Id).ToList();
                 var orthoeopyTestIds = orthoeopyTests.Select(t => t.Id).ToList();
                 var regularTestIds = regularTests.Select(t => t.Id).ToList();
+                var notParticleTestIds = notParticleTests.Select(t => t.Id).ToList();
 
                 var spellingTestsDict = spellingTests.ToDictionary(t => t.Id);
                 var punctuationTestsDict = punctuationTests.ToDictionary(t => t.Id);
                 var orthoeopyTestsDict = orthoeopyTests.ToDictionary(t => t.Id);
                 var regularTestsDict = regularTests.ToDictionary(t => t.Id);
+                var notParticleTestsDict = notParticleTests.ToDictionary(t => t.Id);
 
                 foreach (var testId in spellingTestIds)
                 {
@@ -285,6 +299,38 @@ namespace OnlineTutor3.Web.Controllers
                                 TestId = result.RegularTestId,
                                 TestTitle = test.Title,
                                 TestType = "regular",
+                                StudentId = result.StudentId,
+                                StudentName = user?.FullName ?? "Неизвестный студент",
+                                Status = result.IsCompleted ? "completed" : "in_progress",
+                                Score = result.Score,
+                                MaxScore = result.MaxScore,
+                                Percentage = result.Percentage,
+                                StartedAt = result.StartedAt,
+                                CompletedAt = result.CompletedAt,
+                                LastActivityAt = result.CompletedAt ?? result.StartedAt,
+                                TestResultId = result.Id,
+                                IsAutoCompleted = false
+                            });
+                        }
+                    }
+                }
+
+                foreach (var testId in notParticleTestIds)
+                {
+                    var testResults = await _notParticleTestResultRepository.GetByTestIdAsync(testId);
+                    var test = notParticleTestsDict[testId];
+
+                    foreach (var result in testResults)
+                    {
+                        var student = await _studentService.GetByIdAsync(result.StudentId);
+                        if (student != null)
+                        {
+                            var user = await _userManager.FindByIdAsync(student.UserId);
+                            activities.Add(new TestActivityViewModel
+                            {
+                                TestId = result.NotParticleTestId,
+                                TestTitle = test.Title,
+                                TestType = "notparticle",
                                 StudentId = result.StudentId,
                                 StudentName = user?.FullName ?? "Неизвестный студент",
                                 Status = result.IsCompleted ? "completed" : "in_progress",
@@ -503,6 +549,45 @@ namespace OnlineTutor3.Web.Controllers
                         }
                         break;
 
+                    case "notparticle":
+                        var notParticleResult = await _notParticleTestResultRepository.GetByIdAsync(testResultId);
+                        if (notParticleResult != null)
+                        {
+                            var notParticleTest = await _notParticleTestService.GetByIdAsync(notParticleResult.NotParticleTestId);
+                            if (notParticleTest == null || notParticleTest.TeacherId != currentUser.Id)
+                            {
+                                return Forbid();
+                            }
+
+                            var notParticleQuestions = await _notParticleQuestionRepository.GetByTestIdOrderedAsync(notParticleResult.NotParticleTestId);
+                            var notParticleAnswers = await _answerService.GetNotParticleAnswersAsync(testResultId);
+                            var student5 = await _studentService.GetByIdAsync(notParticleResult.StudentId);
+                            var studentUser5 = student5 != null ? await _userManager.FindByIdAsync(student5.UserId) : null;
+                            studentName = studentUser5?.FullName ?? studentUser5?.Email ?? "Неизвестный студент";
+
+                            result = new NotParticleTestResultViewModel
+                            {
+                                TestResult = notParticleResult,
+                                Test = notParticleTest,
+                                Questions = notParticleQuestions,
+                                Answers = notParticleAnswers,
+                                TestTitle = notParticleTest.Title,
+                                Score = notParticleResult.Score,
+                                MaxScore = notParticleResult.MaxScore,
+                                Percentage = notParticleResult.Percentage,
+                                Grade = notParticleResult.Grade ?? 0,
+                                CompletedAt = notParticleResult.CompletedAt,
+                                StartedAt = notParticleResult.StartedAt,
+                                Duration = CalculateTestDuration(notParticleResult, notParticleTest.TimeLimit),
+                                StudentName = studentName,
+                                ShowCorrectAnswers = notParticleTest.ShowCorrectAnswers,
+                                TestIcon = "fa-minus-circle",
+                                TestColor = "secondary",
+                                AttemptNumber = notParticleResult.AttemptNumber
+                            };
+                        }
+                        break;
+
                     default:
                         return BadRequest($"Неизвестный тип теста: {testType}");
                 }
@@ -536,11 +621,13 @@ namespace OnlineTutor3.Web.Controllers
                 var punctuationTests = await _punctuationTestService.GetByTeacherIdAsync(teacherId);
                 var orthoeopyTests = await _orthoeopyTestService.GetByTeacherIdAsync(teacherId);
                 var regularTests = await _regularTestService.GetByTeacherIdAsync(teacherId);
+                var notParticleTests = await _notParticleTestService.GetByTeacherIdAsync(teacherId);
 
                 var spellingTestIds = spellingTests.Select(t => t.Id).ToList();
                 var punctuationTestIds = punctuationTests.Select(t => t.Id).ToList();
                 var orthoeopyTestIds = orthoeopyTests.Select(t => t.Id).ToList();
                 var regularTestIds = regularTests.Select(t => t.Id).ToList();
+                var notParticleTestIds = notParticleTests.Select(t => t.Id).ToList();
 
                 foreach (var testId in spellingTestIds)
                 {
@@ -563,6 +650,12 @@ namespace OnlineTutor3.Web.Controllers
                 foreach (var testId in regularTestIds)
                 {
                     var results = await _regularTestResultRepository.GetByTestIdAsync(testId);
+                    allResults.AddRange(results);
+                }
+
+                foreach (var testId in notParticleTestIds)
+                {
+                    var results = await _notParticleTestResultRepository.GetByTestIdAsync(testId);
                     allResults.AddRange(results);
                 }
 
@@ -621,6 +714,15 @@ namespace OnlineTutor3.Web.Controllers
                     var completed = results.Count(r => r.IsCompleted);
                     var inProgress = results.Count(r => !r.IsCompleted);
                     viewModel.TestStatistics[$"regular_{test.Id}"] = (completed, inProgress);
+                }
+
+                // Обрабатываем NotParticle тесты
+                foreach (var test in viewModel.NotParticleTests)
+                {
+                    var results = await _notParticleTestResultRepository.GetByTestIdAsync(test.Id);
+                    var completed = results.Count(r => r.IsCompleted);
+                    var inProgress = results.Count(r => !r.IsCompleted);
+                    viewModel.TestStatistics[$"notparticle_{test.Id}"] = (completed, inProgress);
                 }
             }
             catch (Exception ex)

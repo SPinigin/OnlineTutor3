@@ -27,15 +27,18 @@ namespace OnlineTutor3.Web.Controllers
         private readonly IPunctuationTestRepository _punctuationTestRepository;
         private readonly IOrthoeopyTestRepository _orthoeopyTestRepository;
         private readonly IRegularTestRepository _regularTestRepository;
+        private readonly INotParticleTestRepository _notParticleTestRepository;
         private readonly ISpellingTestResultRepository _spellingTestResultRepository;
         private readonly IPunctuationTestResultRepository _punctuationTestResultRepository;
         private readonly IOrthoeopyTestResultRepository _orthoeopyTestResultRepository;
         private readonly IRegularTestResultRepository _regularTestResultRepository;
+        private readonly INotParticleTestResultRepository _notParticleTestResultRepository;
         private readonly IRegularQuestionOptionRepository _regularQuestionOptionRepository;
         private readonly ISpellingQuestionRepository _spellingQuestionRepository;
         private readonly IPunctuationQuestionRepository _punctuationQuestionRepository;
         private readonly IOrthoeopyQuestionRepository _orthoeopyQuestionRepository;
         private readonly IRegularQuestionRepository _regularQuestionRepository;
+        private readonly INotParticleQuestionRepository _notParticleQuestionRepository;
         private readonly IHubContext<TestAnalyticsHub> _hubContext;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SecurityValidationService _securityValidation;
@@ -55,15 +58,18 @@ namespace OnlineTutor3.Web.Controllers
             IPunctuationTestRepository punctuationTestRepository,
             IOrthoeopyTestRepository orthoeopyTestRepository,
             IRegularTestRepository regularTestRepository,
+            INotParticleTestRepository notParticleTestRepository,
             ISpellingTestResultRepository spellingTestResultRepository,
             IPunctuationTestResultRepository punctuationTestResultRepository,
             IOrthoeopyTestResultRepository orthoeopyTestResultRepository,
             IRegularTestResultRepository regularTestResultRepository,
+            INotParticleTestResultRepository notParticleTestResultRepository,
             IRegularQuestionOptionRepository regularQuestionOptionRepository,
             ISpellingQuestionRepository spellingQuestionRepository,
             IPunctuationQuestionRepository punctuationQuestionRepository,
             IOrthoeopyQuestionRepository orthoeopyQuestionRepository,
             IRegularQuestionRepository regularQuestionRepository,
+            INotParticleQuestionRepository notParticleQuestionRepository,
             IHubContext<TestAnalyticsHub> hubContext,
             UserManager<ApplicationUser> userManager,
             SecurityValidationService securityValidation,
@@ -82,15 +88,18 @@ namespace OnlineTutor3.Web.Controllers
             _punctuationTestRepository = punctuationTestRepository;
             _orthoeopyTestRepository = orthoeopyTestRepository;
             _regularTestRepository = regularTestRepository;
+            _notParticleTestRepository = notParticleTestRepository;
             _spellingTestResultRepository = spellingTestResultRepository;
             _punctuationTestResultRepository = punctuationTestResultRepository;
             _orthoeopyTestResultRepository = orthoeopyTestResultRepository;
             _regularTestResultRepository = regularTestResultRepository;
+            _notParticleTestResultRepository = notParticleTestResultRepository;
             _regularQuestionOptionRepository = regularQuestionOptionRepository;
             _spellingQuestionRepository = spellingQuestionRepository;
             _punctuationQuestionRepository = punctuationQuestionRepository;
             _orthoeopyQuestionRepository = orthoeopyQuestionRepository;
             _regularQuestionRepository = regularQuestionRepository;
+            _notParticleQuestionRepository = notParticleQuestionRepository;
             _hubContext = hubContext;
             _userManager = userManager;
             _securityValidation = securityValidation;
@@ -236,6 +245,27 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
+                foreach (var test in availableTests.NotParticleTests)
+                {
+                    var testInfo = await BuildNotParticleTestInfoAsync(test, student.Id);
+                    if (testInfo != null)
+                    {
+                        viewModel.NotParticleTests.Add(testInfo);
+                        if (!assignmentsDict.ContainsKey(testInfo.AssignmentId))
+                        {
+                            var assignmentEntity = await _assignmentRepository.GetByIdAsync(testInfo.AssignmentId);
+                            if (assignmentEntity != null)
+                            {
+                                assignmentsDict[testInfo.AssignmentId] = new AssignmentTestsInfo { Assignment = assignmentEntity };
+                            }
+                        }
+                        if (assignmentsDict.ContainsKey(testInfo.AssignmentId))
+                        {
+                            assignmentsDict[testInfo.AssignmentId].NotParticleTests.Add(testInfo);
+                        }
+                    }
+                }
+
                 if (assignment.HasValue)
                 {
                     assignmentsDict = assignmentsDict.Where(kvp => kvp.Key == assignment.Value).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
@@ -254,7 +284,8 @@ namespace OnlineTutor3.Web.Controllers
                             SpellingTests = assignmentInfo.SpellingTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList(),
                             PunctuationTests = assignmentInfo.PunctuationTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList(),
                             OrthoeopyTests = assignmentInfo.OrthoeopyTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList(),
-                            RegularTests = assignmentInfo.RegularTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList()
+                            RegularTests = assignmentInfo.RegularTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList(),
+                            NotParticleTests = assignmentInfo.NotParticleTests.Where(t => t.Title.ToLower().Contains(searchLower)).ToList()
                         };
                         
                         if (filteredInfo.TotalTestsCount > 0 || assignmentInfo.Assignment.Title.ToLower().Contains(searchLower))
@@ -275,6 +306,7 @@ namespace OnlineTutor3.Web.Controllers
                     assignmentInfo.PunctuationTests = assignmentInfo.PunctuationTests.OrderBy(t => t.Title, naturalComparerForTests).ToList();
                     assignmentInfo.OrthoeopyTests = assignmentInfo.OrthoeopyTests.OrderBy(t => t.Title, naturalComparerForTests).ToList();
                     assignmentInfo.RegularTests = assignmentInfo.RegularTests.OrderBy(t => t.Title, naturalComparerForTests).ToList();
+                    assignmentInfo.NotParticleTests = assignmentInfo.NotParticleTests.OrderBy(t => t.Title, naturalComparerForTests).ToList();
                 }
 
                 // Сортируем задания по названию с использованием NaturalStringComparer
@@ -322,7 +354,8 @@ namespace OnlineTutor3.Web.Controllers
                     SpellingResults = historyData.SpellingResults,
                     PunctuationResults = historyData.PunctuationResults,
                     OrthoeopyResults = historyData.OrthoeopyResults,
-                    RegularResults = historyData.RegularResults
+                    RegularResults = historyData.RegularResults,
+                    NotParticleResults = historyData.NotParticleResults
                 };
 
                 await LoadTestDataForResultsAsync(viewModel);
@@ -370,6 +403,12 @@ namespace OnlineTutor3.Web.Controllers
                            (r.RegularTest.Title.ToLowerInvariant().Contains(searchLower) ||
                             r.RegularTest.Description?.ToLowerInvariant().Contains(searchLower) == true))
                 .ToList();
+
+            viewModel.NotParticleResults = viewModel.NotParticleResults
+                .Where(r => r.NotParticleTest != null && 
+                           (r.NotParticleTest.Title.ToLowerInvariant().Contains(searchLower) ||
+                            r.NotParticleTest.Description?.ToLowerInvariant().Contains(searchLower) == true))
+                .ToList();
         }
 
         private async Task LoadTestDataForResultsAsync(ViewModels.StudentTestHistoryViewModel viewModel)
@@ -403,6 +442,14 @@ namespace OnlineTutor3.Web.Controllers
                 if (result.RegularTest == null && result.RegularTestId > 0)
                 {
                     result.RegularTest = await _regularTestRepository.GetByIdAsync(result.RegularTestId);
+                }
+            }
+
+            foreach (var result in viewModel.NotParticleResults)
+            {
+                if (result.NotParticleTest == null && result.NotParticleTestId > 0)
+                {
+                    result.NotParticleTest = await _notParticleTestRepository.GetByIdAsync(result.NotParticleTestId);
                 }
             }
         }
@@ -512,6 +559,32 @@ namespace OnlineTutor3.Web.Controllers
                     if (assignmentsDict.ContainsKey(assignmentId))
                     {
                         assignmentsDict[assignmentId].RegularResults.Add(result);
+                    }
+                }
+            }
+
+            foreach (var result in viewModel.NotParticleResults)
+            {
+                if (result.NotParticleTest != null)
+                {
+                    var assignmentId = result.NotParticleTest.AssignmentId;
+                    if (!assignmentsDict.ContainsKey(assignmentId))
+                    {
+                        var assignment = await _assignmentRepository.GetByIdAsync(assignmentId);
+                        if (assignment != null)
+                        {
+                            assignmentsDict[assignmentId] = new ViewModels.AssignmentHistoryInfo { Assignment = assignment };
+                            
+                            if (!subjectsDict.ContainsKey(assignment.SubjectId))
+                            {
+                                var subject = await _subjectRepository.GetByIdAsync(assignment.SubjectId);
+                                subjectsDict[assignment.SubjectId] = subject?.Name ?? $"Предмет #{assignment.SubjectId}";
+                            }
+                        }
+                    }
+                    if (assignmentsDict.ContainsKey(assignmentId))
+                    {
+                        assignmentsDict[assignmentId].NotParticleResults.Add(result);
                     }
                 }
             }
@@ -782,6 +855,9 @@ namespace OnlineTutor3.Web.Controllers
                         break;
                     case "regular":
                         await _testResultService.UpdateTimeRemainingAsync<RegularTestResult>(testResultId, timeRemainingSeconds);
+                        break;
+                    case "notparticle":
+                        await _testResultService.UpdateTimeRemainingAsync<NotParticleTestResult>(testResultId, timeRemainingSeconds);
                         break;
                     default:
                         return BadRequest("Неизвестный тип теста");
@@ -1908,6 +1984,15 @@ namespace OnlineTutor3.Web.Controllers
             });
         }
 
+        private async Task<AvailableTestInfo?> BuildNotParticleTestInfoAsync(NotParticleTest test, int studentId)
+        {
+            return await BuildTestInfoAsync(test.Id, "NotParticle", studentId, test, async () =>
+            {
+                var questions = await _notParticleQuestionRepository.GetByTestIdOrderedAsync(test.Id);
+                return questions.Count;
+            });
+        }
+
         private async Task<AvailableTestInfo?> BuildTestInfoAsync(int testId, string testType, int studentId, Test test, Func<Task<int>> getQuestionsCount)
         {
             try
@@ -2325,6 +2410,18 @@ namespace OnlineTutor3.Web.Controllers
                             }
                         }
                         break;
+                    case "notparticle":
+                        if (testResult is NotParticleTestResult notParticleResult)
+                        {
+                            testId = notParticleResult.NotParticleTestId;
+                            var notParticleTest = await _notParticleTestRepository.GetByIdAsync(testId);
+                            if (notParticleTest != null)
+                            {
+                                teacherId = notParticleTest.TeacherId;
+                                testTitle = notParticleTest.Title;
+                            }
+                        }
+                        break;
                 }
 
                 if (string.IsNullOrEmpty(teacherId) || string.IsNullOrEmpty(testTitle) || testId == 0)
@@ -2419,6 +2516,18 @@ namespace OnlineTutor3.Web.Controllers
                             }
                         }
                         break;
+                    case "notparticle":
+                        if (testResult is NotParticleTestResult notParticleResult)
+                        {
+                            testId = notParticleResult.NotParticleTestId;
+                            var notParticleTest = await _notParticleTestRepository.GetByIdAsync(testId);
+                            if (notParticleTest != null)
+                            {
+                                teacherId = notParticleTest.TeacherId;
+                                testTitle = notParticleTest.Title;
+                            }
+                        }
+                        break;
                 }
 
                 if (string.IsNullOrEmpty(teacherId) || string.IsNullOrEmpty(testTitle) || testId == 0)
@@ -2488,6 +2597,352 @@ namespace OnlineTutor3.Web.Controllers
                 return partsX.Length.CompareTo(partsY.Length);
             }
         }
+
+        #region NotParticle Test Methods
+
+        // GET: StudentTest/StartNotParticle/{id}
+        public async Task<IActionResult> StartNotParticle(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    _logger.LogWarning("Студент не найден для пользователя {UserId}", currentUser.Id);
+                    TempData["ErrorMessage"] = "Профиль студента не найден.";
+                    return RedirectToAction("Index");
+                }
+
+                var testResult = await _studentTestService.StartNotParticleTestAsync(student.Id, id);
+                await SendTestStartedNotificationAsync(testResult, "notparticle", currentUser.FullName ?? currentUser.Email ?? "Студент");
+                
+                return RedirectToAction(nameof(TakeNotParticle), new { id = testResult.Id });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Попытка доступа к недоступному тесту. TestId: {TestId}", id);
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при начале теста на правописание частицы \"не\". TestId: {TestId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при начале теста. Попробуйте позже.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: StudentTest/TakeNotParticle/{id}
+        public async Task<IActionResult> TakeNotParticle(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                var testResult = await _notParticleTestResultRepository.GetByIdAsync(id);
+                
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                if (testResult.IsCompleted)
+                {
+                    return RedirectToAction("NotParticleResult", new { id = testResult.Id });
+                }
+
+                var test = await _notParticleTestRepository.GetByIdAsync(testResult.NotParticleTestId);
+                if (test == null)
+                {
+                    return NotFound();
+                }
+
+                var questions = await _notParticleQuestionRepository.GetByTestIdOrderedAsync(test.Id);
+                if (!questions.Any())
+                {
+                    TempData["ErrorMessage"] = "В тесте нет вопросов.";
+                    return RedirectToAction("Index");
+                }
+
+                var answers = await _answerService.GetNotParticleAnswersAsync(testResult.Id);
+
+                // Перемешиваем вопросы при первом открытии теста (если еще нет сохраненных ответов)
+                if (!answers.Any())
+                {
+                    var random = new Random();
+                    questions = questions.OrderBy(x => random.Next()).ToList();
+                }
+
+                TimeSpan timeRemaining;
+                if (testResult.TimeRemainingSeconds.HasValue)
+                {
+                    timeRemaining = TimeSpan.FromSeconds(testResult.TimeRemainingSeconds.Value);
+                }
+                else
+                {
+                    var timeElapsed = DateTime.Now - testResult.StartedAt;
+                    var timeLimit = TimeSpan.FromMinutes(test.TimeLimit);
+                    timeRemaining = timeLimit - timeElapsed;
+                    if (timeRemaining.TotalSeconds <= 0)
+                    {
+                        timeRemaining = TimeSpan.Zero;
+                        // Автоматически завершаем тест
+                        var (score, maxScore, percentage) = await _testEvaluationService.CalculateNotParticleTestResultAsync(testResult.Id, test.Id);
+                        testResult.Score = score;
+                        testResult.MaxScore = maxScore;
+                        testResult.Percentage = percentage;
+                        testResult.Grade = TestEvaluationService.CalculateGrade(percentage);
+                        await _testResultService.CompleteTestResultAsync(testResult);
+                        return RedirectToAction("NotParticleResult", new { id = testResult.Id });
+                    }
+                }
+
+                var viewModel = new TakeNotParticleTestViewModel
+                {
+                    TestResult = testResult,
+                    Test = test,
+                    Questions = questions,
+                    Answers = answers,
+                    TimeRemaining = timeRemaining,
+                    CurrentQuestionIndex = 0
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке теста на правописание частицы \"не\". ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при загрузке теста.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // POST: StudentTest/SubmitNotParticleAnswer
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> SubmitNotParticleAnswer([FromBody] SubmitNotParticleAnswerViewModel model)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Пользователь не авторизован" });
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return Json(new { success = false, message = "Студент не найден" });
+                }
+
+                var testResult = await _notParticleTestResultRepository.GetByIdAsync(model.TestResultId);
+                if (testResult == null || testResult.StudentId != student.Id || testResult.IsCompleted)
+                {
+                    return Json(new { success = false, message = "Тест не найден или уже завершен" });
+                }
+
+                var test = await _notParticleTestRepository.GetByIdAsync(testResult.NotParticleTestId);
+                if (test == null)
+                {
+                    return Json(new { success = false, message = "Тест не найден" });
+                }
+
+                if (!_securityValidation.ValidateTimeLimitWithRemaining(testResult.StartedAt, test.TimeLimit, testResult.TimeRemainingSeconds, 30))
+                {
+                    return Json(new { success = false, message = "Время теста истекло" });
+                }
+
+                var question = await _notParticleQuestionRepository.GetByIdAsync(model.QuestionId);
+                if (question == null || question.NotParticleTestId != testResult.NotParticleTestId)
+                {
+                    return Json(new { success = false, message = "Вопрос не найден" });
+                }
+
+                // Преобразуем строку "слитно"/"раздельно" в bool для оценки
+                var normalizedAnswer = model.StudentAnswer.Trim().ToLower();
+                bool studentAnswerIsMerged = normalizedAnswer == "слитно" || normalizedAnswer == "true" || normalizedAnswer == "1";
+
+                // Сохраняем ответ как строку
+                var answer = await _answerService.SaveNotParticleAnswerAsync(testResult.Id, question.Id, model.StudentAnswer);
+
+                var (isCorrect, points) = await _testEvaluationService.EvaluateNotParticleAnswerAsync(
+                    question, 
+                    studentAnswerIsMerged, 
+                    question.Points);
+                answer.IsCorrect = isCorrect;
+                answer.Points = points;
+                await _answerService.UpdateAnswerAsync(answer);
+
+                return Json(new 
+                { 
+                    success = true, 
+                    isCorrect = isCorrect,
+                    points = points
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при сохранении ответа. QuestionId: {QuestionId}, TestResultId: {TestResultId}", 
+                    model.QuestionId, model.TestResultId);
+                return Json(new { success = false, message = "Произошла ошибка при сохранении ответа" });
+            }
+        }
+
+        // POST: StudentTest/CompleteNotParticleTest/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompleteNotParticleTest(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                var testResult = await _notParticleTestResultRepository.GetByIdAsync(id);
+                if (!_securityValidation.ValidateStudentAccessToResult(testResult, student.Id))
+                {
+                    _logger.LogWarning("Попытка завершить тест другого студента. ResultId: {ResultId}, StudentId: {StudentId}", 
+                        id, student.Id);
+                    return NotFound();
+                }
+
+                if (!_securityValidation.ValidateTestNotCompleted(testResult))
+                {
+                    return RedirectToAction("NotParticleResult", new { id = testResult.Id });
+                }
+
+                var test = await _notParticleTestRepository.GetByIdAsync(testResult.NotParticleTestId);
+                if (test == null)
+                {
+                    return NotFound();
+                }
+
+                bool timeExpired = !_securityValidation.ValidateTimeLimit(testResult.StartedAt, test.TimeLimit, 60);
+                if (timeExpired)
+                {
+                    _logger.LogWarning("Попытка завершить тест после истечения времени. ResultId: {ResultId}", id);
+                    TempData["ErrorMessage"] = "Время теста истекло. Тест будет завершен автоматически.";
+                    
+                    if (testResult.TimeRemainingSeconds.HasValue && testResult.TimeRemainingSeconds.Value > 0)
+                    {
+                        testResult.TimeRemainingSeconds = 0;
+                    }
+                }
+
+                var (score, maxScore, percentage) = await _testEvaluationService.CalculateNotParticleTestResultAsync(testResult.Id, testResult.NotParticleTestId);
+                var grade = TestEvaluationService.CalculateGrade(percentage);
+                testResult.Score = score;
+                testResult.MaxScore = maxScore;
+                testResult.Percentage = percentage;
+                testResult.Grade = grade;
+                await _testResultService.CompleteTestResultAsync(testResult);
+                await SendTestCompletedNotificationAsync(testResult, "notparticle", currentUser.FullName ?? currentUser.Email ?? "Студент");
+
+                return RedirectToAction("NotParticleResult", new { id = testResult.Id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при завершении теста на правописание частицы \"не\". ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при завершении теста.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: StudentTest/NotParticleResult/{id}
+        public async Task<IActionResult> NotParticleResult(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Challenge();
+                }
+
+                var student = await _studentRepository.GetByUserIdAsync(currentUser.Id);
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                var testResult = await _notParticleTestResultRepository.GetByIdAsync(id);
+                if (testResult == null || testResult.StudentId != student.Id)
+                {
+                    return NotFound();
+                }
+
+                if (!testResult.IsCompleted)
+                {
+                    return RedirectToAction(nameof(TakeNotParticle), new { id = testResult.Id });
+                }
+
+                var test = await _notParticleTestRepository.GetByIdAsync(testResult.NotParticleTestId);
+                if (test == null)
+                {
+                    return NotFound();
+                }
+
+                var questions = await _notParticleQuestionRepository.GetByTestIdOrderedAsync(test.Id);
+                var answers = await _answerService.GetNotParticleAnswersAsync(testResult.Id);
+
+                var viewModel = new NotParticleTestResultViewModel
+                {
+                    TestResult = testResult,
+                    Test = test,
+                    Questions = questions,
+                    Answers = answers,
+                    TestTitle = test.Title,
+                    Score = testResult.Score,
+                    MaxScore = testResult.MaxScore,
+                    Percentage = testResult.Percentage,
+                    Grade = testResult.Grade ?? 0,
+                    CompletedAt = testResult.CompletedAt,
+                    StartedAt = testResult.StartedAt,
+                    Duration = CalculateTestDuration(testResult, test.TimeLimit),
+                    StudentName = currentUser.FullName ?? currentUser.Email ?? "",
+                    ShowCorrectAnswers = test.ShowCorrectAnswers,
+                    TestIcon = "fa-spell-check",
+                    TestColor = "primary",
+                    AttemptNumber = testResult.AttemptNumber
+                };
+
+                return View("NotParticleResult", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке результата теста на правописание частицы \"не\". ResultId: {ResultId}", id);
+                TempData["ErrorMessage"] = "Произошла ошибка при загрузке результата.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        #endregion
     }
 }
 

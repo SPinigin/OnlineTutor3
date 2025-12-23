@@ -21,10 +21,12 @@ namespace OnlineTutor3.Web.Controllers
         private readonly IPunctuationTestService _punctuationTestService;
         private readonly IOrthoeopyTestService _orthoeopyTestService;
         private readonly IRegularTestService _regularTestService;
+        private readonly INotParticleTestService _notParticleTestService;
         private readonly ISpellingQuestionRepository _spellingQuestionRepository;
         private readonly IPunctuationQuestionRepository _punctuationQuestionRepository;
         private readonly IOrthoeopyQuestionRepository _orthoeopyQuestionRepository;
         private readonly IRegularQuestionRepository _regularQuestionRepository;
+        private readonly INotParticleQuestionRepository _notParticleQuestionRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<AssignmentController> _logger;
 
@@ -38,10 +40,12 @@ namespace OnlineTutor3.Web.Controllers
             IPunctuationTestService punctuationTestService,
             IOrthoeopyTestService orthoeopyTestService,
             IRegularTestService regularTestService,
+            INotParticleTestService notParticleTestService,
             ISpellingQuestionRepository spellingQuestionRepository,
             IPunctuationQuestionRepository punctuationQuestionRepository,
             IOrthoeopyQuestionRepository orthoeopyQuestionRepository,
             IRegularQuestionRepository regularQuestionRepository,
+            INotParticleQuestionRepository notParticleQuestionRepository,
             UserManager<ApplicationUser> userManager,
             ILogger<AssignmentController> logger)
         {
@@ -54,10 +58,12 @@ namespace OnlineTutor3.Web.Controllers
             _punctuationTestService = punctuationTestService;
             _orthoeopyTestService = orthoeopyTestService;
             _regularTestService = regularTestService;
+            _notParticleTestService = notParticleTestService;
             _spellingQuestionRepository = spellingQuestionRepository;
             _punctuationQuestionRepository = punctuationQuestionRepository;
             _orthoeopyQuestionRepository = orthoeopyQuestionRepository;
             _regularQuestionRepository = regularQuestionRepository;
+            _notParticleQuestionRepository = notParticleQuestionRepository;
             _userManager = userManager;
             _logger = logger;
         }
@@ -102,6 +108,7 @@ namespace OnlineTutor3.Web.Controllers
                             List<PunctuationTest> punctuationTests = new List<PunctuationTest>();
                             List<OrthoeopyTest> orthoeopyTests = new List<OrthoeopyTest>();
                             List<RegularTest> regularTests = new List<RegularTest>();
+                            List<NotParticleTest> notParticleTests = new List<NotParticleTest>();
 
                             var naturalComparer = new NaturalStringComparer();
                             
@@ -136,6 +143,15 @@ namespace OnlineTutor3.Web.Controllers
                             {
                                 regularTests = await _regularTestService.GetByAssignmentIdAsync(assignment.Id);
                                 regularTests = regularTests.OrderBy(t => t.Title, naturalComparer).ToList();
+                            }
+                            catch
+                            {
+                            }
+
+                            try
+                            {
+                                notParticleTests = await _notParticleTestService.GetByAssignmentIdAsync(assignment.Id);
+                                notParticleTests = notParticleTests.OrderBy(t => t.Title, naturalComparer).ToList();
                             }
                             catch
                             {
@@ -194,6 +210,19 @@ namespace OnlineTutor3.Web.Controllers
                                 }
                             }
 
+                            var notParticleQuestionCounts = new Dictionary<int, int>();
+                            foreach (var test in notParticleTests)
+                            {
+                                try
+                                {
+                                    notParticleQuestionCounts[test.Id] = await _notParticleQuestionRepository.GetCountByTestIdAsync(test.Id);
+                                }
+                                catch
+                                {
+                                    notParticleQuestionCounts[test.Id] = 0;
+                                }
+                            }
+
                             assignmentsWithTests[assignment.Id] = new AssignmentTestsViewModel
                             {
                                 Assignment = assignment,
@@ -201,10 +230,12 @@ namespace OnlineTutor3.Web.Controllers
                                 PunctuationTests = punctuationTests,
                                 OrthoeopyTests = orthoeopyTests,
                                 RegularTests = regularTests,
+                                NotParticleTests = notParticleTests,
                                 SpellingTestQuestionCounts = spellingQuestionCounts,
                                 PunctuationTestQuestionCounts = punctuationQuestionCounts,
                                 OrthoeopyTestQuestionCounts = orthoeopyQuestionCounts,
-                                RegularTestQuestionCounts = regularQuestionCounts
+                                RegularTestQuestionCounts = regularQuestionCounts,
+                                NotParticleTestQuestionCounts = notParticleQuestionCounts
                             };
                         }
                         catch (Exception ex)
@@ -218,10 +249,12 @@ namespace OnlineTutor3.Web.Controllers
                                 PunctuationTests = new List<PunctuationTest>(),
                                 OrthoeopyTests = new List<OrthoeopyTest>(),
                                 RegularTests = new List<RegularTest>(),
+                                NotParticleTests = new List<NotParticleTest>(),
                                 SpellingTestQuestionCounts = new Dictionary<int, int>(),
                                 PunctuationTestQuestionCounts = new Dictionary<int, int>(),
                                 OrthoeopyTestQuestionCounts = new Dictionary<int, int>(),
-                                RegularTestQuestionCounts = new Dictionary<int, int>()
+                                RegularTestQuestionCounts = new Dictionary<int, int>(),
+                                NotParticleTestQuestionCounts = new Dictionary<int, int>()
                             };
                         }
                     }
@@ -292,6 +325,7 @@ namespace OnlineTutor3.Web.Controllers
                 List<PunctuationTest> punctuationTests = new List<PunctuationTest>();
                 List<OrthoeopyTest> orthoeopyTests = new List<OrthoeopyTest>();
                 List<RegularTest> regularTests = new List<RegularTest>();
+                List<NotParticleTest> notParticleTests = new List<NotParticleTest>();
 
                 var naturalComparer = new NaturalStringComparer();
 
@@ -326,6 +360,15 @@ namespace OnlineTutor3.Web.Controllers
                 {
                     regularTests = await _regularTestService.GetByAssignmentIdAsync(id);
                     regularTests = regularTests.OrderBy(t => t.Title, naturalComparer).ToList();
+                }
+                catch (Exception ex)
+                {
+                }
+
+                try
+                {
+                    notParticleTests = await _notParticleTestService.GetByAssignmentIdAsync(id);
+                    notParticleTests = notParticleTests.OrderBy(t => t.Title, naturalComparer).ToList();
                 }
                 catch (Exception ex)
                 {
@@ -384,14 +427,29 @@ namespace OnlineTutor3.Web.Controllers
                     }
                 }
 
+                var notParticleQuestionCounts = new Dictionary<int, int>();
+                foreach (var test in notParticleTests)
+                {
+                    try
+                    {
+                        notParticleQuestionCounts[test.Id] = await _notParticleQuestionRepository.GetCountByTestIdAsync(test.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        notParticleQuestionCounts[test.Id] = 0;
+                    }
+                }
+
                 ViewBag.SpellingTests = spellingTests;
                 ViewBag.PunctuationTests = punctuationTests;
                 ViewBag.OrthoeopyTests = orthoeopyTests;
                 ViewBag.RegularTests = regularTests;
+                ViewBag.NotParticleTests = notParticleTests;
                 ViewBag.SpellingTestQuestionCounts = spellingQuestionCounts;
                 ViewBag.PunctuationTestQuestionCounts = punctuationQuestionCounts;
                 ViewBag.OrthoeopyTestQuestionCounts = orthoeopyQuestionCounts;
                 ViewBag.RegularTestQuestionCounts = regularQuestionCounts;
+                ViewBag.NotParticleTestQuestionCounts = notParticleQuestionCounts;
 
                 return View(assignment);
             }
