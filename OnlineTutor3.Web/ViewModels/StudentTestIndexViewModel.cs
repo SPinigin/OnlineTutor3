@@ -18,6 +18,7 @@ namespace OnlineTutor3.Web.ViewModels
         public List<AvailableTestInfo> PunctuationTests { get; set; } = new();
         public List<AvailableTestInfo> OrthoeopyTests { get; set; } = new();
         public List<AvailableTestInfo> RegularTests { get; set; } = new();
+        public List<AvailableTestInfo> NotParticleTests { get; set; } = new();
 
         public List<Assignment> AvailableAssignments { get; set; } = new();
         
@@ -36,8 +37,9 @@ namespace OnlineTutor3.Web.ViewModels
         public List<AvailableTestInfo> PunctuationTests { get; set; } = new();
         public List<AvailableTestInfo> OrthoeopyTests { get; set; } = new();
         public List<AvailableTestInfo> RegularTests { get; set; } = new();
+        public List<AvailableTestInfo> NotParticleTests { get; set; } = new();
 
-        public int TotalTestsCount => SpellingTests.Count + PunctuationTests.Count + OrthoeopyTests.Count + RegularTests.Count;
+        public int TotalTestsCount => SpellingTests.Count + PunctuationTests.Count + OrthoeopyTests.Count + RegularTests.Count + NotParticleTests.Count;
     }
 
     /// <summary>
@@ -49,7 +51,7 @@ namespace OnlineTutor3.Web.ViewModels
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public string TestType { get; set; } = string.Empty; // "Spelling", "Punctuation", "Orthoeopy", "Regular"
+        public string TestType { get; set; } = string.Empty; // "Spelling", "Punctuation", "Orthoeopy", "Regular", "NotParticle"
         public int TimeLimit { get; set; }
         public int MaxAttempts { get; set; }
         public int QuestionsCount { get; set; }

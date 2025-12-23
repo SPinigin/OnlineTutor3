@@ -14,6 +14,7 @@ namespace OnlineTutor3.Web.ViewModels
         public List<PunctuationTestResult> PunctuationResults { get; set; } = new();
         public List<OrthoeopyTestResult> OrthoeopyResults { get; set; } = new();
         public List<RegularTestResult> RegularResults { get; set; } = new();
+        public List<NotParticleTestResult> NotParticleResults { get; set; } = new();
 
         // Группировка по заданиям
         public Dictionary<int, AssignmentHistoryInfo> AssignmentsWithResults { get; set; } = new();
@@ -21,7 +22,7 @@ namespace OnlineTutor3.Web.ViewModels
 
         // Статистика
         public int TotalTestsCompleted => SpellingResults.Count + PunctuationResults.Count + 
-                                         OrthoeopyResults.Count + RegularResults.Count;
+                                         OrthoeopyResults.Count + RegularResults.Count + NotParticleResults.Count;
         
         public double AveragePercentage
         {
@@ -32,6 +33,7 @@ namespace OnlineTutor3.Web.ViewModels
                 allPercentages.AddRange(PunctuationResults.Select(r => r.Percentage));
                 allPercentages.AddRange(OrthoeopyResults.Select(r => r.Percentage));
                 allPercentages.AddRange(RegularResults.Select(r => r.Percentage));
+                allPercentages.AddRange(NotParticleResults.Select(r => r.Percentage));
                 
                 return allPercentages.Any() ? allPercentages.Average() : 0.0;
             }
@@ -46,6 +48,7 @@ namespace OnlineTutor3.Web.ViewModels
                 allPercentages.AddRange(PunctuationResults.Select(r => r.Percentage));
                 allPercentages.AddRange(OrthoeopyResults.Select(r => r.Percentage));
                 allPercentages.AddRange(RegularResults.Select(r => r.Percentage));
+                allPercentages.AddRange(NotParticleResults.Select(r => r.Percentage));
                 
                 return allPercentages.Any() ? allPercentages.Max() : 0.0;
             }
@@ -54,7 +57,8 @@ namespace OnlineTutor3.Web.ViewModels
         public int TotalPoints => SpellingResults.Sum(r => r.Score) + 
                                  PunctuationResults.Sum(r => r.Score) + 
                                  OrthoeopyResults.Sum(r => r.Score) + 
-                                 RegularResults.Sum(r => r.Score);
+                                 RegularResults.Sum(r => r.Score) +
+                                 NotParticleResults.Sum(r => r.Score);
     }
 
     /// <summary>
@@ -67,9 +71,10 @@ namespace OnlineTutor3.Web.ViewModels
         public List<PunctuationTestResult> PunctuationResults { get; set; } = new();
         public List<OrthoeopyTestResult> OrthoeopyResults { get; set; } = new();
         public List<RegularTestResult> RegularResults { get; set; } = new();
+        public List<NotParticleTestResult> NotParticleResults { get; set; } = new();
 
         public int TotalResultsCount => SpellingResults.Count + PunctuationResults.Count + 
-                                       OrthoeopyResults.Count + RegularResults.Count;
+                                       OrthoeopyResults.Count + RegularResults.Count + NotParticleResults.Count;
     }
 }
 

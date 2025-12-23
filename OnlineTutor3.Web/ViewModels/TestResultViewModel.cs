@@ -66,5 +66,16 @@ namespace OnlineTutor3.Web.ViewModels
         public List<RegularQuestionOption> Options { get; set; } = new();
         public List<RegularAnswer> Answers { get; set; } = new();
     }
+
+    /// <summary>
+    /// ViewModel для результата теста на правописание частицы "не"
+    /// </summary>
+    public class NotParticleTestResultViewModel : TestResultViewModel
+    {
+        public NotParticleTestResult TestResult { get; set; } = null!;
+        public NotParticleTest Test { get; set; } = null!;
+        public List<NotParticleQuestion> Questions { get; set; } = new();
+        public List<NotParticleAnswer> Answers { get; set; } = new();
+    }
 }
 

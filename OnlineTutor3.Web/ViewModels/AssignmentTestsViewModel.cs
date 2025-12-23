@@ -9,12 +9,14 @@ namespace OnlineTutor3.Web.ViewModels
         public List<PunctuationTest> PunctuationTests { get; set; } = new();
         public List<OrthoeopyTest> OrthoeopyTests { get; set; } = new();
         public List<RegularTest> RegularTests { get; set; } = new();
+        public List<NotParticleTest> NotParticleTests { get; set; } = new();
         public Dictionary<int, int> SpellingTestQuestionCounts { get; set; } = new();
         public Dictionary<int, int> PunctuationTestQuestionCounts { get; set; } = new();
         public Dictionary<int, int> OrthoeopyTestQuestionCounts { get; set; } = new();
         public Dictionary<int, int> RegularTestQuestionCounts { get; set; } = new();
+        public Dictionary<int, int> NotParticleTestQuestionCounts { get; set; } = new();
 
-        public int TotalTestsCount => SpellingTests.Count + PunctuationTests.Count + OrthoeopyTests.Count + RegularTests.Count;
+        public int TotalTestsCount => SpellingTests.Count + PunctuationTests.Count + OrthoeopyTests.Count + RegularTests.Count + NotParticleTests.Count;
     }
 }
 

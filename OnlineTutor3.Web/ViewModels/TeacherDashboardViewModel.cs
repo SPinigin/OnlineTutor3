@@ -13,9 +13,10 @@ namespace OnlineTutor3.Web.ViewModels
         public List<PunctuationTest> PunctuationTests { get; set; } = new();
         public List<OrthoeopyTest> OrthoeopyTests { get; set; } = new();
         public List<RegularTest> RegularTests { get; set; } = new();
+        public List<NotParticleTest> NotParticleTests { get; set; } = new();
 
         public int TotalActiveTests => SpellingTests.Count + PunctuationTests.Count + 
-                                      OrthoeopyTests.Count + RegularTests.Count;
+                                      OrthoeopyTests.Count + RegularTests.Count + NotParticleTests.Count;
 
         public int TotalStudentsInProgress { get; set; }
         public int TotalCompletedToday { get; set; }
@@ -33,7 +34,7 @@ namespace OnlineTutor3.Web.ViewModels
     {
         public int TestId { get; set; }
         public string TestTitle { get; set; } = string.Empty;
-        public string TestType { get; set; } = string.Empty; // spelling, punctuation, orthoeopy, regular
+        public string TestType { get; set; } = string.Empty; // spelling, punctuation, orthoeopy, regular, notparticle
         public int StudentId { get; set; }
         public string StudentName { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty; // started, continued, completed, in_progress
