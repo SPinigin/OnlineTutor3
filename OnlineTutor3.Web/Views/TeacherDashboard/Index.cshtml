@@ -446,8 +446,59 @@
                                     </tr>
                                 }
 
+                                @foreach (var test in Model.NotParticleTests)
+                                {
+                                    <tr class="test-row"
+                                        data-test-type="notparticle"
+                                        data-test-id="@test.Id"
+                                        data-search-text="@test.Title.ToLower()">
+                                        <td>
+                                            <div class="d-flex align-items-start gap-2">
+                                                <span class="badge badge-modern-secondary test-type-badge d-lg-none mt-1">
+                                                    <i class="fas fa-minus-circle"></i>
+                                                </span>
+                                                <div class="flex-grow-1 min-w-0">
+                                                    <strong class="d-block text-dark-modern">@test.Title</strong>
+                                                    <small class="text-muted-modern">
+                                                        @if (!string.IsNullOrEmpty(test.Description))
+                                                        {
+                                                            @test.Description
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">—</span>
+                                                        }
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="d-none d-lg-table-cell">
+                                            <span class="badge badge-modern-secondary test-type-badge">
+                                                <i class="fas fa-minus-circle me-1"></i>
+                                                Частица "не"
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            @{
+                                                var notParticleKey = $"notparticle_{test.Id}";
+                                                var notParticleStats = Model.TestStatistics.ContainsKey(notParticleKey) ? Model.TestStatistics[notParticleKey] : (Completed: 0, InProgress: 0);
+                                            }
+                                            <span class="badge badge-modern-success test-count-completed test-count-badge" data-test-id="@test.Id" data-test-type="notparticle">@notParticleStats.Completed</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge badge-modern-warning test-count-progress test-count-badge" data-test-id="@test.Id" data-test-type="notparticle">@notParticleStats.InProgress</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a asp-controller="NotParticleTest" asp-action="Details" asp-route-id="@test.Id" class="btn btn-sm btn-modern-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                                <span class="d-none d-md-inline ms-1">Детали</span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+
                                 @if (!Model.SpellingTests.Any() && !Model.PunctuationTests.Any() && 
-                                    !Model.OrthoeopyTests.Any() && !Model.RegularTests.Any())
+                                    !Model.OrthoeopyTests.Any() && !Model.RegularTests.Any() && !Model.NotParticleTests.Any())
                                 {
                                     <tr>
                                         <td colspan="5" class="text-center py-5">
