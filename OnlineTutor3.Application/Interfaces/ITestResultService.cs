@@ -28,6 +28,11 @@ namespace OnlineTutor3.Application.Interfaces
         Task<RegularTestResult> CreateRegularTestResultAsync(int studentId, int testId);
 
         /// <summary>
+        /// Создает новый результат теста на правописание частицы "не"
+        /// </summary>
+        Task<NotParticleTestResult> CreateNotParticleTestResultAsync(int studentId, int testId);
+
+        /// <summary>
         /// Получает незавершенный результат теста по орфографии
         /// </summary>
         Task<SpellingTestResult?> GetOngoingSpellingTestResultAsync(int studentId, int testId);
@@ -46,6 +51,11 @@ namespace OnlineTutor3.Application.Interfaces
         /// Получает незавершенный результат классического теста
         /// </summary>
         Task<RegularTestResult?> GetOngoingRegularTestResultAsync(int studentId, int testId);
+
+        /// <summary>
+        /// Получает незавершенный результат теста на правописание частицы "не"
+        /// </summary>
+        Task<NotParticleTestResult?> GetOngoingNotParticleTestResultAsync(int studentId, int testId);
 
         /// <summary>
         /// Получает количество попыток для теста по орфографии
@@ -81,7 +91,8 @@ namespace OnlineTutor3.Application.Interfaces
         Spelling,
         Punctuation,
         Orthoeopy,
-        Regular
+        Regular,
+        NotParticle
     }
 }
 

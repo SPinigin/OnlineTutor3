@@ -46,6 +46,16 @@ namespace OnlineTutor3.Application.Interfaces
         /// Получает все доступные классические тесты для студента
         /// </summary>
         Task<List<RegularTest>> GetAvailableRegularTestsAsync(int studentId);
+
+        /// <summary>
+        /// Проверяет, имеет ли студент доступ к тесту на правописание частицы "не"
+        /// </summary>
+        Task<bool> CanAccessNotParticleTestAsync(int studentId, int testId);
+
+        /// <summary>
+        /// Получает все доступные тесты на правописание частицы "не" для студента
+        /// </summary>
+        Task<List<NotParticleTest>> GetAvailableNotParticleTestsAsync(int studentId);
     }
 }
 

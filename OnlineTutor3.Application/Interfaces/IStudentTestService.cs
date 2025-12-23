@@ -36,6 +36,11 @@ namespace OnlineTutor3.Application.Interfaces
         /// Начинает новый классический тест
         /// </summary>
         Task<RegularTestResult> StartRegularTestAsync(int studentId, int testId);
+
+        /// <summary>
+        /// Начинает новый тест на правописание частицы "не"
+        /// </summary>
+        Task<NotParticleTestResult> StartNotParticleTestAsync(int studentId, int testId);
     }
 
     /// <summary>
@@ -48,6 +53,7 @@ namespace OnlineTutor3.Application.Interfaces
         public List<PunctuationTest> PunctuationTests { get; set; } = new();
         public List<OrthoeopyTest> OrthoeopyTests { get; set; } = new();
         public List<RegularTest> RegularTests { get; set; } = new();
+        public List<NotParticleTest> NotParticleTests { get; set; } = new();
     }
 
     /// <summary>
@@ -60,6 +66,7 @@ namespace OnlineTutor3.Application.Interfaces
         public List<PunctuationTestResult> PunctuationResults { get; set; } = new();
         public List<OrthoeopyTestResult> OrthoeopyResults { get; set; } = new();
         public List<RegularTestResult> RegularResults { get; set; } = new();
+        public List<NotParticleTestResult> NotParticleResults { get; set; } = new();
     }
 }
 

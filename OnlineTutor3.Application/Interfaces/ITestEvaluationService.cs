@@ -46,6 +46,16 @@ namespace OnlineTutor3.Application.Interfaces
         /// Вычисляет итоговый результат классического теста
         /// </summary>
         Task<(int Score, int MaxScore, double Percentage)> CalculateRegularTestResultAsync(int testResultId, int testId);
+
+        /// <summary>
+        /// Оценивает ответ на вопрос теста на правописание частицы "не"
+        /// </summary>
+        Task<(bool IsCorrect, int Points)> EvaluateNotParticleAnswerAsync(NotParticleQuestion question, bool studentAnswerIsMerged, int pointsPerQuestion);
+
+        /// <summary>
+        /// Вычисляет итоговый результат теста на правописание частицы "не"
+        /// </summary>
+        Task<(int Score, int MaxScore, double Percentage)> CalculateNotParticleTestResultAsync(int testResultId, int testId);
     }
 }
 

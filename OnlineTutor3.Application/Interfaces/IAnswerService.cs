@@ -28,6 +28,11 @@ namespace OnlineTutor3.Application.Interfaces
         Task<RegularAnswer> SaveRegularAnswerAsync(int testResultId, int questionId, string? studentAnswer, int? selectedOptionId);
 
         /// <summary>
+        /// Сохраняет ответ на вопрос теста на правописание частицы "не"
+        /// </summary>
+        Task<NotParticleAnswer> SaveNotParticleAnswerAsync(int testResultId, int questionId, string studentAnswer);
+
+        /// <summary>
         /// Получает все ответы для результата теста по орфографии
         /// </summary>
         Task<List<SpellingAnswer>> GetSpellingAnswersAsync(int testResultId);
@@ -46,6 +51,11 @@ namespace OnlineTutor3.Application.Interfaces
         /// Получает все ответы для результата классического теста
         /// </summary>
         Task<List<RegularAnswer>> GetRegularAnswersAsync(int testResultId);
+
+        /// <summary>
+        /// Получает все ответы для результата теста на правописание частицы "не"
+        /// </summary>
+        Task<List<NotParticleAnswer>> GetNotParticleAnswersAsync(int testResultId);
 
         /// <summary>
         /// Обновляет существующий ответ
